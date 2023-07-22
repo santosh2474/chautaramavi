@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Chautara_Mavi_School</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+
+<body>
+<!-- Add the Font Awesome CSS file -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<!-- Topbar Start -->
+<div class="container-fluid bg-dark">
+    <div class="row py-2 px-lg-5">
+        <div class="col-lg-6 col-md-6 col-12 text-center text-md-left mb-2 mb-md-0">
+            <div class="d-flex justify-content-start">
+                <small class="text-white mr-3"><i class="fa fa-phone-alt mr-2"></i><strong>+977-9862606960</strong></small>
+                <small class="text-white mr-3"><i class="fa fa-envelope mr-2"></i><strong>scssdandakharka2045@gmail.com</strong></small>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-12 text-center">
+            <div class="d-flex justify-content-end">
+                <div class="text-white mr-3" id="liveDateTime"><strong></strong></div> <!-- Element to display live date and time -->
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a class="text-white pl-2" href="">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add the Font Awesome JavaScript file -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+
+<style>
+    .text-bold {
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    // Function to update the date and time
+    function updateDateTime() {
+        var dateTimeElement = document.getElementById('liveDateTime');
+        if (dateTimeElement) {
+            var now = new Date();
+            var dateTimeString = now.toLocaleString();
+            dateTimeElement.innerHTML = '<strong>' + dateTimeString + '</strong>';
+        }
+    }
+
+    // Update the date and time every second
+    setInterval(updateDateTime, 1000);
+</script>
+<!-- Topbar End -->
+
+
+
+  <!-- Navbar Start -->
+<div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg bg-white navbar-light py-3 py-lg-0 px-lg-5">
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScRa07J0rcPRzSs62TnJaXAwFBEvZ-CH1LJsok3TZZuQKWcew/viewform?usp=sf_link" class="navbar-brand ml-lg-3">
+            <div class="d-flex align-items-center"> <!-- Add a container for logo and flag -->
+                <img src="img/flag.png" alt="Nepal Flag" class="mr-2" style="max-height: 60px;"> <!-- Reduce the margin and adjust dimensions -->
+                <div class="logo-text">
+                    <img src="img/logo.jpg" alt="Logo" class="mr-2" style="max-height: 60px;">
+                    <h1 class="m-0 text-uppercase text-primary" style="font-size: 15px;">Chautara_Mavi</h1>
+                </div>
+            </div>
+        </a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
+            <div class="navbar-nav mx-auto py-0">
+                <a href="index.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Home</a>
+                <a href="about.html" class="nav-item nav-link" onclick="highlightNavItem(this);">About</a>
+                <a href="course.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Courses</a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
+                    <div class="dropdown-menu m-0">
+                        <a href="detail.html" class="dropdown-item">Course Detail</a>
+                        <a href="feature.html" class="dropdown-item">Our Features</a>
+                        <a href="team.html" class="dropdown-item">Instructors</a>
+                        <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                    </div>
+                </div>
+                <a href="contact.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Contact</a>
+                <a href="donate.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Donate Us</a>
+                <a href="https://drive.google.com/file/d/1OiI0NsIysM7gPb58cF5eOndF_AApUOC3/view?usp=drive_link" class="nav-item nav-link">Notice</a>
+            </div>
+
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScRa07J0rcPRzSs62TnJaXAwFBEvZ-CH1LJsok3TZZuQKWcew/viewform?usp=sf_link" class="btn btn-primary py-2 px-4 d-none d-lg-block">Chautara_Documents</a>
+        </div>
+    </nav>
+</div>
+
+<script>
+function highlightNavItem(element) {
+    // Remove 'active' class from all nav items
+    var navItems = document.getElementsByClassName('nav-item');
+    for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    
+    // Add 'active' class to the clicked nav item
+    element.classList.add('active');
+}
+</script>
+<style>
+    .logo-text {
+        border-left: 1px solid #ccc; /* Add a vertical line between logo and flag */
+        padding-left: 10px; /* Adjust the space between logo and flag */
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<!-- Navbar End -->
+
+
+<!-- Header Start -->
+<div class="jumbotron jumbotron-fluid page-header position-relative overlay-bottom" style="height: 85vh; margin-bottom: 90px;">
+    <div class="container text-center py-1">
+        <h1 class="text-white display-1">About</h1>
+        <div class="d-inline-flex text-white mb-5">
+            <p class="m-0 text-uppercase"><a class="text-white" href="">Home</a></p>
+            <i class="fas fa-angle-double-right align-middle mx-2"></i>
+
+            <p class="m-0 text-uppercase">About</p>
+        </div>
+        <div class="mx-auto mb-5" style="width: 100%; max-width: 600px;">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-light bg-white text-body px-4 dropdown-toggle" type="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">Courses</button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">Diploma In Computer Engineering</a>
+                            <a class="dropdown-item" href="#">+2 Education</a>
+                            <a class="dropdown-item" href="#">+2 Science</a>
+                            <a class="dropdown-item" href="#">School</a>
+                    </div>
+                </div>
+                <input type="text" class="form-control border-light" style="padding: 30px 25px;" placeholder="Keyword">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary px-4 px-lg-5">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+
+
+    <!-- About Start -->
+    <div class="container-fluid py-1">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-lg-5 mb-5 mb-lg-0" style="min-height: 500px;">
+                    <div class="position-relative h-100">
+                        <img class="position-absolute w-100 h-100" src="img/about.jpg" style="object-fit: cover;">
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="section-title position-relative mb-4">
+                        <h6 class="d-inline-block position-relative text-secondary text-uppercase pb-2">About Us</h6>
+                        <h1 class="display-4">हाम्रो बारेमा</h1>
+                    </div>
+                    <p style="text-align: justify;">चौतारा माध्यामिक विद्यालय डाँडाखर्क विद्यालय २०४५ सालमा स्थापना भएको विद्यालय हो । साविक मुलखर्क गाविसको वडा नं. २ मा रहेको यस विद्यालयको नाम डाँडाखर्क भन्ने स्थानमा सर्बसाधारण नागरिकले थकान मेटाउने प्रयोजनका लागि निर्माण गरेको चौताराहरुको नामबाट नामकरण भएको देखिन्छ । हाल विद्यालय भवन रहेका क्षेत्रमा कटारीबाट नुनको भारी बोकेर आएका बटुवाहरुले भारी विसाउन प्रचुर प्रयोग गरेको पाइन्छ । शुरुमा यस विद्यालयको स्थापना गर्न संस्थापक अध्यक्ष दिलबहादुर खत्रीले २ रोपानी जग्गा दानपत्र गरेर निर्माणको थालनी गरेका हुन । स्थापनाका क्रममा डाँडाखर्क कि र ऐसेलुखर्क कि भन्ने स्थानमा विद्यालय सञ्चालन गर्ने भन्ने विवाद भएको थियो । चौतारा प्राथामिक विद्यायका नाममा ऐसेलुखर्कमा सञ्चालन भएको विद्यालयको आफैले एउटै वडामा एउटै नामको दुईवटा विद्यालय सञ्चालन गरेकोले उक्त विद्यालयले नाम परिर्वतन गर्न निर्णय गरे पश्चात विद्यालयको विकास दु्रत गतिमा अगाडी बढेको हो । यो विद्यालयको स्थापना काल देखि निरन्तर सर्घषका वीचमा कक्षा ५ सञ्चालन भएको २०५२ सालमा संस्थापक अध्यक्ष दिलबहादुर खत्रीको पहलमा कक्षा ६ शुरु हुदै कक्षा ८ सञ्चालन भएको हो । विद्यालय अपग्रेड गर्ने अग्रणी भुमिका निर्वाह गर्ने खत्री कै पहलमा २०६५ सालमा कक्षा नौ शुरु भएर २०६६ सालमा कक्षा १० सञ्चालन भएको हो । शैक्षिक गुणस्तरका दृष्टीले अग्रणी भुमिका निर्वाह गरि रहेको यस विद्यालय २०७८ सालबाट कक्षा ११ र प्रविधिक शिक्षा तथा व्यवसायिक तालिम परिषदबाट स्विकृत÷संवन्धन लिइ डिप्लोमा इन कम्प्युटर इन्जिनियारिङ्ग विषयको अध्यायपन भई रहेको छ । माध्यामिक तह कक्षा ११ र १२ मा विज्ञान र शिक्षा संकाय सञ्चालित छ । विद्यालयको स्थापनामा अग्रणी भुमिका निर्वाह गरेका स्थानियहरुको पहलकदमीमा विद्यालयको आफ्नै नाममा सुनकोशी गाउपालिका वडा नं. ५ मा ३३ रोपानी भन्दा बढि जग्गा रहेको छ । विद्यालयको ३ वटा भुकम्प प्रतिरोधी १३ कोठे सुविधा सम्पन्न भवन २ वटा पुराना भवन तथा छात्रा + छात्रका लागि छुट्टाछुटै शौचालय र स्वच्छ पिउनेपानी रहेको छ । विद्यालयमा सुविधा सम्पन्न पुस्तकालय, कम्प्युटर र विज्ञान ल्याव रहेको छ । विद्यालयमा प्रविधि मैत्री पठनपाठनका लागि इन्टरनेट सुविधा रहेको छ ।</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- About End -->
+
+
+   <!-- Feature Start -->
+   <div class="container-fluid bg-image" style="margin: 30px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7 my-0 pt-5 pb-lg-5">
+                <div class="section-title position-relative mb-4">
+                    <h6 class="d-inline-block position-relative text-secondary text-uppercase pb-2">Why Choose Us?</h6>
+                    <h1 class="display-4">"हाम्रो साथ सिक्नु पर्ने उचितता"</h1>
+                </div>
+                <p class="mb-4 pb-2">हाम्रा विषेशताहरु <br>
+                    <ol>
+                        <li>शिक्षकहरुको प्रत्यक्ष निगरानीमा बाल कक्षा देखि कक्षा १२ सम्म गुणस्तरिय अंग्रेजी माध्यममा पठनपाठनको व्यवस्था भएको । </li>
+                        <li>विद्यालयका सबै कक्षा कोठाहरुमा नियमित कक्षा कार्य, गृहकार्य गर्ने गराउने र नगर्ने विद्यार्थीहरुको पहिचान गरी अभिभावकलाई सुचित गर्ने तथा शैक्षिक गुणस्तर अभिवृद्धि गर्ने ।</li>
+                        <li>विद्यालयमा पढ्ने विद्यार्थीहरुका लागि पढ्दै कमाउदै कार्यक्रम अन्र्तगत राष्ट्रिय युवा परिषदका तर्फबाट एक शिक्षण संस्था एक उद्यम कार्यक्रममा सहभागी हुने अवसर ।</li>
+                        <li>विद्यालयका वरापराका छरछिमेकीहरुसंगको नियमित समन्वयमा इको क्लव गठन गरी सरसफाई, नियमित खानेपानी व्यवस्थापन, शौचालय र बाहिरी वतावरणमा सरसफाई चुस्तदुरुस्त रहेको । </li>
+                        <li>सुविधा सम्पन्न कम्प्युटर र विज्ञान प्रयोगशाला तथा पुस्तकालयको व्यवस्था भएको । </li>
+                        <li>आभिभावक तथा विद्यार्थी शिक्षककाहरुका गुनासाको सुनुवाई विद्यालयमा नियमित अभिभावक, विद्यार्थी र शिक्षक वीच अन्र्तक्रिया, छलफल सुझाव संकलन व्यवस्थापन, कामको बाडफाँड र कार्यन्वयनलाई निरन्तरता दिने कार्य नियमित रुपमा हुने ।</li>
+                        <li>छुट्टै विषेश विद्यार्थी मैत्री खेलमैदानको स्वच्छ खानेपानी र शौचालयको व्यवस्था भएको ।</li>
+                        <li>कक्षाकोठामा शिक्षकको भूमिका सहयोगी र बिद्यार्थीको प्रमुख हुने व्यवस्था मिलाइएको, प्रयोगात्मक शिक्षण क्रियामा जोड दिइएको ।</li>
+                        <li>विद्यार्थीको लागि आवश्यक निशुल्क थप कक्षा सञ्चालन गरी सबै विद्यार्थीको समानान्तर शिकाई क्षमता विकासमा जोड दिने ।</li>
+                        <li>विद्यालयमा प्रविधि मैत्री पठनपाठनमा जोड दिदै इन्टरनेट सुविधा भएको ।</li>
+                    </ol>
+                </p>
+                <div class="d-flex mb-3 " style="margin-top: 50px;">
+                    <div class="btn-icon bg-primary mr-4">
+                        <i class="fa fa-2x fa-graduation-cap text-white"></i>
+                    </div>
+                    <div class="mt-n1">
+                        <h4>Skilled Instructors</h4>
+                        <p>Labore rebum duo est Sit dolore eos sit tempor eos stet, vero vero clita magna kasd no nonumy et eos dolor magna ipsum.</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="btn-icon bg-secondary mr-4">
+                        <i class="fa fa-2x fa-certificate text-white"></i>
+                    </div>
+                    <div class="mt-n1">
+                        <h4>International Certificate</h4>
+                        <p>Labore rebum duo est Sit dolore eos sit tempor eos stet, vero vero clita magna kasd no nonumy et eos dolor magna ipsum.</p>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <div class="btn-icon bg-warning mr-4">
+                        <i class="fa fa-2x fa-book-reader text-white"></i>
+                    </div>
+                    <div class="mt-n1">
+                        <h4>Online Classes</h4>
+                        <p class="m-0">Labore rebum duo est Sit dolore eos sit tempor eos stet, vero vero clita magna kasd no nonumy et eos dolor magna ipsum.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5" style="min-height: 500px;">
+                <div class="position-relative h-100">
+                    <img class="position-absolute w-100 h-100" src="img/feature.jpg" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Feature Start -->
+
+
+  <!-- Footer Start -->
+<div class="container-fluid position-relative overlay-top bg-dark text-white-50 py-5" style="margin-top: 90px;">
+    <div class="container mt-5 pt-5">
+      <div class="row">
+        <div class="col-md-6 mb-5">
+          <a href="index.html" class="navbar-brand">
+            <h2 class="mt-n2 text-uppercase text-white">
+              <img src="/img/logo.jpg" alt="Chautara Sec. School Logo" class="mr-3" style="height: 60px;">
+              Chautara Sec. School
+            </h2>
+          </a>
+          <p class="m-0">२०४५ सालमा स्थापना भएको चौतारा माध्यामिक विद्यालय क्रमशः अपग्रेड हुदै अहिले कक्षा १२ र डिप्लोमा इन कम्प्युटर इन्जिनियरङ्ग कक्षा सञ्चालन हुदै आएको छ । पछिल्लो समयमा गुणस्तरीय, दक्ष, योग्य र भरपर्दाे शिक्षकहरुद्धारा पठनपाठन गरिरहेको छ । दक्ष र प्राविधिक मानव श्रोतको उत्पादन र परिचालन गर्ने लक्ष रहेको छ । </p>
+        </div>
+                <div class="col-md-6 mb-5">
+                    <h3 class="text-white mb-4">Newsletter</h3>
+                    <div class="w-100">
+                      <form action="https://formspree.io/f/mvojoqzw" method="POST">
+                        <div class="input-group">
+                          <input type="email" class="form-control border-light" style="padding: 30px;" placeholder="Your Email Address" name="_replyto">
+                          <div class="input-group-append">
+                            <button class="btn btn-primary px-4" type="submit">Sign Up</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Get In Touch</h3>
+                    <p><i class="fa fa-map-marker-alt mr-2"></i>Shree Chautara Mavi Secondary School Dandakharka, Sunkoshi - 05, Okhaldhunga, Nepal</p>
+                    <p><i class="fa fa-phone-alt mr-2"></i>+977-9862606960</p>
+                    <p><i class="fa fa-envelope mr-2"></i>scssdandakharka045@gmail.com</p>
+                    <div class="d-flex justify-content-start mt-4">
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-twitter"></i></a>
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-facebook-f"></i></a>
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-linkedin-in"></i></a>
+                        <a class="text-white" href="#"><i class="fab fa-2x fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Our Courses</h3>
+                    <div class="d-flex flex-column justify-content-start">
+                        <a class="text-white-50 mb-2" href="/detail.html"><i class="fa fa-angle-right mr-2"></i>Diploma In Computer Engineering</a>
+                        <a class="text-white-50 mb-2" href="/detail2.html"><i class="fa fa-angle-right mr-2"></i>+2 Science</a>
+                        <a class="text-white-50 mb-2" href="/detail3.html"><i class="fa fa-angle-right mr-2"></i>+2 Education</a>
+                        <a class="text-white-50 mb-2" href="/detail4.html"><i class="fa fa-angle-right mr-2"></i>School Courses </a>
+                        <a class="text-white-50" href="/detail.html"><i class="fa fa-angle-right mr-2"></i>Short Term Training</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Quick Links</h3>
+                    <div class="d-flex flex-column justify-content-start">
+                        <a class="text-white-50 mb-2" href="https://sunkoshimunokhaldhunga.gov.np/"><i class="fa fa-angle-right mr-2"></i>Sunkoshi Rural Muncipality</a>
+                        <a class="text-white-50 mb-2" href="https://okhaldhunga.edcu.gov.np/page/1_612e3b1403441"><i class="fa fa-angle-right mr-2"></i>Education Development and Coordination Unit Okhaldhunga</a>
+                        <a class="text-white-50 mb-2" href="https://cehrd.gov.np/"><i class="fa fa-angle-right mr-2"></i>CEHRD</a>
+                        <a class="text-white-50 mb-2" href="https://mosd.koshi.gov.np/"><i class="fa fa-angle-right mr-2"></i>Ministry of Social Development, Koshi Province</a>
+                        <a class="text-white-50" href="http://ctevt.org.np/"><i class="fa fa-angle-right mr-2"></i>CTEVT</a>
+                        <a class="text-white-50" href="https://itms.ctevt.org.np:5580/itmsAdmin/"><i class="fa fa-angle-right mr-2"></i>CTEVT Admin Login</a>
+                        <a class="text-white-50" href="https://iemis.doe.gov.np/"><i class="fa fa-angle-right mr-2"></i>IEMIS Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid bg-dark text-white-50 border-top py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
+                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">chautaramavi.com</a>. All Rights Reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-right">
+                    <p class="m-0">Designed by <a class="text-white" href="https://www.santoshthakur.tech/">Er. Santosh Thakur</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary rounded-0 btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

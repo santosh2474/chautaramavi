@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Chautara_Mavi_School</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+
+<body>
+<!-- Add the Font Awesome CSS file -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<!-- Topbar Start -->
+<div class="container-fluid bg-dark">
+    <div class="row py-2 px-lg-5">
+        <div class="col-lg-6 col-md-6 col-12 text-center text-md-left mb-2 mb-md-0">
+            <div class="d-flex justify-content-start">
+                <small class="text-white mr-3"><i class="fa fa-phone-alt mr-2"></i><strong>+977-9862606960</strong></small>
+                <small class="text-white mr-3"><i class="fa fa-envelope mr-2"></i><strong>scssdandakharka045@gmail.com</strong></small>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-12 text-center">
+            <div class="d-flex justify-content-end">
+                <div class="text-white mr-3" id="liveDateTime"><strong></strong></div> <!-- Element to display live date and time -->
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a class="text-white px-2" href="">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a class="text-white pl-2" href="">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add the Font Awesome JavaScript file -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+
+<style>
+    .text-bold {
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    // Function to update the date and time
+    function updateDateTime() {
+        var dateTimeElement = document.getElementById('liveDateTime');
+        if (dateTimeElement) {
+            var now = new Date();
+            var dateTimeString = now.toLocaleString();
+            dateTimeElement.innerHTML = '<strong>' + dateTimeString + '</strong>';
+        }
+    }
+
+    // Update the date and time every second
+    setInterval(updateDateTime, 1000);
+</script>
+<!-- Topbar End -->
+
+
+
+  <!-- Navbar Start -->
+<div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg bg-white navbar-light py-3 py-lg-0 px-lg-5">
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScRa07J0rcPRzSs62TnJaXAwFBEvZ-CH1LJsok3TZZuQKWcew/viewform?usp=sf_link" class="navbar-brand ml-lg-3">
+            <div class="d-flex align-items-center"> <!-- Add a container for logo and flag -->
+                <img src="img/flag.png" alt="Nepal Flag" class="mr-2" style="max-height: 60px;"> <!-- Reduce the margin and adjust dimensions -->
+                <div class="logo-text">
+                    <img src="img/logo.jpg" alt="Logo" class="mr-2" style="max-height: 60px;">
+                    <h1 class="m-0 text-uppercase text-primary" style="font-size: 15px;">Chautara_Mavi</h1>
+                </div>
+            </div>
+        </a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
+            <div class="navbar-nav mx-auto py-0">
+                <a href="index.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Home</a>
+                <a href="about.html" class="nav-item nav-link" onclick="highlightNavItem(this);">About</a>
+                <a href="course.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Courses</a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
+                    <div class="dropdown-menu m-0">
+                        <a href="detail.html" class="dropdown-item">Course Detail</a>
+                        <a href="feature.html" class="dropdown-item">Our Features</a>
+                        <a href="team.html" class="dropdown-item">Instructors</a>
+                        <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                    </div>
+                </div>
+                <a href="contact.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Contact</a>
+                <a href="donate.html" class="nav-item nav-link" onclick="highlightNavItem(this);">Donate Us</a>
+                <a href="https://drive.google.com/file/d/1OiI0NsIysM7gPb58cF5eOndF_AApUOC3/view?usp=drive_link" class="nav-item nav-link">Notice</a>
+            </div>
+
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScRa07J0rcPRzSs62TnJaXAwFBEvZ-CH1LJsok3TZZuQKWcew/viewform?usp=sf_link" class="btn btn-primary py-2 px-4 d-none d-lg-block">Chautara_Documents</a>
+        </div>
+    </nav>
+</div>
+
+<script>
+function highlightNavItem(element) {
+    // Remove 'active' class from all nav items
+    var navItems = document.getElementsByClassName('nav-item');
+    for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    
+    // Add 'active' class to the clicked nav item
+    element.classList.add('active');
+}
+</script>
+<style>
+    .logo-text {
+        border-left: 1px solid #ccc; /* Add a vertical line between logo and flag */
+        padding-left: 10px; /* Adjust the space between logo and flag */
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<!-- Navbar End -->
+
+    <!-- Detail Start -->
+    <style>
+        p {
+            text-align: justify;
+        }
+    </style>
+    <div class="container-fluid py-1">
+        <div class="container py-1">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="mb-5" > 
+                        <div class="section-title position-relative mb-5">
+                            <h6 class="d-inline-block position-relative text-secondary text-uppercase pb-2">Course Detail</h6>
+                            <h1 class="display-4">+2 Education</h1>
+                        </div>
+                        <img class="img-fluid rounded w-100 mb-4" src="img/header.jpg" alt="Image">
+                        <p>Ten Plus two in Education course is the foundations of education for the teachers at the Lower Secondary Level. It is designed for the purpose of imparting basic understanding and developing several important aspects such as, educational background and its development. The course intends to impart meaning, general views, functions of education, as well as education as a system; it also intends to give general knowledge about prominent educationists, curriculum, educational administration, modern trends in education, guidance and counseling and education aspects in Nepal.</p>
+                        <p>
+                            This subject aims to find out interrelated factors involved in an education system of Nepal. It elaborates the meaning, nature, and functions of education to the students who are the ‘would be’ teachers of tomorrow. One understands the meaning, importance and elements of curriculum. It teaches the students the methods, procedures concepts and importance of guidance and counseling which will help them to be a better leader in the future. Education showcases the trends of education and educational administration in our society and relates the historical perspectives of education to it.
+                        </p>
+                        <p>Students must have completed SEE or equivalent with a minimum GPA 1.6. He/She should have minimum D+ in English, Nepali, Social Studies and EPH.</p>
+                        <a href="/contents/class-11-and-12-subject-name-and-code-number.pdf" class="btn btn-primary">View Subjects_&_Code</a>
+                        <a href="/contents/Class_11_12_sbject_wise_syllabus.pdf" class="btn btn-primary">View Syllabus</a>
+                        <p>
+
+                        </p>
+<p><strong>Criteria is given below:</strong></p>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid #333;
+    }
+    
+    th,
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #333;
+        border-right: 1px solid #333;
+    }
+    
+    th:last-child,
+    td:last-child {
+        border-right: none;
+    }
+    
+    td:not(:last-child) {
+        padding-right: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        table {
+            font-size: 14px;
+        }
+        
+        td:not(:last-child) {
+            padding-right: 10px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        table {
+            font-size: 12px;
+        }
+        
+        td {
+            padding: 5px;
+        }
+        
+        td:not(:last-child) {
+            padding-right: 5px;
+        }
+    }
+</style>
+<table>
+	<tbody>
+		<tr>
+			<td>
+			<p><strong>S.N. </strong></p>
+			</td>
+			<td>
+			<p><strong>Subjects that can be chosen for grade 11 (+2) </strong></p>
+			</td>
+			<td>
+			<p><strong>GPA </strong></p>
+			</td>
+			<td>
+			<p><strong>Subjects where you need C+ </strong></p>
+			</td>
+			<td>
+			<p><strong>Subjects where you need D+</strong></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>1</p>
+			</td>
+			<td>
+			<p>Science Subject Group:</p>
+
+			<p>Physics, Chemistry, Biology/ Mathematics/ Computer Science/ Agriculture</p>
+			</td>
+			<td>
+			<p>2</p>
+			</td>
+			<td>
+			<p>Science and Mathematics</p>
+			</td>
+			<td>
+			<p>English, Nepali and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>2</p>
+			</td>
+			<td>
+			<p>Vocational Subject Group:</p>
+
+			<p>Animal Science/ Plant Science, Electrical Engineering/ Civil Engineering/ Computer Engineering</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>3</p>
+			</td>
+			<td>
+			<p>Mathematics/ Geography/ Accountancy/ Economics/ Computer Science/ Teaching Mathematics/ Psychology/ Elements of Finance/ Jyotish/ Co-operative Management/ Business Studies/ Business Mathematics</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, Mathematics, Science and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>4</p>
+			</td>
+			<td>
+			<p>Physics Education/ Chemistry Education/ Biology Education/ Teaching Science</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, Mathematics, Science and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>5</p>
+			</td>
+			<td>
+			<p>English/ Alternative English/ Teaching English/ Linguistics</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>6</p>
+			</td>
+			<td>
+			<p>Hotel Management/ Travel and Tourism</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, Mathematics and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>7</p>
+			</td>
+			<td>
+			<p>Nepali/ Teaching Nepali</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English/ Sanskrit, Nepali, and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>8</p>
+			</td>
+			<td>
+			<p>History/ Political Science/ Culture/ Home Science/ Sociology/ Philosophy/ Library and Information Science/ Rural Development</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>9</p>
+			</td>
+			<td>
+			<p>Introduction to Education/ Instructional Pedagogy/ Health and Physical Education/ Population Studies/ Environment Education</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English, Nepali, Science, Health Population and Environment Education</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>10</p>
+			</td>
+			<td>
+			<p>Sanskrit Byakaran/ Sahitya/ Nyaya/ Veda/ Niti Shastra/ Bouddha Education/ Law</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English/ Sanskrit, Nepali, and Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>11</p>
+			</td>
+			<td>
+			<p>Mass Communication/ Human Value Education/ Law</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>&nbsp;</td>
+			<td>
+			<p>English, Nepali, Social Studies</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>12</p>
+			</td>
+			<td>
+			<p>Maithali/ Hindi/ Newari/ French/ Japanese/ Urdu/ German/ Chinese and Other Languages</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>
+			<p>-</p>
+			</td>
+			<td>
+			<p>English</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p>13</p>
+			</td>
+			<td>
+			<p>Dance/ Music/ Sculpture/ Painting/ Applied Arts/ Sports and Others</p>
+			</td>
+			<td>
+			<p>1.6</p>
+			</td>
+			<td>&nbsp;</td>
+			<td>
+			<p>English</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+                    </div>
+                    <p><h5>CURRICULAR STRUCTURE</h5>Curriculum Development Center has recently unveiled the new curriculum for class 11 and 12. The new curriculum has eliminated the system of particular stream-based education like Ten Plus Two Science, Management, Humanities, and so on.</p>
+                    <div class="downloads">
+                        <h5>Downloads:</h5>
+                        <ul>
+                            <li><a href="contents\Class_11_and_12_Curriculum_Compulsory_Subjects.pdf">Class 11 and 12 Curriculum (Compulsory Subjects).pdf</a></li>
+                            <li><a href="contents\Part- I_Class_ 11_and_12_Curriculum_Optional_Subjects.pdf">Part- I: Class 11 and 12 Curriculum (Optional Subjects).pdf</a></li>
+                            <li><a href="contents\Part- II_Class_11_and_12_Curriculum_Optional_Subjects.pdf">Part- II: Class 11 and 12 Curriculum (Optional Subjects).pdf</a></li>
+                            <li><a href="contents\Part- III_Class 11_and_12_Curriculum_Optional Subjects.pdf">Part- III: Class 11 and 12 Curriculum (Optional Subjects).pdf</a></li>
+                            <li><a href="contents\Part- IV_Class_11_and_12_Curriculum_Optional_Subjects.pdf">Part- IV: Class 11 and 12 Curriculum (Optional Subjects).pdf</a></li>
+                            <li><a href="contents\Part-V_Class_11_and_12_Curriculum_Optional_Subjects.pdf">Part- V: Class 11 and 12 Curriculum (Optional Subjects).pdf</a></li>
+                        </ul>
+                    </div>
+                    <style>
+                        .table-container {
+                            margin-bottom: 20px;
+                            margin-top: 20px;
+                            overflow-x: auto;
+                        }
+                    
+                        table {
+                            border-collapse: collapse;
+                            width: 100%;
+                            border: 1px solid #333;
+                        }
+                    
+                        th,
+                        td {
+                            padding: 10px;
+                            border-bottom: 1px solid #333;
+                            border-right: 1px solid #333;
+                        }
+                    
+                        th:last-child,
+                        td:last-child {
+                            border-right: none;
+                        }
+                    
+                        td:not(:last-child) {
+                            padding-right: 20px;
+                        }
+                    
+                        @media (max-width: 768px) {
+                            table {
+                                font-size: 14px;
+                            }
+                    
+                            td:not(:last-child) {
+                                padding-right: 10px;
+                            }
+                        }
+                    
+                        @media (max-width: 576px) {
+                            table {
+                                font-size: 12px;
+                            }
+                    
+                            td {
+                                padding: 5px;
+                            }
+                    
+                            td:not(:last-child) {
+                                padding-right: 5px;
+                            }
+                        }
+                    </style>
+                    <div class="table-container">
+                        <h5>Regular Class 11 and 12 Courses</h5>
+                        <h5>Compulsory Subjects</h5>
+                        <h5>Grade 11</h5>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><strong>S.N.</strong></td>
+                                    <td><strong>Class 11 Subjects and Code</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Nepali [Nep. 001]</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>English [Eng. 003]</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Social Studies and Life Skill [Sol. 005] Or Mathematics [Mat. 007]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h5>Grade 12</h5>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><strong>S.N.</strong></td>
+                                    <td><strong>Class 12 Subjects and Codes</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Nepali [Nep. 002]</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>English [Eng. 004]</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Social Studies and Life Skill [Sol. 006] Or Mathematics [Mat. 008]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><h5>Optional Subjects<br>
+                        Grade 11</h5></p>
+                    
+                    <div class="table-container">
+                    <table border="1" cellpadding="0" cellspacing="0" dir="ltr" >
+                        <tbody>
+                            <tr>
+                                <td><strong>S.N.</strong></td>
+                                <td><strong>Option I</strong></td>
+                                <td><strong>Option II</strong></td>
+                                <td><strong>Option III</strong></td>
+                                <td><strong>Option IV</strong></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Physics [Phy. 101]</td>
+                                <td>Biology [bio. 201]</td>
+                                <td>Chemistry [Che. 301]</td>
+                                <td>Mathematics [Mat. 401]</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Accounting [Acc. 103]</td>
+                                <td>Education and Development [Ed. 203]</td>
+                                <td>Economics [Eco. 303]</td>
+                                <td>Applied mathematics [Ama.403]</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Rural Development [Rd. 105]</td>
+                                <td>Geography [Geo. 205]</td>
+                                <td>Tourism and Mountaineering Studies [Tms. 305]</td>
+                                <td>Business Mathematics [Bmt. 405]</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Jurisprudence and Legal Theories [Jlt. 107]</td>
+                                <td>Procedural Law [Prl. 207]</td>
+                                <td>Marketing [Mar. 307]</td>
+                                <td>Human rights [Hur. 407]</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Painting [Pai. 111]</td>
+                                <td>Sociology [Soc. 211]</td>
+                                <td>Gerontology and Care Taking Education [Gct. 309]</td>
+                                <td>Library and Information Science [Lis. 409]</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Child Development and Learning [Cdl. 115]</td>
+                                <td>Ayurveda [Ayu. 213]</td>
+                                <td>Yoga [yog. 311]</td>
+                                <td>Home Science [Hos. 411]</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Psychology [Psy. 119]</td>
+                                <td>Business Studies [Bus. 215]</td>
+                                <td>Vocal/Instrumental [Voc. 313]</td>
+                                <td>Environment Science [Ens. 413]</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>History [His. 121]</td>
+                                <td>Linguistics [Lin. 217]</td>
+                                <td>Sewing and Knitting [Sek. 315]</td>
+                                <td>General Law [Gel. 415]</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>Gender Studies [Ges. 123]</td>
+                                <td>Political Science [Pol. 219]</td>
+                                <td>Constitutional Law [Col. 317]</td>
+                                <td>Finance [Fin. 417]</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Hospitality Management [Hom. 125]</td>
+                                <td>Philosophy [Phi. 221]</td>
+                                <td>Culinary Arts [Cua. 321]</td>
+                                <td>Co-operative management [Com. 419]</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td>Agronomy [Agr. 127]</td>
+                                <td>Population Studies [Pos. 223]</td>
+                                <td>Culture [Cul. 323]</td>
+                                <td>Buddhist Studies [Bud. 421]</td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td>Naturopathy [Nat. 129]</td>
+                                <td>Horticulture [Hor. 225]</td>
+                                <td>Fashion Designing [Fad. 325]</td>
+                                <td>Sculpture [Scu. 423]</td>
+                            </tr>
+                            <tr>
+                                <td>13</td>
+                                <td>Human Value Education [Hve. 131]</td>
+                                <td>Food and Nutrition [Fon. 227]</td>
+                                <td>Film and Documentary [Fid. 327]</td>
+                                <td>Signing [Sig. 425]</td>
+                            </tr>
+                            <tr>
+                                <td>14</td>
+                                <td>&nbsp;</td>
+                                <td>Dance [Dan. 229]</td>
+                                <td>Livestock, Poultry and Fish Farming [Lpf. 329]</td>
+                                <td>Computer Science [Com. 427]</td>
+                            </tr>
+                            <tr>
+                                <td>15</td>
+                                <td>&nbsp;</td>
+                                <td>Computer Science [Com. 231]</td>
+                                <td>Nepali [Nep. 331]</td>
+                                <td>Sericulture and Beekeeping [Sbk. 429]</td>
+                            </tr>
+                            <tr>
+                                <td>16</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>English [Eng. 333]</td>
+                                <td>Beautician and Hair Dressing [Beh. 431]</td>
+                            </tr>
+                            <tr>
+                                <td>17</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Maithili [Mai. 335]</td>
+                                <td>Medicinal Herbals [Meh. 433]</td>
+                            </tr>
+                            <tr>
+                                <td>18</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Newari [New. 337]</td>
+                                <td>Plumbing and Wiring [Plw. 435]</td>
+                            </tr>
+                            <tr>
+                                <td>19</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Hindi [Hin. 339]</td>
+                                <td>Internal Decoration [Ind. 437]</td>
+                            </tr>
+                            <tr>
+                                <td>20</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Chinese Chi. [341]</td>
+                                <td>Hotel Management [Hom. 439]</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>German [Jer. 343]</td>
+                                <td>Mass Comunication [Mac. 441]</td>
+                            </tr>
+                            <tr>
+                                <td>22</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Japanese [Jap. 345]</td>
+                                <td>Health and Physical Education [Hpe. 443]</td>
+                            </tr>
+                            <tr>
+                                <td>23</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Korean [Kor. 347]</td>
+                                <td>Sports Science [Sps. 445]</td>
+                            </tr>
+                            <tr>
+                                <td>24</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Urdu [Urd. 349]</td>
+                                <td>Social Studies and Life Skills [Sol. 447]</td>
+                            </tr>
+                            <tr>
+                                <td>25</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Bhojpuri [Bhj. 351]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>26</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>French [Fre. 353]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>27</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Hebrew [Heb. 355]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>28</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Arabic [Are. 357]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>29</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Sanskrit [San. 359]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>30</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Applied Arts [Apa. 361]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p><h5>Optional Subjects<br>
+                        Grade 12</h5></p>
+                    <table  border="1" cellpadding="0" cellspacing="0" dir="ltr">
+                        <tbody>
+                            <tr>
+                                <td>S.N.</td>
+                                <td>Option I</td>
+                                <td>Option II</td>
+                                <td>Option III</td>
+                                <td>Option IV</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Physics [Phy. 102]</td>
+                                <td>Biology [bio. 202]</td>
+                                <td>Chemistry [Che. 302]</td>
+                                <td>Mathematics [Mat. 402]</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Accounting [Acc. 104]</td>
+                                <td>Education and Development [Ed. 204]</td>
+                                <td>Economics [Eco. 304]</td>
+                                <td>Applied mathematics [Ama.403]</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Rural Development [Rd. 106]</td>
+                                <td>Geography [Geo. 206]</td>
+                                <td>Tourism and Mountaineering Studies [Tms. 306]</td>
+                                <td>Business Mathematics [Bmt. 406]</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Nepalese Legal system [Nls. 110]</td>
+                                <td>Procedural Law [Prl. 207]</td>
+                                <td>Marketing [Mar. 308]</td>
+                                <td>Human rights [Hur. 408]</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Painting [Pai. 112]</td>
+                                <td>Sociology [Soc. 212]</td>
+                                <td>Gerontology and Care Taking Education [Gct. 310]</td>
+                                <td>Library and Information Science [Lis. 409]</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Instructional Pedagogy and Evaluation [Ipe. 118]</td>
+                                <td>Ayurveda [Ayu. 214]</td>
+                                <td>Yoga [yog. 312]</td>
+                                <td>Home Science [Hos. 412]</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Psychology [Psy. 120]</td>
+                                <td>Business Studies [Bus. 216]</td>
+                                <td>Vocal/Instrumental [Voc. 314]</td>
+                                <td>Environment Science [Ens. 413]</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>History [His. 122]</td>
+                                <td>Linguistics [Lin. 218]</td>
+                                <td>Sewing and Knitting [Sek. 316]</td>
+                                <td>General Law [Gel. 416]</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>Gender Studies [Ges. 124]</td>
+                                <td>Political Science [Pol. 220]</td>
+                                <td>Constitutional Law [Col. 318]</td>
+                                <td>Finance [Fin. 417]</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Hospitality Management [Hom. 126]</td>
+                                <td>Philosophy [Phi. 222]</td>
+                                <td>Culinary Arts [Cua. 322]</td>
+                                <td>Co-operative management [Com. 420]</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td>Agronomy [Agr. 128]</td>
+                                <td>Population Studies [Pos. 224]</td>
+                                <td>Culture [Cul. 324]</td>
+                                <td>Buddhist Studies [Bud. 422]</td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td>Naturopathy [Nat. 129]</td>
+                                <td>Horticulture [Hor. 226]</td>
+                                <td>Fashion Designing [Fad. 326]</td>
+                                <td>Sculpture [Scu. 424]</td>
+                            </tr>
+                            <tr>
+                                <td>13</td>
+                                <td>Human Value Education [Hve. 132]</td>
+                                <td>Food and Nutrition [Fon. 228]</td>
+                                <td>Film and Documentry [Fid. 328]</td>
+                                <td>Signing [Sig. 426]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Dance [Dan. 230]</td>
+                                <td>Livestock, Poultry and Fish Farming [Lpf. 330]</td>
+                                <td>Computer Science [Com. 428]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Computer Science [Com. 232]</td>
+                                <td>Nepali [Nep. 332]</td>
+                                <td>Sericulture and Beekeeping [Sbk. 430]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>English [Eng. 334]</td>
+                                <td>Beautician and Hair Dressing [Beh. 432]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Maithili [Mai. 336]</td>
+                                <td>Medicinal Herbals [Meh. 434]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Newari [New. 338]</td>
+                                <td>Plumbing and Wiring [Plw. 436]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Hindi [Hin. 340]</td>
+                                <td>Internal Decoration [Ind. 437]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Chinese Chi. [342]</td>
+                                <td>Hotel Management [Hom. 440]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>German [Jer. 344]</td>
+                                <td>Mass Comunication [Mac. 442]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Japanese [Jap. 346]</td>
+                                <td>Health and Physical Education [Hpe. 444]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Korean [Kor. 348]</td>
+                                <td>Sports Science [Sps. 446]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Urdu [Urd. 350]</td>
+                                <td>Social Studies and Life Skills [Sol. 448]</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Bhojpuri [Bhj. 352]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>French [Fre. 354]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Hebrew [Heb. 356]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Arabic [Are. 358]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>Sanskrit [San. 360]</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>
+                                <p>Applied Arts [Apa. 362]</p>
+                    
+                                <p>&nbsp;</p>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                    <h2 class="mb-3">Related Courses</h2>
+                    <div class="owl-carousel related-carousel position-relative" style="padding: 0 30px;">
+                        <a class="courses-list-item position-relative d-block overflow-hidden mb-2" href="detail.html">
+                            <img class="img-fluid" src="img/courses-1.jpg" alt="">
+                            <div class="courses-text">
+                                <h4 class="text-center text-white px-3">+2 Science</h4>
+                                <div class="border-top w-100 mt-3">
+                                    <div class="d-flex justify-content-between p-4">
+                                        <span class="text-white"><i class="fa fa-user mr-2"></i>Msc. Ramesh Kr. Mandal</span>
+                                        <span class="text-white"><i class="fa fa-star mr-2"></i>4.5
+                                            <small>(250)</small></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="courses-list-item position-relative d-block overflow-hidden mb-2" href="detail.html">
+                            <img class="img-fluid" src="img/courses-2.jpg" alt="">
+                            <div class="courses-text">
+                                <h4 class="text-center text-white px-3">Diploma In Computer Science Engineering</h4>
+                                <div class="border-top w-100 mt-3">
+                                    <div class="d-flex justify-content-between p-4">
+                                        <span class="text-white"><i class="fa fa-user mr-2"></i>Mr. Chandra Bahadur Khatri</span>
+                                        <span class="text-white"><i class="fa fa-star mr-2"></i>4.5
+                                            <small>(250)</small></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="courses-list-item position-relative d-block overflow-hidden mb-2" href="detail.html">
+                            <img class="img-fluid" src="img/courses-3.jpg" alt="">
+                            <div class="courses-text">
+                                <h4 class="text-center text-white px-3">School(Class: Nursery to 09) </h4>
+                                <div class="border-top w-100 mt-3">
+                                    <div class="d-flex justify-content-between p-4">
+                                        <span class="text-white"><i class="fa fa-user mr-2"></i>Mr. Kamal Bdr. Katwal</span>
+                                        <span class="text-white"><i class="fa fa-star mr-2"></i>4.5
+                                            <small>(250)</small></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+               </div>
+
+                <div class="col-lg-4 mt-5 mt-lg-0">
+                    <div class="bg-primary mb-5 py-3">
+                        <h3 class="text-white py-3 px-4 m-0">Course Features</h3>
+                        <div class="d-flex justify-content-between border-bottom px-4">
+                            <h6 class="text-white my-3">Instructor</h6>
+                            <h6 class="text-white my-3">Mr. Hari Bahadur Bhujel</h6>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom px-4">
+                            <h6 class="text-white my-3">Rating</h6>
+                            <h6 class="text-white my-3">4.5 <small>(250)</small></h6>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom px-4">
+                            <h6 class="text-white my-3">Lectures</h6>
+                            <h6 class="text-white my-3">25</h6>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom px-4">
+                            <h6 class="text-white my-3">Duration</h6>
+                            <h6 class="text-white my-3">2 Years</h6>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom px-4">
+                            <h6 class="text-white my-3">Skill level</h6>
+                            <h6 class="text-white my-3">All Level</h6>
+                        </div>
+                        <div class="d-flex justify-content-between px-4">
+                            <h6 class="text-white my-3">Language</h6>
+                            <h6 class="text-white my-3">English</h6>
+                        </div>
+                        <h5 class="text-white py-3 px-4 m-0">Course Price: 1.5 Lakhs</h5>
+                        <div class="py-3 px-4">
+                            <a class="btn btn-block btn-secondary py-3 px-5" href="/enrollement.html">Enroll Now</a>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <h2 class="mb-3">Categories</h2>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="/detail.html" class="text-decoration-none h6 m-0">Diploma In Computer Engineering (CTEVT)</a>
+                                <span class="badge badge-primary badge-pill">3 Years Course</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="detail3.html" class="text-decoration-none h6 m-0">+2 Education</a>
+                                <span class="badge badge-primary badge-pill">2 Years Course</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="detail2.html" class="text-decoration-none h6 m-0">+2 Science</a>
+                                <span class="badge badge-primary badge-pill">2 Years Course</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="detail4.html" class="text-decoration-none h6 m-0">School (Class: Nursery to Nine) </a>
+                                <span class="badge badge-primary badge-pill">1 Year per Class</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="" class="text-decoration-none h6 m-0">Short Term Training (NSTB)</a>
+                                <span class="badge badge-primary badge-pill">Varies Accordingly</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-5">
+                        <h2 class="mb-4">Recent Courses</h2>
+                        <a class="d-flex align-items-center text-decoration-none mb-4" href="/detail.html">
+                            <img class="img-fluid rounded" src="img/courses-80x80.jpg" alt="">
+                            <div class="pl-3">
+                                <h6>Diploma In Computer Engineering</h6>
+                                <div class="d-flex">
+                                    <small class="text-body mr-3"><i class="fa fa-user text-primary mr-2"></i>Mr. Chandra Bahadur Khatri</small>
+                                    <small class="text-body"><i class="fa fa-star text-primary mr-2"></i>4.5 (250)</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="d-flex align-items-center text-decoration-none mb-4" href="detail2.html">
+                            <img class="img-fluid rounded" src="img/courses-80x80.jpg" alt="">
+                            <div class="pl-3">
+                                <h6>+2 Science</h6>
+                                <div class="d-flex">
+                                    <small class="text-body mr-3"><i class="fa fa-user text-primary mr-2"></i>Msc. Ramesh Kr. Mandal</small>
+                                    <small class="text-body"><i class="fa fa-star text-primary mr-2"></i>4.5 (250)</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="d-flex align-items-center text-decoration-none mb-4" href="detail3.html">
+                            <img class="img-fluid rounded" src="img/courses-80x80.jpg" alt="">
+                            <div class="pl-3">
+                                <h6>+2 Education</h6>
+                                <div class="d-flex">
+                                    <small class="text-body mr-3"><i class="fa fa-user text-primary mr-2"></i>Mr. Hari Bahadur Bhujel</small>
+                                    <small class="text-body"><i class="fa fa-star text-primary mr-2"></i>4.5 (250)</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="d-flex align-items-center text-decoration-none" href="detail4.html">
+                            <img class="img-fluid rounded" src="img/courses-80x80.jpg" alt="">
+                            <div class="pl-3">
+                                <h6>School (Class: Nursery to 10)</h6>
+                                <div class="d-flex">
+                                    <small class="text-body mr-3"><i class="fa fa-user text-primary mr-2"></i>Mr. Kamal Bdr. Katwal</small>
+                                    <small class="text-body"><i class="fa fa-star text-primary mr-2"></i>4.5 (250)</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Detail End -->
+
+
+       <!-- Footer Start -->
+<div class="container-fluid position-relative overlay-top bg-dark text-white-50 py-5" style="margin-top: 90px;">
+    <div class="container mt-5 pt-5">
+      <div class="row">
+        <div class="col-md-6 mb-5">
+          <a href="index.html" class="navbar-brand">
+            <h2 class="mt-n2 text-uppercase text-white">
+              <img src="/img/logo.jpg" alt="Chautara Sec. School Logo" class="mr-3" style="height: 60px;">
+              Chautara Sec. School
+            </h2>
+          </a>
+          <p class="m-0">२०४५ सालमा स्थापना भएको चौतारा माध्यामिक विद्यालय क्रमशः अपग्रेड हुदै अहिले कक्षा १२ र डिप्लोमा इन कम्प्युटर इन्जिनियरङ्ग कक्षा सञ्चालन हुदै आएको छ । पछिल्लो समयमा गुणस्तरीय, दक्ष, योग्य र भरपर्दाे शिक्षकहरुद्धारा पठनपाठन गरिरहेको छ । दक्ष र प्राविधिक मानव श्रोतको उत्पादन र परिचालन गर्ने लक्ष रहेको छ । </p>
+        </div>
+                <div class="col-md-6 mb-5">
+                    <h3 class="text-white mb-4">Newsletter</h3>
+                    <div class="w-100">
+                      <form action="https://formspree.io/f/mvojoqzw" method="POST">
+                        <div class="input-group">
+                          <input type="email" class="form-control border-light" style="padding: 30px;" placeholder="Your Email Address" name="_replyto">
+                          <div class="input-group-append">
+                            <button class="btn btn-primary px-4" type="submit">Sign Up</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Get In Touch</h3>
+                    <p><i class="fa fa-map-marker-alt mr-2"></i>Shree Chautara Mavi Secondary School Dandakharka, Sunkoshi - 05, Okhaldhunga, Nepal</p>
+                    <p><i class="fa fa-phone-alt mr-2"></i>+977-9862606960</p>
+                    <p><i class="fa fa-envelope mr-2"></i>scssdandakharka045@gmail.com</p>
+                    <div class="d-flex justify-content-start mt-4">
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-twitter"></i></a>
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-facebook-f"></i></a>
+                        <a class="text-white mr-4" href="#"><i class="fab fa-2x fa-linkedin-in"></i></a>
+                        <a class="text-white" href="#"><i class="fab fa-2x fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Our Courses</h3>
+                    <div class="d-flex flex-column justify-content-start">
+                        <a class="text-white-50 mb-2" href="/detail.html"><i class="fa fa-angle-right mr-2"></i>Diploma In Computer Engineering</a>
+                        <a class="text-white-50 mb-2" href="/detail2.html"><i class="fa fa-angle-right mr-2"></i>+2 Science</a>
+                        <a class="text-white-50 mb-2" href="/detail3.html"><i class="fa fa-angle-right mr-2"></i>+2 Education</a>
+                        <a class="text-white-50 mb-2" href="/detail4.html"><i class="fa fa-angle-right mr-2"></i>School Courses </a>
+                        <a class="text-white-50" href="#"><i class="fa fa-angle-right mr-2"></i>Short Term Training</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <h3 class="text-white mb-4">Quick Links</h3>
+                    <div class="d-flex flex-column justify-content-start">
+                        <a class="text-white-50 mb-2" href="https://sunkoshimunokhaldhunga.gov.np/"><i class="fa fa-angle-right mr-2"></i>Sunkoshi Rural Muncipality</a>
+                        <a class="text-white-50 mb-2" href="https://okhaldhunga.edcu.gov.np/page/1_612e3b1403441"><i class="fa fa-angle-right mr-2"></i>Education Development and Coordination Unit Okhaldhunga</a>
+                        <a class="text-white-50 mb-2" href="https://cehrd.gov.np/"><i class="fa fa-angle-right mr-2"></i>CEHRD</a>
+                        <a class="text-white-50 mb-2" href="https://mosd.koshi.gov.np/"><i class="fa fa-angle-right mr-2"></i>Ministry of Social Development, Koshi Province</a>
+                        <a class="text-white-50" href="http://ctevt.org.np/"><i class="fa fa-angle-right mr-2"></i>CTEVT</a>
+                        <a class="text-white-50" href="https://itms.ctevt.org.np:5580/itmsAdmin/"><i class="fa fa-angle-right mr-2"></i>CTEVT Admin Login</a>
+                        <a class="text-white-50" href="https://iemis.doe.gov.np/"><i class="fa fa-angle-right mr-2"></i>IEMIS Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid bg-dark text-white-50 border-top py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
+                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">chautaramavi.com</a>. All Rights Reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-right">
+                    <p class="m-0">Designed by <a class="text-white" href="https://www.santoshthakur.tech/">Er. Santosh Thakur</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary rounded-0 btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
