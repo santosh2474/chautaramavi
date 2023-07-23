@@ -186,53 +186,53 @@ function highlightNavItem(element) {
 
                         </p>
 <p><strong>Criteria is given below:</strong></p>
-<style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        border: 1px solid #333;
-    }
-    
-    th,
-    td {
-        padding: 10px;
-        border-bottom: 1px solid #333;
-        border-right: 1px solid #333;
-    }
-    
-    th:last-child,
-    td:last-child {
-        border-right: none;
-    }
-    
-    td:not(:last-child) {
-        padding-right: 20px;
-    }
-    
-    @media (max-width: 768px) {
+   <style>
         table {
-            font-size: 14px;
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #333;
         }
-        
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            border-right: 1px solid #333;
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
         td:not(:last-child) {
-            padding-right: 10px;
+            padding-right: 20px;
         }
-    }
-    
-    @media (max-width: 576px) {
-        table {
-            font-size: 12px;
+
+        /* Responsive styles for tablets and smaller devices */
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+
+            td:not(:last-child) {
+                padding-right: 10px;
+            }
         }
-        
-        td {
-            padding: 5px;
+
+        /* Responsive styles for mobile phones */
+        @media (max-width: 576px) {
+            table {
+                font-size: 12px;
+            }
+
+            td {
+                padding: 5px;
+            }
+
+            td:not(:last-child) {
+                padding-right: 5px;
+            }
         }
-        
-        td:not(:last-child) {
-            padding-right: 5px;
-        }
-    }
-</style>
+    </style>
 <table>
 	<tbody>
 		<tr>
