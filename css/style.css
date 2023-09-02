@@ -9844,7 +9844,7 @@ h6,
   object-fit: cover;
 }
 .jumbotron.page-header {
-  background: linear-gradient(rgba(40, 120, 235, 0.9), rgba(40, 120, 235, 0.9)), url(../img/page-header.jpg), no-repeat center center;
+  background: linear-gradient(rgba(40, 120, 235, 0.5), rgba(40, 120, 235, 0.5)), url(../img/page-header.jpg), no-repeat center center;
   background-size: cover;
 }
 
