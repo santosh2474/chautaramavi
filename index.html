@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <title>Chautara_Mavi_School</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
-
-    
     <!-- Favicon -->
     <link href="img/favicon.ico" rel="icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
@@ -26,13 +21,106 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
 
-
     <style>
         body {
             overflow-x: hidden;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+    
+        .banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #cececa;
+            margin: 8px auto;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 300px;
+            max-width: 100%; /* Ensure the banner doesn't exceed the viewport width */
+            flex-direction: column; /* Arrange items in a column */
+        }
+    
+        .banner .media {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 90%;
+            transition: transform 0.5s ease;
+        }
+    
+        .banner .slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    
+        .banner .slide img,
+        .banner .slide video {
+            width: 200%; /* Make images and videos take full width */
+            height: 95%; /* Ensure they take full height */
+            object-fit: contain; /* Preserve aspect ratio */
+        }
+    
+        .banner .buttons {
+            margin-top: 0px; /* Add margin to separate buttons from media */
+            display: flex;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            gap: 5px; /* Adjusted for better spacing */
+        }
+    
+        .banner .buttons a {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #007BFF;
+            color: #FFF;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    
+        .banner .buttons a:hover {
+            background-color: #0056b3;
+        }
+    
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .banner {
+                width: 90%;
+                height: 250px;
+            }
+    
+            .banner .buttons {
+                gap: 3px; /* Reduce gap between buttons */
+            }
+    
+            .banner .buttons a {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .banner {
+                width: 95%;
+                height: 200px;
+            }
+    
+            .banner .buttons {
+                gap: 2px; /* Further reduce gap between buttons */
+            }
+    
+            .banner .buttons a {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
         }
     </style>
     
+
 </head>
 
 <body>
@@ -165,6 +253,190 @@ function highlightNavItem(element) {
 </style>
 
 <!-- Navbar End -->
+
+<!-- Banner Start -->
+<div class="banner">
+    <div class="media" id="bannerMedia">
+        <div class="slide">
+            <img src="banner_img/img4.jpg" alt="Image 4">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img1.jpg" alt="Image 1">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img2.jpg" alt="Image 2">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img3.jpg" alt="Image 3">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img4.jpg" alt="Image 4">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img5.jpg" alt="Image 5">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img6.jpg" alt="Image 6">
+        </div>
+        <div class="slide">
+            <img src="banner_img/img7.jpg" alt="Image 7">
+        </div>
+        <div class="slide">
+            <video controls id="bannerVideo">
+                <source src="banner_img/video1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="slide">
+            <video controls id="bannerVideo">
+                <source src="banner_img/video2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="slide">
+            <video controls id="bannerVideo">
+                <source src="banner_img/video3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="slide">
+            <img src="banner_img/img1.jpg" alt="Image 1">
+        </div>
+    </div>
+    <div class="buttons">
+        <a href="#" id="prev">Previous</a>
+        <a href="#" id="next">Next</a>
+        <a href="banner_img/img1.jpg" download="image.jpg" id="download">Download</a>
+    </div>
+</div>
+
+<script>
+const mediaContainer = document.getElementById('bannerMedia');
+let currentIndex = 1; // Start at the first actual slide
+const slideCount = mediaContainer.children.length;
+let autoSlideInterval;
+let videoPlaying = false;
+
+function updateSlide(index) {
+    const slideWidth = 100; // Each slide takes 100% width
+    mediaContainer.style.transition = "transform 0.5s ease-in-out";
+    mediaContainer.style.transform = `translateX(-${index * slideWidth}%)`;
+
+    // Handle the infinite loop transition
+    if (index === slideCount - 1) { // Transition from last to first
+        setTimeout(() => {
+            mediaContainer.style.transition = "none";
+            mediaContainer.style.transform = `translateX(-${slideWidth}%)`;
+            currentIndex = 1;
+        }, 500); // Match this duration with the transition duration
+    } else if (index === 0) { // Transition from first to last
+        setTimeout(() => {
+            mediaContainer.style.transition = "none";
+            mediaContainer.style.transform = `translateX(-${(slideCount - 2) * slideWidth}%)`;
+            currentIndex = slideCount - 2;
+        }, 500);
+    }
+}
+
+function autoSlide() {
+    if (!videoPlaying) {
+        currentIndex = (currentIndex + 1) % slideCount;
+        updateSlide(currentIndex);
+        updateDownloadLink();
+    }
+}
+
+function startAutoSlide() {
+    autoSlideInterval = setInterval(autoSlide, 5000); // 5000ms = 5 seconds
+}
+
+function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+}
+
+startAutoSlide();
+
+// Add event listeners for prev and next buttons
+document.getElementById('prev').addEventListener('click', function(event) {
+    event.preventDefault();
+    stopAutoSlide(); // Stop auto-slide on manual navigation
+    const video = document.querySelector('video');
+    if (video && !video.paused) {
+        video.pause();
+        videoPlaying = false;
+    }
+    currentIndex = (currentIndex > 0) ? currentIndex - 1 : slideCount - 1;
+    updateSlide(currentIndex);
+    updateDownloadLink();
+    startAutoSlide(); // Resume auto-slide after manual navigation
+});
+
+document.getElementById('next').addEventListener('click', function(event) {
+    event.preventDefault();
+    stopAutoSlide(); // Stop auto-slide on manual navigation
+
+    // Pause currently playing video
+    const video = document.querySelector('video');
+    if (video && !video.paused) {
+        video.pause();
+        videoPlaying = false;
+    }
+
+    // Move to the next slide
+    currentIndex = (currentIndex + 1) % slideCount;
+    updateSlide(currentIndex);
+    updateDownloadLink();
+    startAutoSlide(); // Resume auto-slide after manual navigation
+});
+
+// Pause auto-slide on hover and resume on mouse leave
+const slides = document.querySelectorAll('.slide');
+slides.forEach(slide => {
+    slide.addEventListener('mouseenter', function() {
+        stopAutoSlide();
+    });
+    slide.addEventListener('mouseleave', function() {
+        startAutoSlide();
+    });
+});
+
+// Pause auto-slide when video is playing and resume when paused or ended
+const videos = document.querySelectorAll('video');
+videos.forEach(video => {
+    video.addEventListener('play', function() {
+        videoPlaying = true;
+        stopAutoSlide();
+    });
+    video.addEventListener('pause', function() {
+        videoPlaying = false;
+        startAutoSlide();
+    });
+    video.addEventListener('ended', function() {
+        videoPlaying = false;
+        startAutoSlide();
+    });
+});
+
+// Update the download link dynamically based on current slide
+function updateDownloadLink() {
+    const downloadLink = document.getElementById('download');
+    const currentSlide = mediaContainer.children[currentIndex];
+    const media = currentSlide.querySelector('img, video');
+
+    if (media.tagName.toLowerCase() === 'img') {
+        downloadLink.href = media.src;
+        downloadLink.download = 'image.jpg';
+    } else if (media.tagName.toLowerCase() === 'video') {
+        downloadLink.href = media.querySelector('source').src;
+        downloadLink.download = 'video.mp4';
+    }
+}
+
+updateDownloadLink(); // Initial call to set the correct download link
+
+</script>
+<!-- Banner End -->
 
 <!-- Header Start -->
 <div class="jumbotron position-relative overlay-bottom" style="height: 85vh; margin-bottom: 40px;">
