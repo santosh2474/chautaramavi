@@ -1,0 +1,153 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  min-height: 100vh; /* Ensure the body height is at least the viewport height */
+  overflow: auto; /* Allow scrolling */
+}
+
+#slideContainer {
+  width: 720px;
+  margin: auto;
+  position: fixed; /* Use fixed to center the container */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; /* Ensure it's above other content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+}
+
+#slideContainer .sliderBtn {
+  position: absolute;
+  background-color: #2878EB;
+  border: none;
+  color: white;
+  padding: 1rem;
+  top: calc(50% - 1rem - 27px);
+  z-index: 1001; /* Ensure buttons are above the slider */
+  font-family: Nunito;
+  font-weight: 600;
+  font-size: 1.5rem;
+  cursor: pointer;
+  outline: none;
+}
+
+#slideContainer .sliderBtn:hover {
+  background-color: #1154b6;
+}
+
+#prev {
+  left: 0;
+}
+
+#next {
+  right: 0;
+}
+
+#slideContainer .closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #2878EB;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  z-index: 1002; /* Ensure close button is above the slider */
+  font-family: Nunito;
+  font-weight: 600;
+  font-size: 1.5rem;
+  cursor: pointer;
+  outline: none;
+}
+
+#slideContainer .closeBtn:hover {
+  background-color: #1154b6;
+}
+
+#slideContainer .slide {
+  display: none;
+  width: 100%;
+  height: auto;
+}
+
+#slideContainer .show {
+  display: block;
+  animation: fadein 1s ease-in-out 0s 1 normal forwards;
+}
+
+#slideContainer .downloadBtn {
+  display: block;
+  margin: 1rem 5rem;
+  padding: 0.5rem 1rem;
+  background-color: #2878EB;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 0.3rem;
+  font-family: Nunito;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+#slideContainer .downloadBtn:hover {
+  background-color: #1154b6;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#slideContainer .slide p {
+  padding: 1rem 0;
+  background-color: white;
+  color: black;
+  text-align: center;
+  font-family: Nunito;
+  font-weight: 600;
+}
+
+#slideContainer img {
+  width: 100%;
+  height: auto;
+  max-height: 400px; /* Set the maximum height for images */
+  border-radius: 0.4rem 0.4rem 0 0;
+  display: block;
+  margin: auto;
+}
+
+#slideContainer video {
+  width: 100%;
+  height: auto;
+  max-height: 400px; /* Reduced maximum height for videos */
+  border-radius: 0.4rem 0.4rem 0 0;
+  display: block;
+  margin: auto;
+}
+
+@media screen and (max-width: 722px) {
+  #slideContainer {
+    width: 100%;
+  }
+  #slideContainer .sliderBtn {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  #slideContainer .slide p {
+    padding: 0.5rem 0;
+  }
+  #slideContainer video {
+    max-height: 200px; /* Reduce maximum height for videos */
+  }
+}
