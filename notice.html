@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice Portal | Chautara Mavi</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- Header -->
+  <header class="bg-blue-700 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Chautara Mavi - Notice Portal</h1>
+      <nav>
+        <a href="https://www.chautaramavi.com/" target ="_blank" class="px-3 hover:underline">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notice Section -->
+  <main class="max-w-6xl mx-auto p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">📢 Latest Notices</h2>
+
+    <!-- Notice List -->
+    <div id="noticeBoard" class="space-y-4">
+      <!-- Example Notice -->
+      <div class="bg-white shadow rounded-xl p-4 border-l-4 border-blue-600">
+        <h3 class="text-lg font-semibold text-blue-700">Class 11 Admission Open</h3>
+        <p class="text-gray-700 mt-2">Admission for Class 11 has been opened from 2082/05/15. Interested students are requested to apply within 15 days.</p>
+        <span class="text-sm text-gray-500">Published: 2082/05/10</span>
+      </div>
+
+      <div class="bg-white shadow rounded-xl p-4 border-l-4 border-green-600">
+        <h3 class="text-lg font-semibold text-green-700">Diploma Routine</h3>
+        <p class="text-gray-700 mt-2">The Diploma routine has been published. Please download the PDF from the link below.</p>
+        <a href="/files/class12_exam_routine.pdf" target="_blank" class="text-blue-600 underline">Download Routine</a>
+        <span class="block text-sm text-gray-500">Published: 2082/05/05</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-blue-700 text-white text-center py-4 mt-10">
+    <p>© 2025 Chautara Mavi. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Optional Script to Dynamically Load Notices -->
+  <script>
+    // Example: Future dynamic notices can be fetched via JSON/API
+    const notices = [
+      {
+        title: "Fee Submission Deadline",
+        content: "All students are informed to submit their fees before 2082/05/20.",
+        date: "2082/05/08",
+        color: "red"
+      }
+    ];
+
+    const noticeBoard = document.getElementById("noticeBoard");
+
+    notices.forEach(n => {
+      const div = document.createElement("div");
+      div.className = `bg-white shadow rounded-xl p-4 border-l-4 border-${n.color}-600`;
+      div.innerHTML = `
+        <h3 class="text-lg font-semibold text-${n.color}-700">${n.title}</h3>
+        <p class="text-gray-700 mt-2">${n.content}</p>
+        <span class="text-sm text-gray-500">Published: ${n.date}</span>
+      `;
+      noticeBoard.appendChild(div);
+    });
+  </script>
+</body>
+</html>
