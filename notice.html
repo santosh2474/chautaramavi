@@ -5,70 +5,430 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notice Portal | Chautara Mavi</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+    
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+
+  <style>
+    /* Custom DataTables styling */
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      border-radius: 0.375rem !important;
+      margin: 0 2px;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #3b82f6 !important;
+      color: white !important;
+      border: 1px solid #3b82f6 !important;
+    }
+    
+    /* Mobile responsive improvements */
+    @media (max-width: 768px) {
+      .mobile-hide { display: none; }
+      
+      /* Mobile table cell padding */
+      table.dataTable tbody td {
+        padding: 12px 8px;
+      }
+      
+      /* Mobile responsive table width */
+      .dataTables_wrapper {
+        overflow-x: auto;
+      }
+      
+      .search-filters {
+        flex-direction: column;
+      }
+      
+      .search-filters > div {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    /* Ensure table content wrapping */
+    table.dataTable tbody td {
+      word-wrap: break-word;
+      max-width: 200px;
+    }
+    
+    /* Mobile specific content styling */
+    @media (max-width: 640px) {
+      table.dataTable tbody td {
+        max-width: 150px;
+        font-size: 0.875rem;
+      }
+      
+      .notice-content {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      @supports (display: -webkit-box) {
+        .notice-content {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          white-space: normal;
+          line-clamp: 2;
+        }
+      }
+    }
+
+    /* Custom search styling */
+    .search-container {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .date-input {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .search-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .search-btn:hover {
+      background: #2563eb;
+    }
+
+    .clear-btn {
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .clear-btn:hover {
+      background: #4b5563;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
   <!-- Header -->
   <header class="bg-blue-700 text-white shadow-md">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Chautara Mavi - Notice Portal</h1>
-      <nav>
-        <a href="https://www.chautaramavi.com/" target ="_blank" class="px-3 hover:underline">Home</a>
-      </nav>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold">Chautara Mavi - Notice Portal</h1>
+        </div>
+        <nav>
+          <a href="https://www.chautaramavi.com/" target="_blank" 
+             class="px-4 py-2 hover:bg-blue-600 rounded transition-colors">
+            Home
+          </a>
+        </nav>
+      </div>
     </div>
   </header>
 
   <!-- Notice Section -->
-  <main class="max-w-6xl mx-auto p-6">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">📢 Latest Notices</h2>
-
-    <!-- Notice List -->
-    <div id="noticeBoard" class="space-y-4">
-      <!-- Example Notice -->
-      <div class="bg-white shadow rounded-xl p-4 border-l-4 border-blue-600">
-        <h3 class="text-lg font-semibold text-blue-700">Class 11 Admission Open</h3>
-        <p class="text-gray-700 mt-2">Admission for Class 11 has been opened from 2082/05/15. Interested students are requested to apply within 15 days.</p>
-        <span class="text-sm text-gray-500">Published: 2082/05/10</span>
+  <main class="w-full p-4 sm:p-6 lg:p-8 flex-grow">
+    <!-- Title Section -->
+    <div class="mb-6">
+      <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">📢 Latest Notices</h2>
+      <p class="text-gray-600 text-sm sm:text-base">Stay updated with important announcements</p>
+    </div>
+    
+    <!-- DataTable Container - Full Width -->
+    <div class="w-full bg-white rounded-lg shadow overflow-hidden">
+      <div class="bg-gray-50 border-b px-6 py-4">
+        <h3 class="text-lg font-medium text-gray-900">Notice Board</h3>
       </div>
-
-      <div class="bg-white shadow rounded-xl p-4 border-l-4 border-green-600">
-        <h3 class="text-lg font-semibold text-green-700">Diploma Routine</h3>
-        <p class="text-gray-700 mt-2">The Diploma routine has been published. Please download the PDF from the link below.</p>
-        <a href="/files/class12_exam_routine.pdf" target="_blank" class="text-blue-600 underline">Download Routine</a>
-        <span class="block text-sm text-gray-500">Published: 2082/05/05</span>
+      
+      <!-- Enhanced Search Container -->
+      <div class="p-4 sm:p-6">
+        <div class="search-container">
+          <h4 class="text-sm font-medium text-gray-700 mb-3">🔍 Search by Nepali Date (BS)</h4>
+          <div class="search-filters flex flex-wrap items-end gap-4">
+            <div class="flex-1 min-w-0">
+              <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+              <input type="text" id="dateFrom" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/1)">
+            </div>
+            <div class="flex-1 min-w-0">
+              <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+              <input type="text" id="dateTo" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/30)">
+            </div>
+            <div class="flex-1 min-w-0">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Exact Date</label>
+              <input type="text" id="exactDate" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D">
+            </div>
+            <div class="flex gap-2">
+              <button id="searchByDate" class="search-btn">Search</button>
+              <button id="clearSearch" class="clear-btn">Clear</button>
+            </div>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-500">💡 Tip: You can use both formats - 2082/05/03 or 2082/5/3 (both will work the same)</p>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table id="noticeTable" class="display w-full">
+            <thead>
+              <tr>
+                <th class="text-left">Title</th>
+                <th class="text-left">Content</th>
+                <th class="text-left">Date (BS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium text-gray-900">Holiday Notice</td>
+                <td class="text-gray-700">
+                  <div class="notice-content">School will remain closed from 2082-06-06 till 2082-7-11 due to Festivals.</div>
+                  <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mt-2">
+                    Holiday
+                  </span>
+                </td>
+                <td class="text-gray-600" data-sort="20820507">
+                  <div>
+                    <div class="font-medium">2082/05/14</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Diploma Routine for 1st, 3rd, and 5th Semester</td>
+                <td class="text-gray-700">
+                  <div class="notice-content">The Diploma routine has been updated and published.</div>
+                  <a href="/files/1.pdf" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm underline block mt-1">
+                    Download Routine
+                  </a>
+                  <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
+                    Imp. PDF
+                  </span>
+                </td>
+                <td class="text-gray-600" data-sort="20820512">
+                  <div>
+                    <div class="font-medium">2082/05/14</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Regrding Pending Fees</td>
+                <td class="text-gray-700">
+                  <div class="notice-content">Clear all your pending before 2082-04-29</div>
+                  <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mt-2">
+                    Urgent
+                  </span>
+                </td>
+                <td class="text-gray-600" data-sort="20820510">
+                  <div>
+                    <div class="font-medium">2082/04/20</div>                    
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-blue-700 text-white text-center py-4 mt-10">
-    <p>© 2025 Chautara Mavi. All Rights Reserved.</p>
+  <footer class="bg-blue-700 text-white text-center py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>© 2025 Chautara Mavi. All Rights Reserved.</p>
+    </div>
   </footer>
 
-  <!-- Optional Script to Dynamically Load Notices -->
+  <!-- Initialize DataTable with Enhanced Date Search -->
   <script>
-    // Example: Future dynamic notices can be fetched via JSON/API
-    const notices = [
-      {
-        title: "Fee Submission Deadline",
-        content: "All students are informed to submit their fees before 2082/05/20.",
-        date: "2082/05/08",
-        color: "red"
+    $(document).ready(function() {
+      // Initialize DataTable
+      var table = $('#noticeTable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 20, 50],
+        "ordering": true,
+        "searching": true,
+        "order": [[ 2, "desc" ]], // Sort by date column descending (latest first)
+        "language": {
+          "search": "Search notices:",
+          "lengthMenu": "Show _MENU_ notices per page",
+          "info": "Showing _START_ to _END_ of _TOTAL_ notices",
+          "infoEmpty": "No notices available",
+          "infoFiltered": "(filtered from _MAX_ total notices)",
+          "paginate": {
+            "first": "First",
+            "last": "Last",
+            "next": "Next",
+            "previous": "Previous"
+          }
+        },
+        "dom": '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"mb-2 sm:mb-0"l><"mb-2 sm:mb-0"f>>rtip',
+        "columnDefs": [
+          {
+            "targets": [0],
+            "responsivePriority": 1
+          },
+          {
+            "targets": [1], 
+            "responsivePriority": 3
+          },
+          {
+            "targets": [2],
+            "responsivePriority": 2,
+            // Custom sorting for Nepali dates
+            "type": "num",
+            "render": function(data, type, row) {
+              if (type === 'sort' || type === 'type') {
+                // Extract the data-sort attribute value for sorting
+                var sortValue = $(data).attr('data-sort');
+                return parseInt(sortValue) || 0;
+              }
+              return data;
+            }
+          }
+        ]
+      });
+
+      // Helper function to convert date format YYYY/MM/DD to comparable number YYYYMMDD
+      function dateToNumber(dateString) {
+        if (!dateString) return 0;
+        
+        // Split the date and pad with zeros to ensure consistent format
+        var parts = dateString.split('/');
+        if (parts.length !== 3) return 0;
+        
+        var year = parts[0].padStart(4, '0');
+        var month = parts[1].padStart(2, '0');
+        var day = parts[2].padStart(2, '0');
+        
+        return parseInt(year + month + day);
       }
-    ];
 
-    const noticeBoard = document.getElementById("noticeBoard");
+      // Helper function to extract date from table cell
+      function getDateFromCell(cell) {
+        var dateText = $(cell).find('div.font-medium').text().trim();
+        return dateToNumber(dateText);
+      }
 
-    notices.forEach(n => {
-      const div = document.createElement("div");
-      div.className = `bg-white shadow rounded-xl p-4 border-l-4 border-${n.color}-600`;
-      div.innerHTML = `
-        <h3 class="text-lg font-semibold text-${n.color}-700">${n.title}</h3>
-        <p class="text-gray-700 mt-2">${n.content}</p>
-        <span class="text-sm text-gray-500">Published: ${n.date}</span>
-      `;
-      noticeBoard.appendChild(div);
+      // Custom search function for date filtering
+      function searchByDateRange(fromDate, toDate, exactDate) {
+        table.draw();
+      }
+
+      // Add custom search functionality
+      $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        if (settings.nTable.id !== 'noticeTable') {
+          return true;
+        }
+
+        var fromDate = $('#dateFrom').val();
+        var toDate = $('#dateTo').val();
+        var exactDate = $('#exactDate').val();
+
+        // If no date filters are set, show all
+        if (!fromDate && !toDate && !exactDate) {
+          return true;
+        }
+
+        var rowDate = table.cell(dataIndex, 2).data();
+        var actualDate = $(rowDate).find('div.font-medium').text().trim();
+        var rowDateNumber = dateToNumber(actualDate);
+
+        // Exact date search
+        if (exactDate) {
+          var exactDateNumber = dateToNumber(exactDate);
+          return rowDateNumber === exactDateNumber;
+        }
+
+        // Range search
+        var fromDateNumber = fromDate ? dateToNumber(fromDate) : 0;
+        var toDateNumber = toDate ? dateToNumber(toDate) : 99999999;
+
+        return rowDateNumber >= fromDateNumber && rowDateNumber <= toDateNumber;
+      });
+
+      // Search button click handler
+      $('#searchByDate').click(function() {
+        var fromDate = $('#dateFrom').val();
+        var toDate = $('#dateTo').val();
+        var exactDate = $('#exactDate').val();
+
+        // Validate date format (now allows single digit months/days)
+        function isValidDate(date) {
+          if (!date) return true;
+          return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(date);
+        }
+
+        if (!isValidDate(fromDate) || !isValidDate(toDate) || !isValidDate(exactDate)) {
+          alert('Please use the correct Nepali date format: YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/15 or 2082/05/15)');
+          return;
+        }
+
+        // Clear one type of search when using another
+        if (exactDate) {
+          $('#dateFrom').val('');
+          $('#dateTo').val('');
+        } else if (fromDate || toDate) {
+          $('#exactDate').val('');
+        }
+
+        table.draw();
+      });
+
+      // Clear search button handler
+      $('#clearSearch').click(function() {
+        $('#dateFrom').val('');
+        $('#dateTo').val('');
+        $('#exactDate').val('');
+        table.search('').draw();
+      });
+
+      // Enter key support for search inputs
+      $('#dateFrom, #dateTo, #exactDate').keypress(function(e) {
+        if (e.which === 13) { // Enter key
+          $('#searchByDate').click();
+        }
+      });
+
+      // Auto-clear conflicting inputs
+      $('#exactDate').on('input', function() {
+        if ($(this).val()) {
+          $('#dateFrom').val('');
+          $('#dateTo').val('');
+        }
+      });
+
+      $('#dateFrom, #dateTo').on('input', function() {
+        if ($(this).val()) {
+          $('#exactDate').val('');
+        }
+      });
     });
   </script>
 </body>
