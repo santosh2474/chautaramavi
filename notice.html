@@ -9,6 +9,7 @@
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -17,17 +18,28 @@
   <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
 
   <style>
-    /* Custom DataTables styling */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* DataTables custom styling */
+    .dataTables_wrapper {
+      font-family: inherit;
+    }
+
     .dataTables_wrapper .dataTables_length select,
     .dataTables_wrapper .dataTables_filter input {
       border: 1px solid #d1d5db;
       border-radius: 0.375rem;
-      padding: 0.5rem;
+      padding: 0.375rem 0.5rem;
+      font-size: 0.875rem;
     }
     
     .dataTables_wrapper .dataTables_paginate .paginate_button {
       border-radius: 0.375rem !important;
       margin: 0 2px;
+      padding: 6px 12px !important;
+      font-size: 0.875rem !important;
     }
     
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
@@ -35,67 +47,178 @@
       color: white !important;
       border: 1px solid #3b82f6 !important;
     }
-    
-    /* Mobile responsive improvements */
-    @media (max-width: 768px) {
-      .mobile-hide { display: none; }
-      
-      /* Mobile table cell padding */
-      table.dataTable tbody td {
-        padding: 12px 8px;
-      }
-      
-      /* Mobile responsive table width */
-      .dataTables_wrapper {
-        overflow-x: auto;
-      }
-      
-      .search-filters {
-        flex-direction: column;
-      }
-      
-      .search-filters > div {
-        margin-bottom: 0.5rem;
-      }
+
+    /* Table styling */
+    table.dataTable {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100% !important;
     }
-    
-    /* Ensure table content wrapping */
+
+    table.dataTable thead th {
+      background-color: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
     table.dataTable tbody td {
-      word-wrap: break-word;
-      max-width: 200px;
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+      font-size: 0.875rem;
+      line-height: 1.4;
     }
-    
-    /* Mobile specific content styling */
-    @media (max-width: 640px) {
+
+    table.dataTable tbody tr:hover {
+      background-color: #f9fafb;
+    }
+
+    /* Responsive table improvements */
+    @media (max-width: 1024px) {
       table.dataTable tbody td {
-        max-width: 150px;
-        font-size: 0.875rem;
+        padding: 12px;
+        font-size: 0.8rem;
       }
       
-      .notice-content {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      
-      @supports (display: -webkit-box) {
-        .notice-content {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          white-space: normal;
-          line-clamp: 2;
-        }
+      table.dataTable thead th {
+        padding: 10px 12px;
+        font-size: 0.8rem;
       }
     }
 
-    /* Custom search styling */
+    @media (max-width: 768px) {
+      /* Mobile layout adjustments */
+      .search-filters {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .search-buttons {
+        flex-direction: row;
+        gap: 0.5rem;
+      }
+      
+      .search-btn, .clear-btn {
+        flex: 1;
+      }
+
+      /* Table mobile responsive */
+      .dataTables_wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table.dataTable tbody td {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+        max-width: 200px;
+        word-wrap: break-word;
+      }
+      
+      table.dataTable thead th {
+        padding: 8px;
+        font-size: 0.75rem;
+      }
+
+      /* DataTables controls mobile */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+        margin-top: 1rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      table.dataTable tbody td {
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        max-width: 150px;
+      }
+      
+      table.dataTable thead th {
+        padding: 6px;
+        font-size: 0.7rem;
+      }
+
+      .notice-content {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
+        white-space: normal;
+        max-height: 2.4em;
+      }
+
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+        margin: 0 1px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      table.dataTable tbody td {
+        padding: 6px 4px;
+        font-size: 0.65rem;
+        max-width: 120px;
+      }
+      
+      table.dataTable thead th {
+        padding: 5px;
+        font-size: 0.65rem;
+      }
+
+      .badge {
+        font-size: 0.6rem !important;
+        padding: 0.15rem 0.3rem !important;
+      }
+
+      .download-link {
+        font-size: 0.65rem !important;
+      }
+    }
+
+    /* Content styling */
+    .notice-content {
+      line-height: 1.4;
+      color: #6b7280;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    .download-link {
+      font-size: 0.875rem;
+      display: block;
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+      word-break: break-all;
+    }
+
+    /* Search container styling */
     .search-container {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 0.5rem;
       padding: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .date-input {
@@ -103,6 +226,7 @@
       border-radius: 0.375rem;
       padding: 0.5rem;
       font-size: 0.875rem;
+      width: 100%;
     }
 
     .search-btn {
@@ -114,6 +238,10 @@
       font-size: 0.875rem;
       cursor: pointer;
       transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     .search-btn:hover {
@@ -129,70 +257,294 @@
       font-size: 0.875rem;
       cursor: pointer;
       transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     .clear-btn:hover {
       background: #4b5563;
+    }
+
+    /* Header responsive */
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 1.125rem;
+      }
+      
+      .main-title {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 1rem;
+      }
+      
+      .main-title {
+        font-size: 1.125rem;
+      }
+      
+      .container-padding {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+    }
+
+    /* Mobile menu */
+    .mobile-menu-btn {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .desktop-nav {
+        display: none;
+      }
+      
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .mobile-nav {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #1e40af;
+        width: 200px;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        display: none;
+      }
+      
+      .mobile-nav.active {
+        display: block;
+      }
+      
+      .mobile-nav a {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: white;
+        border-bottom: 1px solid #3b82f6;
+      }
+      
+      .mobile-nav a:hover {
+        background: #3b82f6;
+      }
+    }
+
+    /* Expanded content modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      max-width: 90%;
+      width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .close-modal {
+      float: right;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .read-more-btn {
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    
+    .read-more-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Mobile-specific improvements */
+    .mobile-notice-row {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .mobile-notice-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+    
+    .mobile-notice-content {
+      font-size: 0.85rem;
+      color: #4b5563;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .mobile-notice-date {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    
+    .mobile-notice-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .mobile-notice-attachments {
+      margin-top: 8px;
+    }
+    
+    /* Ensure all content is visible on mobile */
+    @media (max-width: 768px) {
+      .dataTables_wrapper .dataTable thead {
+        display: none;
+      }
+      
+      .dataTables_wrapper .dataTable tbody tr {
+        display: block;
+        margin-bottom: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      
+      .dataTables_wrapper .dataTable tbody td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        border: none;
+        max-width: none;
+      }
+      
+      .dataTables_wrapper .dataTable tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.8rem;
+        color: #374151;
+      }
+      
+          .notice-content {
+        line-clamp: unset;          /* Standard property */
+        -webkit-line-clamp: unset;  /* Vendor-prefixed (for Chrome, Safari, Edge) */
+        max-height: none;
+        display: block;
+      }
+
+      
+      .badge {
+        font-size: 0.7rem;
+      }
     }
   </style>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-blue-700 text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4">
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold">Chautara Mavi - Notice Portal</h1>
+  <header class="bg-blue-700 text-white shadow-md relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 container-padding">
+      <div class="flex justify-between items-center py-3 sm:py-4">
+        <div class="flex-1 min-w-0">
+          <h1 class="header-title text-xl sm:text-2xl font-bold text-white truncate">Chautara Mavi - Notice Portal</h1>
         </div>
-        <nav>
+        <nav class="ml-4 desktop-nav">
           <a href="https://www.chautaramavi.com/" target="_blank" 
-             class="px-4 py-2 hover:bg-blue-600 rounded transition-colors">
-            Home
+             class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base">
+            Back To chautaramavi
           </a>
         </nav>
+        <button class="mobile-menu-btn text-white p-2 rounded-md hover:bg-blue-600">
+          <i class="fas fa-bars"></i>
+        </button>
       </div>
     </div>
   </header>
 
   <!-- Notice Section -->
-  <main class="w-full p-4 sm:p-6 lg:p-8 flex-grow">
+  <main class="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 flex-grow container-padding">
     <!-- Title Section -->
-    <div class="mb-6">
-      <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">📢 Latest Notices</h2>
+    <div class="mb-4 sm:mb-6">
+      <h2 class="main-title text-xl sm:text-2xl font-semibold text-gray-800 mb-2">📢 Latest Notices</h2>
       <p class="text-gray-600 text-sm sm:text-base">Stay updated with important announcements</p>
     </div>
     
-    <!-- DataTable Container - Full Width -->
+    <!-- DataTable Container -->
     <div class="w-full bg-white rounded-lg shadow overflow-hidden">
-      <div class="bg-gray-50 border-b px-6 py-4">
-        <h3 class="text-lg font-medium text-gray-900">Notice Board</h3>
+      <div class="bg-gray-50 border-b px-4 sm:px-6 py-3 sm:py-4">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900">Notice Board</h3>
       </div>
       
-      <!-- Enhanced Search Container -->
+      <!-- Search Container -->
       <div class="p-4 sm:p-6">
         <div class="search-container">
           <h4 class="text-sm font-medium text-gray-700 mb-3">🔍 Search by Nepali Date (BS)</h4>
-          <div class="search-filters flex flex-wrap items-end gap-4">
-            <div class="flex-1 min-w-0">
+          <div class="search-filters flex flex-wrap items-end gap-3 sm:gap-4">
+            <div class="flex-1 min-w-0 sm:min-w-32">
               <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
-              <input type="text" id="dateFrom" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/1)">
+              <input type="text" id="dateFrom" class="date-input" placeholder="2082/5/1">
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 sm:min-w-32">
               <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
-              <input type="text" id="dateTo" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/30)">
+              <input type="text" id="dateTo" class="date-input" placeholder="2082/5/30">
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 sm:min-w-32">
               <label class="block text-xs font-medium text-gray-700 mb-1">Exact Date</label>
-              <input type="text" id="exactDate" class="date-input w-full" placeholder="YYYY/MM/DD or YYYY/M/D">
+              <input type="text" id="exactDate" class="date-input" placeholder="2082/5/15">
             </div>
-            <div class="flex gap-2">
-              <button id="searchByDate" class="search-btn">Search</button>
-              <button id="clearSearch" class="clear-btn">Clear</button>
+            <div class="search-buttons flex gap-2 w-full sm:w-auto">
+              <button id="searchByDate" class="search-btn">
+                <i class="fas fa-search"></i> Search
+                <div class="loading-spinner" id="searchSpinner"></div>
+              </button>
+              <button id="clearSearch" class="clear-btn">
+                <i class="fas fa-times"></i> Clear
+              </button>
             </div>
           </div>
           <div class="mt-3">
-            <p class="text-xs text-gray-500">💡 Tip: You can use both formats - 2082/05/03 or 2082/5/3 (both will work the same)</p>
+            <p class="text-xs text-gray-500">💡 Tip: You can use both formats - 2082/05/03 or 2082/5/3</p>
           </div>
         </div>
         
@@ -207,48 +559,36 @@
             </thead>
             <tbody>
               <tr>
-                <td class="font-medium text-gray-900">Holiday Notice</td>
-                <td class="text-gray-700">
+                <td class="font-medium text-gray-900" data-label="Title">Holiday Notice</td>
+                <td class="text-gray-700" data-label="Content">
                   <div class="notice-content">School will remain closed from 2082-06-06 till 2082-7-11 due to Festivals.</div>
-                  <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mt-2">
-                    Holiday
-                  </span>
+                  <span class="badge bg-gray-100 text-gray-800">Holiday</span>
                 </td>
-                <td class="text-gray-600" data-sort="20820507">
-                  <div>
-                    <div class="font-medium">2082/05/14</div>
-                  </div>
+                <td class="text-gray-600" data-sort="20820514" data-label="Date">
+                  <div class="font-medium">2082/05/14</div>
                 </td>
               </tr>
               <tr>
-                <td class="font-medium text-gray-900">Diploma Routine for 1st, 3rd, and 5th Semester</td>
-                <td class="text-gray-700">
-                  <div class="notice-content">The Diploma routine has been updated and published.</div>
-                  <a href="/files/1.pdf" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm underline block mt-1">
-                    Download Routine
+                <td class="font-medium text-gray-900" data-label="Title">Diploma Routine for 1st, 3rd, and 5th Semester</td>
+                <td class="text-gray-700" data-label="Content">
+                  <div class="notice-content">The Diploma routine has been updated and published. All students are requested to check the routine and follow accordingly. The routine includes exam schedules for all semesters.</div>
+                  <a href="/files/1.pdf" target="_blank" class="download-link text-blue-600 hover:text-blue-800 underline">
+                    <i class="fas fa-download"></i> Download Routine
                   </a>
-                  <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
-                    Imp. PDF
-                  </span>
+                  <span class="badge bg-blue-100 text-blue-800">Imp. PDF</span>
                 </td>
-                <td class="text-gray-600" data-sort="20820512">
-                  <div>
-                    <div class="font-medium">2082/05/14</div>
-                  </div>
+                <td class="text-gray-600" data-sort="20820514" data-label="Date">
+                  <div class="font-medium">2082/05/14</div>
                 </td>
               </tr>
               <tr>
-                <td class="font-medium text-gray-900">Regrding Pending Fees</td>
-                <td class="text-gray-700">
-                  <div class="notice-content">Clear all your pending before 2082-04-29</div>
-                  <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mt-2">
-                    Urgent
-                  </span>
+                <td class="font-medium text-gray-900" data-label="Title">Regarding Pending Fees</td>
+                <td class="text-gray-700" data-label="Content">
+                  <div class="notice-content">Clear all your pending fees before 2082-04-29 to avoid any inconvenience. Students with pending fees will not be allowed to attend classes after the deadline.</div>
+                  <span class="badge bg-yellow-100 text-yellow-800">Urgent</span>
                 </td>
-                <td class="text-gray-600" data-sort="20820510">
-                  <div>
-                    <div class="font-medium">2082/04/20</div>                    
-                  </div>
+                <td class="text-gray-600" data-sort="20820420" data-label="Date">
+                  <div class="font-medium">2082/04/20</div>
                 </td>
               </tr>
             </tbody>
@@ -259,174 +599,136 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-blue-700 text-white text-center py-4 mt-auto">
-    <div class="max-w-7xl mx-auto px-4">
-      <p>© 2025 Chautara Mavi. All Rights Reserved.</p>
+  <footer class="bg-gray-800 text-white py-6 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p>&copy; 2023 Chautara Mavi. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- Initialize DataTable with Enhanced Date Search -->
   <script>
     $(document).ready(function() {
-      // Initialize DataTable
+      // Initialize DataTable with responsive features
       var table = $('#noticeTable').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [5, 10, 20, 50],
-        "ordering": true,
-        "searching": true,
-        "order": [[ 2, "desc" ]], // Sort by date column descending (latest first)
-        "language": {
-          "search": "Search notices:",
-          "lengthMenu": "Show _MENU_ notices per page",
-          "info": "Showing _START_ to _END_ of _TOTAL_ notices",
-          "infoEmpty": "No notices available",
-          "infoFiltered": "(filtered from _MAX_ total notices)",
-          "paginate": {
-            "first": "First",
-            "last": "Last",
-            "next": "Next",
-            "previous": "Previous"
+        responsive: true,
+        ordering: true,
+        order: [[2, 'desc']], // Default sort by date descending
+        language: {
+          search: "Search notices:",
+          lengthMenu: "Show _MENU_ entries",
+          info: "Showing _START_ to _END_ of _TOTAL_ notices",
+          infoEmpty: "No notices available",
+          infoFiltered: "(filtered from _MAX_ total notices)",
+          paginate: {
+            previous: "← Previous",
+            next: "Next →"
           }
         },
-        "dom": '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"mb-2 sm:mb-0"l><"mb-2 sm:mb-0"f>>rtip',
-        "columnDefs": [
-          {
-            "targets": [0],
-            "responsivePriority": 1
-          },
-          {
-            "targets": [1], 
-            "responsivePriority": 3
-          },
-          {
-            "targets": [2],
-            "responsivePriority": 2,
-            // Custom sorting for Nepali dates
-            "type": "num",
-            "render": function(data, type, row) {
-              if (type === 'sort' || type === 'type') {
-                // Extract the data-sort attribute value for sorting
-                var sortValue = $(data).attr('data-sort');
-                return parseInt(sortValue) || 0;
-              }
-              return data;
-            }
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+        drawCallback: function(settings) {
+          // Enhance mobile view after table is drawn
+          if ($(window).width() < 768) {
+            $('.notice-content').css({
+              'webkit-line-clamp': 'unset',
+              'max-height': 'none',
+              'display': 'block'
+            });
           }
-        ]
+        }
       });
-
-      // Helper function to convert date format YYYY/MM/DD to comparable number YYYYMMDD
-      function dateToNumber(dateString) {
-        if (!dateString) return 0;
-        
-        // Split the date and pad with zeros to ensure consistent format
-        var parts = dateString.split('/');
-        if (parts.length !== 3) return 0;
-        
-        var year = parts[0].padStart(4, '0');
-        var month = parts[1].padStart(2, '0');
-        var day = parts[2].padStart(2, '0');
-        
-        return parseInt(year + month + day);
-      }
-
-      // Helper function to extract date from table cell
-      function getDateFromCell(cell) {
-        var dateText = $(cell).find('div.font-medium').text().trim();
-        return dateToNumber(dateText);
-      }
-
-      // Custom search function for date filtering
-      function searchByDateRange(fromDate, toDate, exactDate) {
-        table.draw();
-      }
-
-      // Add custom search functionality
-      $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-        if (settings.nTable.id !== 'noticeTable') {
-          return true;
-        }
-
-        var fromDate = $('#dateFrom').val();
-        var toDate = $('#dateTo').val();
-        var exactDate = $('#exactDate').val();
-
-        // If no date filters are set, show all
-        if (!fromDate && !toDate && !exactDate) {
-          return true;
-        }
-
-        var rowDate = table.cell(dataIndex, 2).data();
-        var actualDate = $(rowDate).find('div.font-medium').text().trim();
-        var rowDateNumber = dateToNumber(actualDate);
-
-        // Exact date search
-        if (exactDate) {
-          var exactDateNumber = dateToNumber(exactDate);
-          return rowDateNumber === exactDateNumber;
-        }
-
-        // Range search
-        var fromDateNumber = fromDate ? dateToNumber(fromDate) : 0;
-        var toDateNumber = toDate ? dateToNumber(toDate) : 99999999;
-
-        return rowDateNumber >= fromDateNumber && rowDateNumber <= toDateNumber;
+      
+      // Mobile menu toggle
+      $('.mobile-menu-btn').click(function() {
+        $('.mobile-nav').toggleClass('active');
       });
-
-      // Search button click handler
+      
+      // Close mobile menu when clicking outside
+      $(document).click(function(e) {
+        if (!$(e.target).closest('.mobile-menu-btn, .mobile-nav').length) {
+          $('.mobile-nav').removeClass('active');
+        }
+      });
+      
+      // Search functionality
       $('#searchByDate').click(function() {
-        var fromDate = $('#dateFrom').val();
-        var toDate = $('#dateTo').val();
-        var exactDate = $('#exactDate').val();
-
-        // Validate date format (now allows single digit months/days)
-        function isValidDate(date) {
-          if (!date) return true;
-          return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(date);
-        }
-
-        if (!isValidDate(fromDate) || !isValidDate(toDate) || !isValidDate(exactDate)) {
-          alert('Please use the correct Nepali date format: YYYY/MM/DD or YYYY/M/D (e.g., 2082/5/15 or 2082/05/15)');
-          return;
-        }
-
-        // Clear one type of search when using another
-        if (exactDate) {
-          $('#dateFrom').val('');
-          $('#dateTo').val('');
-        } else if (fromDate || toDate) {
-          $('#exactDate').val('');
-        }
-
-        table.draw();
+        var fromDate = $('#dateFrom').val().trim();
+        var toDate = $('#dateTo').val().trim();
+        var exactDate = $('#exactDate').val().trim();
+        
+        // Show loading spinner
+        $('#searchSpinner').show();
+        
+        // Simulate search delay for better UX
+        setTimeout(function() {
+          table.columns(2).search('').draw(); // Clear previous search
+          
+          if (exactDate) {
+            // Search for exact date
+            table.columns(2).search('^' + exactDate + '$', true, false).draw();
+          } else if (fromDate || toDate) {
+            // Custom range search logic
+            table.draw();
+            
+            // Since DataTables doesn't natively support Nepali date range filtering,
+            // we need to implement custom filtering
+            var fromParts = fromDate.split('/');
+            var toParts = toDate.split('/');
+            
+            // Convert to sortable format (remove slashes and pad with zeros)
+            var fromSortable = fromDate ? fromDate.replace(/\//g, '').padStart(7, '0') : '0000000';
+            var toSortable = toDate ? toDate.replace(/\//g, '').padStart(7, '0') : '9999999';
+            
+            // Custom filtering
+            $.fn.dataTable.ext.search.push(
+              function(settings, data, dataIndex) {
+                var dateCell = data[2]; // Date is in the third column (index 2)
+                var dateSortable = dateCell.replace(/\//g, '').padStart(7, '0');
+                
+                if ((fromSortable === '0000000' || dateSortable >= fromSortable) && 
+                    (toSortable === '9999999' || dateSortable <= toSortable)) {
+                  return true;
+                }
+                return false;
+              }
+            );
+            
+            table.draw();
+            
+            // Remove the custom filter function after applying
+            $.fn.dataTable.ext.search.pop();
+          } else {
+            // If no search criteria, just redraw to show all
+            table.draw();
+          }
+          
+          // Hide loading spinner
+          $('#searchSpinner').hide();
+        }, 500);
       });
-
-      // Clear search button handler
+      
+      // Clear search functionality
       $('#clearSearch').click(function() {
         $('#dateFrom').val('');
         $('#dateTo').val('');
         $('#exactDate').val('');
-        table.search('').draw();
+        table.columns().search('').draw();
       });
-
-      // Enter key support for search inputs
-      $('#dateFrom, #dateTo, #exactDate').keypress(function(e) {
-        if (e.which === 13) { // Enter key
-          $('#searchByDate').click();
-        }
-      });
-
-      // Auto-clear conflicting inputs
-      $('#exactDate').on('input', function() {
-        if ($(this).val()) {
-          $('#dateFrom').val('');
-          $('#dateTo').val('');
-        }
-      });
-
-      $('#dateFrom, #dateTo').on('input', function() {
-        if ($(this).val()) {
-          $('#exactDate').val('');
+      
+      // Enhance mobile view on resize
+      $(window).resize(function() {
+        if ($(window).width() < 768) {
+          $('.notice-content').css({
+            'webkit-line-clamp': 'unset',
+            'max-height': 'none',
+            'display': 'block'
+          });
+        } else {
+          $('.notice-content').css({
+            'webkit-line-clamp': '2',
+            'max-height': '2.4em',
+            'display': '-webkit-box'
+          });
         }
       });
     });
