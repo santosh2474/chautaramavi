@@ -466,9 +466,9 @@
         color: #374151;
       }
       
-          .notice-content {
-        line-clamp: unset;          /* Standard property */
-        -webkit-line-clamp: unset;  /* Vendor-prefixed (for Chrome, Safari, Edge) */
+      .notice-content {
+        line-clamp: unset;
+        -webkit-line-clamp: unset;
         max-height: none;
         display: block;
       }
@@ -477,6 +477,17 @@
       .badge {
         font-size: 0.7rem;
       }
+    }
+
+    .search-result-info {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      color: #1e40af;
+      font-size: 0.875rem;
+      display: none;
     }
   </style>
 </head>
@@ -490,14 +501,11 @@
           <h1 class="header-title text-xl sm:text-2xl font-bold text-white truncate">Chautara Mavi - Notice Portal</h1>
         </div>
         <nav class="ml-4 desktop-nav">
-          <a href="https://www.chautaramavi.com/" target="_blank" 
+          <a href="https://www.chautaramavi.com/" 
              class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base">
             Back To chautaramavi
           </a>
         </nav>
-        <button class="mobile-menu-btn text-white p-2 rounded-md hover:bg-blue-600">
-          <i class="fas fa-bars"></i>
-        </button>
       </div>
     </div>
   </header>
@@ -548,6 +556,10 @@
           </div>
         </div>
         
+        <div id="searchResultInfo" class="search-result-info">
+          <i class="fas fa-info-circle"></i> <span id="searchResultText"></span>
+        </div>
+        
         <div class="overflow-x-auto">
           <table id="noticeTable" class="display w-full">
             <thead>
@@ -558,13 +570,24 @@
               </tr>
             </thead>
             <tbody>
+             
+              <tr>
+                <td class="font-medium text-gray-900" data-label="Title">Regarding Pending Fees</td>
+                <td class="text-gray-700" data-label="Content">
+                  <div class="notice-content">Clear all your pending fees before 2082-04-29 to avoid any inconvenience. Students with pending fees will not be allowed to attend classes after the deadline.</div>
+                  <span class="badge bg-yellow-100 text-yellow-800">Urgent</span>
+                </td>
+                <td class="text-gray-600" data-sort="20820420" data-label="Date" data-date="2082/4/20">
+                  <div class="font-medium">2082/04/20</div>
+                </td>
+              </tr>
               <tr>
                 <td class="font-medium text-gray-900" data-label="Title">Holiday Notice</td>
                 <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">School will remain closed from 2082-06-06 till 2082-7-11 due to Festivals.</div>
+                  <div class="notice-content">School will remain closed from 2082-06-03 till 2082-7-12 due to Festivals.</div>
                   <span class="badge bg-gray-100 text-gray-800">Holiday</span>
                 </td>
-                <td class="text-gray-600" data-sort="20820514" data-label="Date">
+                <td class="text-gray-600" data-sort="20820514" data-label="Date" data-date="2082/5/14">
                   <div class="font-medium">2082/05/14</div>
                 </td>
               </tr>
@@ -577,18 +600,8 @@
                   </a>
                   <span class="badge bg-blue-100 text-blue-800">Imp. PDF</span>
                 </td>
-                <td class="text-gray-600" data-sort="20820514" data-label="Date">
+                <td class="text-gray-600" data-sort="20820514" data-label="Date" data-date="2082/5/14">
                   <div class="font-medium">2082/05/14</div>
-                </td>
-              </tr>
-              <tr>
-                <td class="font-medium text-gray-900" data-label="Title">Regarding Pending Fees</td>
-                <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">Clear all your pending fees before 2082-04-29 to avoid any inconvenience. Students with pending fees will not be allowed to attend classes after the deadline.</div>
-                  <span class="badge bg-yellow-100 text-yellow-800">Urgent</span>
-                </td>
-                <td class="text-gray-600" data-sort="20820420" data-label="Date">
-                  <div class="font-medium">2082/04/20</div>
                 </td>
               </tr>
             </tbody>
@@ -601,17 +614,71 @@
   <!-- Footer -->
   <footer class="bg-gray-800 text-white py-6 mt-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <p>&copy; 2023 Chautara Mavi. All rights reserved.</p>
+      <p>&copy; 2025 Chautara Mavi. All rights reserved.</p>
     </div>
   </footer>
 
   <script>
     $(document).ready(function() {
+      // Function to normalize date format for comparison
+      function normalizeDateForComparison(dateStr) {
+        if (!dateStr) return null;
+        
+        // Remove spaces and normalize slashes
+        const cleaned = dateStr.replace(/\s/g, '').replace(/[\/\\]/g, '/');
+        
+        // Split by slash
+        const parts = cleaned.split('/');
+        if (parts.length !== 3) return null;
+        
+        // Pad year, month, day with zeros for consistent comparison
+        const year = parts[0].padStart(4, '0');
+        const month = parts[1].padStart(2, '0');
+        const day = parts[2].padStart(2, '0');
+        
+        // Return as comparable number (YYYYMMDD format)
+        return parseInt(year + month + day);
+      }
+
+      // Function to check if date matches the search criteria
+      function dateMatches(cellDate, fromDate, toDate, exactDate) {
+        const cellDateNum = normalizeDateForComparison(cellDate);
+        if (!cellDateNum) return false;
+
+        // If exact date is provided, use only that
+        if (exactDate) {
+          const exactDateNum = normalizeDateForComparison(exactDate);
+          return exactDateNum && cellDateNum === exactDateNum;
+        }
+
+        // Handle range search
+        let fromDateNum = fromDate ? normalizeDateForComparison(fromDate) : null;
+        let toDateNum = toDate ? normalizeDateForComparison(toDate) : null;
+
+        // If both from and to dates are provided
+        if (fromDateNum && toDateNum) {
+          return cellDateNum >= fromDateNum && cellDateNum <= toDateNum;
+        }
+        
+        // If only from date is provided
+        if (fromDateNum && !toDateNum) {
+          return cellDateNum >= fromDateNum;
+        }
+        
+        // If only to date is provided
+        if (!fromDateNum && toDateNum) {
+          return cellDateNum <= toDateNum;
+        }
+
+        // If no search criteria, show all
+        return true;
+      }
+
       // Initialize DataTable with responsive features
       var table = $('#noticeTable').DataTable({
         responsive: true,
         ordering: true,
-        order: [[2, 'desc']], // Default sort by date descending
+        order: [[2, 'dsc']], // Changed to 'asc' for ascending order
         language: {
           search: "Search notices:",
           lengthMenu: "Show _MENU_ entries",
@@ -650,61 +717,63 @@
         }
       });
       
+      // Custom search filter function
+      let currentSearchFilter = null;
+      
       // Search functionality
       $('#searchByDate').click(function() {
         var fromDate = $('#dateFrom').val().trim();
         var toDate = $('#dateTo').val().trim();
         var exactDate = $('#exactDate').val().trim();
         
+        // Validate input
+        if (!fromDate && !toDate && !exactDate) {
+          alert('Please enter at least one date field to search.');
+          return;
+        }
+        
         // Show loading spinner
         $('#searchSpinner').show();
         
+        // Remove any existing custom filter
+        if (currentSearchFilter) {
+          $.fn.dataTable.ext.search.splice($.fn.dataTable.ext.search.indexOf(currentSearchFilter), 1);
+        }
+        
+        // Create new search filter
+        currentSearchFilter = function(settings, data, dataIndex) {
+          // Get the date from the row (it's in the 3rd column, index 2)
+          const row = table.row(dataIndex).node();
+          const dateCell = $(row).find('td').eq(2).attr('data-date');
+          
+          return dateMatches(dateCell, fromDate, toDate, exactDate);
+        };
+        
+        // Add the custom filter
+        $.fn.dataTable.ext.search.push(currentSearchFilter);
+        
         // Simulate search delay for better UX
         setTimeout(function() {
-          table.columns(2).search('').draw(); // Clear previous search
+          // Apply the filter
+          table.draw();
           
+          // Show search result info
+          let searchInfo = '';
           if (exactDate) {
-            // Search for exact date
-            table.columns(2).search('^' + exactDate + '$', true, false).draw();
-          } else if (fromDate || toDate) {
-            // Custom range search logic
-            table.draw();
-            
-            // Since DataTables doesn't natively support Nepali date range filtering,
-            // we need to implement custom filtering
-            var fromParts = fromDate.split('/');
-            var toParts = toDate.split('/');
-            
-            // Convert to sortable format (remove slashes and pad with zeros)
-            var fromSortable = fromDate ? fromDate.replace(/\//g, '').padStart(7, '0') : '0000000';
-            var toSortable = toDate ? toDate.replace(/\//g, '').padStart(7, '0') : '9999999';
-            
-            // Custom filtering
-            $.fn.dataTable.ext.search.push(
-              function(settings, data, dataIndex) {
-                var dateCell = data[2]; // Date is in the third column (index 2)
-                var dateSortable = dateCell.replace(/\//g, '').padStart(7, '0');
-                
-                if ((fromSortable === '0000000' || dateSortable >= fromSortable) && 
-                    (toSortable === '9999999' || dateSortable <= toSortable)) {
-                  return true;
-                }
-                return false;
-              }
-            );
-            
-            table.draw();
-            
-            // Remove the custom filter function after applying
-            $.fn.dataTable.ext.search.pop();
+            searchInfo = `Showing notices for exact date: ${exactDate}`;
           } else {
-            // If no search criteria, just redraw to show all
-            table.draw();
+            let parts = [];
+            if (fromDate) parts.push(`from ${fromDate}`);
+            if (toDate) parts.push(`to ${toDate}`);
+            searchInfo = `Showing notices ${parts.join(' ')}`;
           }
+          
+          $('#searchResultText').text(searchInfo);
+          $('#searchResultInfo').show();
           
           // Hide loading spinner
           $('#searchSpinner').hide();
-        }, 500);
+        }, 300);
       });
       
       // Clear search functionality
@@ -712,7 +781,25 @@
         $('#dateFrom').val('');
         $('#dateTo').val('');
         $('#exactDate').val('');
-        table.columns().search('').draw();
+        
+        // Remove custom filter
+        if (currentSearchFilter) {
+          $.fn.dataTable.ext.search.splice($.fn.dataTable.ext.search.indexOf(currentSearchFilter), 1);
+          currentSearchFilter = null;
+        }
+        
+        // Clear DataTable search and redraw
+        table.search('').draw();
+        
+        // Hide search result info
+        $('#searchResultInfo').hide();
+      });
+
+      // Add Enter key support for search inputs
+      $('#dateFrom, #dateTo, #exactDate').keypress(function(e) {
+        if (e.which == 13) { // Enter key
+          $('#searchByDate').click();
+        }
       });
       
       // Enhance mobile view on resize
@@ -729,6 +816,21 @@
             'max-height': '2.4em',
             'display': '-webkit-box'
           });
+        }
+      });
+
+      // Auto-format date inputs (add leading zeros)
+      $('#dateFrom, #dateTo, #exactDate').blur(function() {
+        let value = $(this).val().trim();
+        if (value) {
+          // Try to format the date consistently
+          let parts = value.split('/');
+          if (parts.length === 3) {
+            let year = parts[0].padStart(4, '0');
+            let month = parts[1].padStart(2, '0');
+            let day = parts[2].padStart(2, '0');
+            $(this).val(`${year}/${month}/${day}`);
+          }
         }
       });
     });
