@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #001f3f;
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        canvas {
+            border: 2px solid #ffffff;
+            background-color: black;
+        }
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .scoreboard div {
+            font-size: 1.2rem;
+        }
+        #pause-button {
+            background-color: #ffcc00;
+            border: none;
+            color: black;
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #pause-button:hover {
+            background-color: #ff9900;
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard">
+        <div id="score-center">Score: 0</div>
+        <div id="level-center">Level: 1</div>
+        <div id="timer-center">Time: 0s</div>
+        <div id="high-score-center">High Score: 0</div>
+        <div id="difficulty-controls">
+            <button class="difficulty-button" data-difficulty="easy">Easy</button>
+            <button class="difficulty-button" data-difficulty="medium">Medium</button>
+            <button class="difficulty-button" data-difficulty="hard">Hard</button>
+            
+            <div id="difficulty-message" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: black; color: white; padding: 10px; border-radius: 5px; font-size: 18px;"></div>
+            
+          </div>
+          
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <button id="pause-button">Pause</button>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Contents</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f7f9;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #2c3e50, #1a2530);
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+    
+    .description {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .semester-container {
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .semester-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    
+    .semester-header {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .semester-header:hover {
+      background: linear-gradient(135deg, #2980b9, #2573a7);
+    }
+    
+    .semester-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    
+    .toggle-icon {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .semester-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+    
+    .semester-content.active {
+      max-height: 3000px; /* Large enough to contain all content */
+    }
+    
+    /* Desktop table styling */
+    .desktop-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .desktop-table th, .desktop-table td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .desktop-table th {
+      background-color: #f1f8ff;
+      font-weight: 450;
+      color: #2c3e50;
+    }
+    
+    .desktop-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .desktop-table tr:hover {
+      background-color: #f1f8ff;
+    }
+    
+    /* Mobile card styling */
+    .mobile-cards {
+      display: none;
+      padding: 15px;
+    }
+    
+    .subject-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .subject-header {
+      background: #f1f8ff;
+      padding: 12px 15px;
+      font-weight: 600;
+      color: #2c3e50;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .subject-links {
+      padding: 15px;
+    }
+    
+    .btn-link {
+      display: block;
+      padding: 10px 15px;
+      margin: 8px 0;
+      background: #f8f9fa;
+      color: #2980b9;
+      text-decoration: none;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .btn-link:hover {
+      background: #e3f2fd;
+      color: #1a5c9e;
+      border-color: #c5e1ff;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Responsive design */
+    @media (max-width: 992px) {
+      .desktop-table {
+        display: none;
+      }
+      
+      .mobile-cards {
+        display: block;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .semester-title {
+        font-size: 1.2rem;
+      }
+      
+      .btn-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    header {
+  text-align: center;
+  padding: 20px;
+  background: #363738;
+  border-bottom: 2px solid #ddd;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+header .description {
+  font-size: 1rem;
+  color: #ebe5e5;
+  margin-bottom: 15px;
+}
+
+.institute-info h2 {
+  font-size: 1.5rem;
+  margin: 5px 0;
+  color: #eceff1;
+}
+
+.institute-info p {
+  font-size: 1rem;
+  color: #f6f1f1;
+  line-height: 1.4;
+}
+
+  </style>
+</head>
+<!-- SweetAlert2 Library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Show attractive alert when page loads
+  window.onload = function () {
+    Swal.fire({
+      title: "🚧 Under Development 🚧",
+      text: "This Web-Page is currently in under Developing Condition. If you still want to continue, please click OK.",
+      icon: "info",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#3085d6",
+      background: "#f9f9f9"
+    });
+  };
+</script>
+
+<body>
+  <div class="container">
+    <header>
+  <h1>Academic Contents</h1>
+  <p class="description">
+    Access syllabus, question papers, solutions, notes, and lecturer information for all semesters
+  </p>
+
+  <div class="institute-info">
+    <h2>🏫 Shree Chautara Secondary School Dandakharka</h2>
+    <p>
+      Sunkoshi-05, Okhaldhunga, Koshi Province, Nepal <br>
+      Diploma in Computer Engineering (Affiliated to CTEVT)
+    </p>
+  </div>
+    </header>
+
+    <!-- Semester 1 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(1)">
+        <div class="semester-title">Semester 1</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-1">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Applied English</th>
+              <th>Nepali</th>
+              <th>Computer Application</th>
+              <th>Engineering Math-I</th>
+              <th>Engineering Physics-I</th>
+              <th>Engineering Chemistry-I</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/English/English_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/English/English.pdf"  target="_blank">Questions</a>
+                <a class="btn-link" href="pdfs/applied_english_solutions.pdf" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/English/Applied English--Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/English/ramesh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Nepali/nepali_syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Nepali/Applied Nepali.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Nepali/nepali_solutions.pdf" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/Nepali/nepali_notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Nepali/Rohit sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Computer/Computer_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Computer/Computer_Application.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/Computer/Computer_Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Computer/ramesh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Math-I/Mathematics I_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Math-I/Math_I.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="pdfs/engineering_math1_solutions.pdf" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/Math-I/#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Math-I/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Physics-I/Physics I_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Physics-I/Engg Physics.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="pdfs/engineering_physics1_solutions.pdf" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/Physics-I/Eng_physics_I_note.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Physics-I/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Chemistry-I/Chemistry-i_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Chemistry-I/Engg Chemistry I.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="pdfs/engineering_chemistry1_solutions.pdf" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Notes/Chemistry-I/Eng_Chemistry_I_Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Chemistry-I/Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Applied English</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/English/English_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/English/English.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/applied_english_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/English/Applied English--Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/English/ramesh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Nepali</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Nepali/nepali_syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Nepali/Applied Nepali.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/nepali_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/Nepali/nepali_notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Nepali/Rohit sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Computer Application</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Computer/Computer_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Computer/Computer_Application.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/computer_application_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/Computer/Computer_Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Computer/ramesh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Engineering Math-I</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Math-I/Mathematics I_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Math-I/Math_I.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/engineering_math1_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/Math-I/#" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Math-I/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Engineering Physics-I</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Physics-I/Physics I_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Physics-I/Engg Physics.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/engineering_physics1_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/Physics-I/Eng_physics_I_note.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Physics-I/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Engineering Chemistry-I</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester1/Syllabus/Chemistry-I/Chemistry-i_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Previous_Year_Questions/Chemistry-I/Engg Chemistry I.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="pdfs/engineering_chemistry1_solutions.pdf" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Notes/Chemistry-I/" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester1/Lecturer/Chemistry-I/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester 2 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(2)">
+        <div class="semester-title">Semester 2</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-2">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Engineering Math-II</th>
+              <th>Engineering Physics-II</th>
+              <th>Engineering Chemistry-II</th>
+              <th>Applied Mechanics</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Math-II/Math-II_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Math-II/Engg Mathematics II.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Notes/Math-II/" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Math-II/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Physics-II/Physics II_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Physics-II/Physics_II.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Notes/Physics-II/Physics II__Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Physics-II/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Chemistry-II/Chemistry-II_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Chemistry-II/Engg. Chemistry II.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Notes/Chemistry-II/Chemistry II__Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Chemistry-II//Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Applied Mechanics/Applied_Mechanics_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Applied Mechanics/Applied Mechanics.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Notes/Applied Mechanics/Applied Mechanics_Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Applied Mechanics/Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td> 
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Engineering Math-II</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Math-II/Math-II_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Math-II/Engg Mathematics II.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="#" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Math-II/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Engineering Physics-II</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Physics-II/Physics II_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Physics-II/Physics_II.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Notes/Physics-II/Physics II__Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Physics-II/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Engineering Chemistry-II</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Chemistry-II/Chemistry-II_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Chemistry-II/Engg. Chemistry II.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Notes/Chemistry-II/Chemistry II__Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Chemistry-II/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          
+          <div class="subject-card">
+            <div class="subject-header">Applied Mechanics</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester2/Syllabus/Applied Mechanics/Applied_Mechanics_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Previous_Year_Questions/Applied Mechanics/Applied Mechanics.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Notes/Applied Mechanics/Applied Mechanics_Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester2/Lecturer/Applied Mechanics/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester 3 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(3)">
+        <div class="semester-title">Semester 3</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-3">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Engineering Math-III</th>
+              <th>C Programming</th>
+              <th>Web Technology-I</th>
+              <th>Digital Logic</th>
+              <th>Discrete Structure</th>
+              <th>Software Engineering</th>
+              <th>Basic Electrical & Electronics Engineering</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Math-III/Mahe-II_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Math-III/Engineering Mathematics III.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Math-III/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/C_Programming/C Programming_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/C_Programming/C Programming.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/C_Programming/C_Programming_Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/C_Programming/santosh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Web_Technology-I/Web Technology I_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Web_Technology-I/Web Technology- I.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/Web_Technology-I/Web Technology _ I.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Web_Technology-I/santosh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Digital Logic/Digital Logic_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Digital_Logic/Digital Logic.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/Digital Logic/Digital Logic Note.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Digital_Logic/Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Discrete Structure/Discrete Structure_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Discrete Structure/Discrete Structure.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/Discrete Structure/Discrete Structure Note.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Discrete Structure/santosh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Softwore_Engineering/Software Engineering_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Softwore_Engineering/Software Engineering.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/Softwore_Engineering/Software Engineering Notes.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Softwore_Engineering/Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Basic_Elecrical&Electronices_Engineering/Basic Electrical and Electronics Engineering_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Basic_Elecrical&Electronices_Engineering/Electrical Engg..pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Notes/Basic_Elecrical&Electronices_Engineering/Electrical Engineering Note.pdf" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Basic_Elecrical&Electronices_Engineering/samir tamang-1.png" target="_blank">Lecturer</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Engineering Math-III</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Math-III/Mahe-II_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Math-III/Engineering Mathematics III.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="#" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Math-III/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">C Programming</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/C_Programming/C Programming_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/C_Programming/C Programming.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/C_Programming/C_Programming_Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/C_Programming/santosh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Web Technology-I</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Web_Technology-I/Web Technology I_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Web_Technology-I/Web Technology- I.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/Web_Technology-I/Web Technology _ I.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Web_Technology-I/santosh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Digital Logic</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Digital Logic/Digital Logic_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Digital_Logic/Digital Logic.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/Digital Logic/Digital Logic Note.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Digital_Logic/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Discrete Structure</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Discrete Structure/Discrete Structure_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Discrete Structure/Discrete Structure.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/Discrete Structure/Discrete Structure Note.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Discrete Structure/santosh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Software Engineering</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Software_Engineering/Software Engineering_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Softwore_Engineering/Software Engineering.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/Softwore_Engineering/Software Engineering Notes.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Softwore_Engineering/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Basic Electrical & Electronics Engineering</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester3/Syllabus/Basic_Electrical&Electronics_Engineering/Basic Electrical and Electronics Engineering_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Previous_Year_Questions/Basic_Elecrical&Electronices_Engineering/Electrical Engg..pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Notes/Basic_Elecrical&Electronices_Engineering/Electrical Engineering Note.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester3/Lecturer/Basic_Elecrical&Electronices_Engineering/samir tamang-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester 4 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(4)">
+        <div class="semester-title">Semester 4</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-4">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Database Management System</th>
+              <th>Data Structure & Algorithm</th>
+              <th>Object Oriented Programming in Java</th>
+              <th>Microprocessor & Computer Architecture</th>
+              <th>Web Technology-II</th>
+              <th>Statistics and Probability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Database_Management_System/Database Management System _Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Database_Management_System/DBMS.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Database_Management_System/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Data_Structure&Algorithm/Data Structure and Algorithm_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Data_Structure&Algorithm/DSA.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Data_Structure&Algorithm/Krisna sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Object_Orinted_Programming_In_Java/Object-Oriented Programming in Java_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Object_Orinted_Programming_In_Java/OOPs Java.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Object_Orinted_Programming_In_Java/santosh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Mircoprocesser&Architecture/Microprocessor and Computer Architecture_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Mircoprocesser&Architecture/M&CA.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Mircoprocesser&Architecture/samir tamang-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Web_Technology-II/Web Technology II_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Web_Technology-II/Web-Technology-II.pdf" target="_blank">Questions</a>
+                <a class="btn-link" href="#" target="_blank">Solutions</a>
+                <a class="btn-link" href="#" target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Web_Technology-II/santosh sir-1.png" target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Staistics&Probability/Statistics and Probability_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Staistics&Probability/Statistics & Probability.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Staistics&Probability/samir tamang-1.png"target="_blank">Lecturer</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Database Management System</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Database_Management_System/Database Management System _Syllabus.pdf">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Database_Management_System/DBMS.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Database_Management_System/Krisna sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Data Structure & Algorithm</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Data_Structure&Algorithm/Data Structure and Algorithm_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Data_Structure&Algorithm/DSA.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Data_Structure&Algorithm/Krisna sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Object Oriented Programming in Java</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Object_Orinted_Programming_In_Java/Object-Oriented Programming in Java_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Object_Orinted_Programming_In_Java/OOPs Java.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Object_Orinted_Programming_In_Java/santosh sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Microprocessor & Computer Architecture</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Mircoprocesser&Architecture/Microprocessor and Computer Architecture_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Mircoprocesser&Architecture/M&CA.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Mircoprocesser&Architecture/samir tamang-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Web Technology-II</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Web_Technology-II/Web Technology II_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Web_Technology-II/Web-Technology-II.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Web_Technology-II/santosh sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Statistics and Probability</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester4/Syllabus/Staistics&Probability/Statistics and Probability_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Previous_Year_Questions/Staistics&Probability/Statistics & Probability.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester4/Lecturer/Staistics&Probability/samir tamang-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester 5 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(5)">
+        <div class="semester-title">Semester 5</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-5">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Computer Graphics</th>
+              <th>Data Communication & Network</th>
+              <th>Operating System</th>
+              <th>Computer Repair & Maintenance</th>
+              <th>Data Mining & Data Warehousing</th>
+              <th>Elective-I (E-Commerce)</th>
+              <th>Minor project</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Computer_Graphics/Computer Graphics_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Computer_Graphics/Computer Graphics.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Computer_Graphics/santosh sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Data_Communication_&_Network/Data Communication & Network_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Data_Communicatio&Network/Data Communication & Network.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Data_Communicatio&Network/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Operating_System/Operating System_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Operating_System/Operating System.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Operating_System/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Computer_Repair_&_Maintenance/Computer Repair & Maintenance_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Computer_Repair&Maintance/Computer Repair & Maintenance.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Computer_Repair&Maintance/santosh sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Data_Mining_&_Data_Warehousing/Data Mining & Data Warehousing_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Datamining&Data_Warehousing/Data mining.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Datamining&Data_Warehousing/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Elective-I(E-commerce)/E-Commerce_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Elective-I(E-commerce)/E-Commerce.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="#"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Elective-I(E-commerce)/ramesh fir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Minor_Project/Minor Project_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="#"target="_blank">Demo</a>
+                <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Minor_Project/santosh sir-1.png"target="_blank">Lecturer</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Computer Graphics</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Computer_Graphics/Computer Graphics_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Computer_Graphics/Computer Graphics.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Computer_Graphics/santosh sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Data Communication & Network</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Data_Communication_&_Network/Data Communication & Network_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Data_Communicatio&Network/Data Communication & Network.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Data_Communicatio&Network/Krisna sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Operating System</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Operating_System/Operating System_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Operating_System/Operating System.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Operating_System/Krisna sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Computer Repair & Maintenance</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Computer_Repair_&_Maintenance/Computer Repair & Maintenance_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Computer_Repair&Maintance/Computer Repair & Maintenance.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Computer_Repair_&_Maintenance/santosh sir-1.pn"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Data Mining & Data Warehousing</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Data_Mining_&_Data_Warehousing/Data Mining & Data Warehousing_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Datamining&Data_Warehousing/Data mining.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Datamining&Data_Warehousing/Krisna sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Elective-I (E-Commerce)</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Elective-I(E-commerce)/E-Commerce_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Previous_Year_Questions/Elective-I(E-commerce)/E-Commerce.pdf"target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#"target="_blank">Solutions</a>
+              <a class="btn-link" href="#"target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Elective-I(E-commerce)/ramesh sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Minor project</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester5/Syllabus/Minor_Project/Minor Project_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="#"target="_blank">Demo</a>
+              <a class="btn-link" href="Academic_Contents/Semester5/Lecturer/Minor_Project/santosh sir-1.png"target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester 6 -->
+    <div class="semester-container">
+      <div class="semester-header" onclick="toggleSemester(6)">
+        <div class="semester-title">Semester 6</div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="semester-content" id="semester-6">
+        <!-- Desktop Table -->
+        <table class="desktop-table">
+          <thead>
+            <tr>
+              <th>Multimedia System</th>
+              <th>Internet of Things</th>
+              <th>Information Security</th>
+              <th>Entrepreneurship Development</th>
+              <th>Elective-II (E-Governance)</th>
+              <th>Major project</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Multimedia_System/Multimedia System_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Multimedia_System/Multimedia System.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Notes/Multimedia_System/Multimedia System.pdf"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Multimedia_System/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Internet_Of_Things/Internet of Things _Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Internet_Of_Things/Internet of things.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Notes/Internet_Of_Things/IOT.pdf"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Internet_Of_Things/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Information_Security/Information Security_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Information_Security/Information security.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Notes/Information_Security/Information security.pdf"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Information_Security/Krisna sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Enterpreneurship_Development/Entrepreneurship Development_Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Enterpreneurship_Development/Entrepreneurship Development.pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Notes/Enterpreneurship_Development/Entrepreneurship Development.pdf"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Enterpreneurship_Development/ramesh sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Elective-I(E-governance)/E-Governance _Syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Elective-I(E-governance)/E-Governance-(Elective-II).pdf"target="_blank">Questions</a>
+                <a class="btn-link" href="#"target="_blank">Solutions</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Notes/Elective-I(E-governance)/Egovernance.pdf"target="_blank">Notes</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Elective-I(E-governance)/ramesh sir-1.png"target="_blank">Lecturer</a>
+              </td>
+              <td>
+                <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Major_Project/Major Project_syllabus.pdf" target="_blank">Syllabus</a>
+                <a class="btn-link" href="#"target="_blank">Demo</a>
+                <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Major_Project/santosh sir-1.png" target="_blank">Lecturer</a>
+
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          <div class="subject-card">
+            <div class="subject-header">Multimedia System</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Multimedia_System/Multimedia System_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Multimedia_System/Multimedia System.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Notes/Multimedia_System/Multimedia System.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Multimedia_System/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Internet of Things</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Internet_Of_Things/Internet of Things _Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Internet_Of_Things/Internet of things.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Notes/Internet_Of_Things/IOT.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Internet_Of_Things/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Information Security</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Information_Security/Information Security_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Information_Security/Information security.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Notes/Information_Security/Information security.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Information_Security/Krisna sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Entrepreneurship Development</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Enterpreneurship_Development/Entrepreneurship Development_Syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Enterpreneurship_Development/Entrepreneurship Development.pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Notes/Enterpreneurship_Development/Entrepreneurship Development.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Enterpreneurship_Development/ramesh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          <div class="subject-card">
+            <div class="subject-header">Elective-II (E-Governance)</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Elective-I(E-governance)/E-Governance _Syllabus.pdf" target="_blank_">Syllabus</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Previous_Year_Questions/Elective-I(E-governance)/E-Governance-(Elective-II).pdf" target="_blank">Previous Year Questions</a>
+              <a class="btn-link" href="#" target="_blank">Solutions</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Notes/Elective-I(E-governance)/Egovernance.pdf" target="_blank">Notes</a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Elective-I(E-governance)/ramesh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          <div class="subject-card">
+            <div class="subject-header">Major_Project</div>
+            <div class="subject-links">
+              <a class="btn-link" href="Academic_Contents/Semester6/Syllabus/Major_Project/Major Project_syllabus.pdf" target="_blank">Syllabus</a>
+              <a class="btn-link" href="#">Demo</a>
+              </a>
+              <a class="btn-link" href="Academic_Contents/Semester6/Lecturer/Major_Project/santosh sir-1.png" target="_blank">Lecturer Information</a>
+            </div>
+          </div>
+          
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 Academic Contents Portal | Designed for Computer Engineering Students</p>
+    </div>
+  </div>
+
+  <script>
+    // Function to toggle semester content visibility
+    function toggleSemester(semesterNum) {
+      const content = document.getElementById(`semester-${semesterNum}`);
+      const isActive = content.classList.contains('active');
+      
+      // Close all semesters first
+      document.querySelectorAll('.semester-content').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Update all toggle icons to closed state
+      document.querySelectorAll('.toggle-icon').forEach(icon => {
+        icon.textContent = '▼';
+        icon.style.transform = 'rotate(0deg)';
+      });
+      
+      // If the clicked semester wasn't already active, open it
+      if (!isActive) {
+        content.classList.add('active');
+        const header = content.previousElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        icon.textContent = '▲';
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+  </script>
+</body>
+</html>

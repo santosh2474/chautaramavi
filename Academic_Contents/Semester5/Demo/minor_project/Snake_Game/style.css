@@ -1,0 +1,51 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f1f1f1;
+    margin: 0;
+}
+
+canvas {
+    border: 2px solid #000;
+    margin-top: 20px;
+}
+
+.controls {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.speed {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.game-info {
+    font-size: 18px;
+    margin-top: 10px;
+}
+#difficulty-controls {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+  }
+  #difficulty-controls button {
+    margin: 0 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #0074d9;
+    color: white;
+  }
+  #difficulty-controls button:hover {
+    background-color: #0053a6;
+  }
+  
