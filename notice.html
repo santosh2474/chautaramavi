@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notice Portal | Chautara Mavi</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Notice Portal | Chautara Mavi
+  </title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
   <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+  <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js">
+  </script>
   <!-- DataTables JS -->
-  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
-
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js">
+  </script>
+  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js">
+  </script>
   <style>
-    * {
+   * {
       box-sizing: border-box;
     }
 
@@ -490,148 +492,127 @@
       display: none;
     }
   </style>
-</head>
-<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
-
+ </head>
+ <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
   <!-- Header -->
   <header class="bg-blue-700 text-white shadow-md relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 container-padding">
-      <div class="flex justify-between items-center py-3 sm:py-4">
-        <div class="flex-1 min-w-0">
-          <h1 class="header-title text-xl sm:text-2xl font-bold text-white truncate">Chautara Mavi - Notice Portal</h1>
-        </div>
-        <nav class="ml-4 desktop-nav">
-          <a href="https://www.chautaramavi.com/" 
-             class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base">
-            Back To chautaramavi
-          </a>
-        </nav>
-      </div>
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 container-padding">
+    <div class="flex justify-between items-center py-3 sm:py-4">
+     <div class="flex-1 min-w-0">
+      <h1 class="header-title text-xl sm:text-2xl font-bold text-white truncate">
+       Chautara Mavi - Notice Portal
+      </h1>
+     </div>
+     <nav class="ml-4 desktop-nav">
+      <a class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base" href="https://www.chautaramavi.com/">
+       Back To chautaramavi
+      </a>
+     </nav>
     </div>
+   </div>
   </header>
-
   <!-- Notice Section -->
   <main class="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 flex-grow container-padding">
-    <!-- Title Section -->
-    <div class="mb-4 sm:mb-6">
-      <h2 class="main-title text-xl sm:text-2xl font-semibold text-gray-800 mb-2">📢 Latest Notices</h2>
-      <p class="text-gray-600 text-sm sm:text-base">Stay updated with important announcements</p>
+   <!-- Title Section -->
+   <div class="mb-4 sm:mb-6">
+    <h2 class="main-title text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+     📢 Latest Notices
+    </h2>
+    <p class="text-gray-600 text-sm sm:text-base">
+     Stay updated with important announcements
+    </p>
+   </div>
+   <!-- DataTable Container -->
+   <div class="w-full bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-gray-50 border-b px-4 sm:px-6 py-3 sm:py-4">
+     <h3 class="text-base sm:text-lg font-medium text-gray-900">
+      Notice Board
+     </h3>
     </div>
-    
-    <!-- DataTable Container -->
-    <div class="w-full bg-white rounded-lg shadow overflow-hidden">
-      <div class="bg-gray-50 border-b px-4 sm:px-6 py-3 sm:py-4">
-        <h3 class="text-base sm:text-lg font-medium text-gray-900">Notice Board</h3>
+    <!-- Search Container -->
+    <div class="p-4 sm:p-6">
+     <div class="search-container">
+      <h4 class="text-sm font-medium text-gray-700 mb-3">
+       🔍 Search by Nepali Date (BS)
+      </h4>
+      <div class="search-filters flex flex-wrap items-end gap-3 sm:gap-4">
+       <div class="flex-1 min-w-0 sm:min-w-32">
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+         From Date
+        </label>
+        <input class="date-input" id="dateFrom" placeholder="2082/5/1" type="text"/>
+       </div>
+       <div class="flex-1 min-w-0 sm:min-w-32">
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+         To Date
+        </label>
+        <input class="date-input" id="dateTo" placeholder="2082/5/30" type="text"/>
+       </div>
+       <div class="flex-1 min-w-0 sm:min-w-32">
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+         Exact Date
+        </label>
+        <input class="date-input" id="exactDate" placeholder="2082/5/15" type="text"/>
+       </div>
+       <div class="search-buttons flex gap-2 w-full sm:w-auto">
+        <button class="search-btn" id="searchByDate">
+         <i class="fas fa-search">
+         </i>
+         Search
+         <div class="loading-spinner" id="searchSpinner">
+         </div>
+        </button>
+        <button class="clear-btn" id="clearSearch">
+         <i class="fas fa-times">
+         </i>
+         Clear
+        </button>
+       </div>
       </div>
-      
-      <!-- Search Container -->
-      <div class="p-4 sm:p-6">
-        <div class="search-container">
-          <h4 class="text-sm font-medium text-gray-700 mb-3">🔍 Search by Nepali Date (BS)</h4>
-          <div class="search-filters flex flex-wrap items-end gap-3 sm:gap-4">
-            <div class="flex-1 min-w-0 sm:min-w-32">
-              <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
-              <input type="text" id="dateFrom" class="date-input" placeholder="2082/5/1">
-            </div>
-            <div class="flex-1 min-w-0 sm:min-w-32">
-              <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
-              <input type="text" id="dateTo" class="date-input" placeholder="2082/5/30">
-            </div>
-            <div class="flex-1 min-w-0 sm:min-w-32">
-              <label class="block text-xs font-medium text-gray-700 mb-1">Exact Date</label>
-              <input type="text" id="exactDate" class="date-input" placeholder="2082/5/15">
-            </div>
-            <div class="search-buttons flex gap-2 w-full sm:w-auto">
-              <button id="searchByDate" class="search-btn">
-                <i class="fas fa-search"></i> Search
-                <div class="loading-spinner" id="searchSpinner"></div>
-              </button>
-              <button id="clearSearch" class="clear-btn">
-                <i class="fas fa-times"></i> Clear
-              </button>
-            </div>
-          </div>
-          <div class="mt-3">
-            <p class="text-xs text-gray-500">💡 Tip: You can use both formats - 2082/05/03 or 2082/5/3</p>
-          </div>
-        </div>
-        
-        <div id="searchResultInfo" class="search-result-info">
-          <i class="fas fa-info-circle"></i> <span id="searchResultText"></span>
-        </div>
-        
-        <div class="overflow-x-auto">
-          <table id="noticeTable" class="display w-full">
-            <thead>
-              <tr>
-                <th class="text-left">Title</th>
-                <th class="text-left">Content</th>
-                <th class="text-left">Date (BS)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="font-medium text-gray-900" data-label="Title">Gen-Z दिवस २०८२/८३ मनाइने बारे सूचना</td>
-                <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">यस विद्यालयमा वि.सं. २०८२/८३ सालमा Gen-Z दिवस विशेष कार्यक्रम सहित मनाइने भएकोले सो अवसरमा विभिन्न शैक्षिक, सांस्कृतिक र सामाजिक गतिविधिहरू आयोजना गरिनेछ । विद्यार्थी, शिक्षक तथा सरोकारवालाको उपस्थितिलाई आवश्यक मानिने भएकाले उक्त दिन विद्यालय बिदा रहनेछ ।</div>
-                  <a href="/files/2.jpg" target="_blank" class="download-link text-blue-600 hover:text-blue-800 underline">
-                    <i class="fas fa-download"></i> Download Notice
-                  </a>
-                  <span class="badge bg-yellow-100 text-yellow-800">Holiday</span>
-                </td>
-                <td class="text-gray-600" data-sort="20820524" data-label="Date" data-date="2082/5/24">
-                  <div class="font-medium">2082/05/24</div>
-                </td>
-              </tr>
-              <tr>
-                <td class="font-medium text-gray-900" data-label="Title">Regarding Pending Fees</td>
-                <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">Clear all your pending fees before 2082-04-29 to avoid any inconvenience. Students with pending fees will not be allowed to attend classes after the deadline.</div>
-                  <span class="badge bg-yellow-100 text-yellow-800">Urgent</span>
-                </td>
-                <td class="text-gray-600" data-sort="20820420" data-label="Date" data-date="2082/4/20">
-                  <div class="font-medium">2082/04/20</div>
-                </td>
-              </tr>
-              <tr>
-                <td class="font-medium text-gray-900" data-label="Title">Holiday Notice</td>
-                <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">School will remain closed from 2082-06-03 till 2082-7-12 due to Festivals.</div>
-                  <span class="badge bg-gray-100 text-gray-800">Holiday</span>
-                </td>
-                <td class="text-gray-600" data-sort="20820514" data-label="Date" data-date="2082/5/14">
-                  <div class="font-medium">2082/05/14</div>
-                </td>
-              </tr>
-              <tr>
-                <td class="font-medium text-gray-900" data-label="Title">Diploma Routine for 1st, 3rd, and 5th Semester</td>
-                <td class="text-gray-700" data-label="Content">
-                  <div class="notice-content">The Diploma routine has been updated and published. All students are requested to check the routine and follow accordingly. The routine includes exam schedules for all semesters.</div>
-                  <a href="/files/1.pdf" target="_blank" class="download-link text-blue-600 hover:text-blue-800 underline">
-                    <i class="fas fa-download"></i> Download Routine
-                  </a>
-                  <span class="badge bg-blue-100 text-blue-800">Imp. PDF</span>
-                </td>
-                <td class="text-gray-600" data-sort="20820514" data-label="Date" data-date="2082/5/14">
-                  <div class="font-medium">2082/05/14</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="mt-3">
+       <p class="text-xs text-gray-500">
+        💡 Tip: You can use both formats - 2082/05/03 or 2082/5/3
+       </p>
       </div>
+     </div>
+     <div class="search-result-info" id="searchResultInfo">
+      <i class="fas fa-info-circle">
+      </i>
+      <span id="searchResultText">
+      </span>
+     </div>
+     <div class="overflow-x-auto">
+      <table class="display w-full" id="noticeTable">
+       <thead>
+        <tr>
+         <th class="text-left">
+          Title
+         </th>
+         <th class="text-left">
+          Content
+         </th>
+         <th class="text-left">
+          Date (BS)
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+       </tbody>
+      </table>
+     </div>
     </div>
+   </div>
   </main>
-
   <!-- Footer -->
   <footer class="bg-gray-800 text-white py-6 mt-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <p>&copy; 2025 Chautara Mavi. All rights reserved.</p>
-    </div>
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p>
+     © 2025 Chautara Mavi. All rights reserved.
+    </p>
+   </div>
   </footer>
-
   <script>
-    $(document).ready(function() {
+   $(document).ready(function() {
       // Function to normalize date format for comparison
       function normalizeDateForComparison(dateStr) {
         if (!dateStr) return null;
@@ -847,5 +828,5 @@
       });
     });
   </script>
-</body>
+ </body>
 </html>
