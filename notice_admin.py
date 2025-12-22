@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, filedialog
+from tkinter import messagebox, ttk, filedialog, simpledialog
 from bs4 import BeautifulSoup
 import os
 import shutil
@@ -15,6 +15,180 @@ selected_notice = None
 current_file_path = None
 search_mode = "title"
 is_maximized = True
+
+# -------------------- Global Scaling Configuration --------------------
+SCALING_SETTINGS = {
+    "window_scale": 1.0,
+    "font_scale": 1.0,
+    "padding_scale": 1.0,
+    "button_scale": 1.0,
+    "card_scale": 1.4,
+    "input_scale": 1.0,
+}
+
+# -------------------- Responsive Configuration --------------------
+class ResponsiveConfig:
+    def __init__(self, root):
+        self.root = root
+        self.base_width = 1366
+        self.base_height = 768
+        self.scale_factor = self.calculate_scale_factor()
+        
+    def calculate_scale_factor(self):
+        """Calculate scale factor based on screen resolution"""
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        width_scale = screen_width / self.base_width
+        height_scale = screen_height / self.base_height
+        
+        scale = min(width_scale, height_scale)
+        
+        if scale < 0.7:
+            scale = 0.7
+        elif scale > 1.2:
+            scale = 1.2
+            
+        return scale * SCALING_SETTINGS["window_scale"]
+    
+    def scale(self, value, scale_type="general"):
+        """Scale a value based on screen resolution and scaling settings"""
+        if scale_type == "font":
+            return int(value * self.scale_factor * 0.85 * SCALING_SETTINGS["font_scale"])
+        elif scale_type == "padding":
+            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["padding_scale"])
+        elif scale_type == "button":
+            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["button_scale"])
+        elif scale_type == "card":
+            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["card_scale"])
+        elif scale_type == "input":
+            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["input_scale"])
+        else:
+            return int(value * self.scale_factor * 0.9)
+    
+    def font_size(self, base_size):
+        """Get responsive font size"""
+        scaled_size = base_size * self.scale_factor * 0.85 * SCALING_SETTINGS["font_scale"]
+        return max(int(scaled_size), 9)
+
+# Initialize responsive config early
+temp_root = tk.Tk()
+temp_root.withdraw()
+resp = ResponsiveConfig(temp_root)
+temp_root.destroy()
+
+# -------------------- Scaling Settings Dialog --------------------
+def show_scaling_dialog():
+    """Show dialog to adjust scaling settings"""
+    scaling_window = tk.Toplevel(root)
+    scaling_window.title("⚙️ UI Scaling Settings")
+    scaling_window.geometry(f"{resp.scale(500)}x{resp.scale(500)}")
+    scaling_window.configure(bg=COLORS["light"])
+    scaling_window.transient(root)
+    scaling_window.grab_set()
+    
+    scaling_window.update_idletasks()
+    x = (root.winfo_screenwidth() // 2) - (resp.scale(500) // 2)
+    y = (root.winfo_screenheight() // 2) - (resp.scale(500) // 2)
+    scaling_window.geometry(f'{resp.scale(500)}x{resp.scale(500)}+{x}+{y}')
+    
+    # Header
+    header = tk.Frame(scaling_window, bg=COLORS["primary"], height=resp.scale(70))
+    header.pack(fill="x")
+    header.pack_propagate(False)
+    
+    tk.Label(header, text="⚙️ UI Scaling Settings", bg=COLORS["primary"], fg="white",
+             font=("Segoe UI", resp.font_size(16), "bold")).pack(expand=True)
+    
+    # Content
+    content = tk.Frame(scaling_window, bg=COLORS["light"], padx=resp.scale(30), pady=resp.scale(20))
+    content.pack(fill="both", expand=True)
+    
+    # Scaling controls
+    tk.Label(content, text="Adjust UI element sizes:", bg=COLORS["light"], fg=COLORS["dark"],
+             font=("Segoe UI", resp.font_size(12), "bold")).pack(anchor="w", pady=(0, resp.scale(20)))
+    
+    # Create sliders for each scaling setting
+    sliders = {}
+    slider_frame = tk.Frame(content, bg=COLORS["light"])
+    slider_frame.pack(fill="both", expand=True)
+    
+    settings_info = {
+        "window_scale": ("Window Size", 0.5, 1.5, 0.1),
+        "font_scale": ("Font Size", 0.5, 2.0, 0.1),
+        "padding_scale": ("Padding", 0.5, 2.0, 0.1),
+        "button_scale": ("Buttons", 0.5, 2.0, 0.1),
+        "card_scale": ("Notice Cards", 0.5, 2.0, 0.1),
+        "input_scale": ("Input Fields", 0.5, 2.0, 0.1),
+    }
+    
+    for i, (key, (label, min_val, max_val, resolution)) in enumerate(settings_info.items()):
+        frame = tk.Frame(slider_frame, bg=COLORS["light"])
+        frame.pack(fill="x", pady=resp.scale(10))
+        
+        # Label and current value
+        label_frame = tk.Frame(frame, bg=COLORS["light"])
+        label_frame.pack(fill="x")
+        
+        tk.Label(label_frame, text=label, bg=COLORS["light"], fg=COLORS["dark"],
+                 font=("Segoe UI", resp.font_size(10), "bold"), width=15).pack(side="left")
+        
+        value_label = tk.Label(label_frame, text=f"{SCALING_SETTINGS[key]:.1f}x", 
+                              bg=COLORS["light"], fg=COLORS["primary"],
+                              font=("Segoe UI", resp.font_size(10), "bold"))
+        value_label.pack(side="right")
+        
+        # Slider
+        slider = tk.Scale(frame, from_=min_val, to=max_val, resolution=resolution,
+                         orient=tk.HORIZONTAL, length=resp.scale(300),
+                         bg=COLORS["light"], fg=COLORS["dark"],
+                         highlightthickness=0, troughcolor=COLORS["border"],
+                         command=lambda val, k=key, vl=value_label: update_slider_value(k, float(val), vl))
+        slider.set(SCALING_SETTINGS[key])
+        slider.pack(fill="x")
+        sliders[key] = slider
+        
+        # Min/Max labels
+        minmax_frame = tk.Frame(frame, bg=COLORS["light"])
+        minmax_frame.pack(fill="x")
+        
+        tk.Label(minmax_frame, text=f"{min_val:.1f}x", bg=COLORS["light"], fg=COLORS["text_secondary"],
+                 font=("Segoe UI", resp.font_size(8))).pack(side="left")
+        tk.Label(minmax_frame, text=f"{max_val:.1f}x", bg=COLORS["light"], fg=COLORS["text_secondary"],
+                 font=("Segoe UI", resp.font_size(8))).pack(side="right")
+    
+    def update_slider_value(key, value, value_label):
+        SCALING_SETTINGS[key] = value
+        value_label.config(text=f"{value:.1f}x")
+    
+    # Preview button
+    def preview_changes():
+        messagebox.showinfo("Preview", "Apply settings to see changes in the main window.")
+    
+    # Apply button
+    def apply_scaling():
+        # Update responsive config with new scaling
+        resp.scale_factor = resp.calculate_scale_factor()
+        
+        # Rebuild UI with new scaling
+        refresh_ui_scaling()
+        scaling_window.destroy()
+        messagebox.showinfo("Success", "UI scaling applied successfully!")
+    
+    # Reset button
+    def reset_scaling():
+        for key in SCALING_SETTINGS:
+            SCALING_SETTINGS[key] = 1.0
+            sliders[key].set(1.0)
+    
+    # Button frame
+    button_frame = tk.Frame(content, bg=COLORS["light"])
+    button_frame.pack(fill="x", pady=resp.scale(20))
+    
+    create_modern_button(button_frame, "🔍 Preview", preview_changes, COLORS["info"]).pack(side="left", padx=resp.scale(5))
+    create_modern_button(button_frame, "🔄 Reset", reset_scaling, COLORS["warning"]).pack(side="left", padx=resp.scale(5))
+    create_modern_button(button_frame, "✅ Apply", apply_scaling, COLORS["success"]).pack(side="left", padx=resp.scale(5))
+    create_modern_button(button_frame, "❌ Cancel", scaling_window.destroy, COLORS["danger"]).pack(side="left", padx=resp.scale(5))
 
 # -------------------- Modern Color Scheme --------------------
 COLORS = {
@@ -38,8 +212,8 @@ COLORS = {
     "card_bg": "#FFFFFF",
     "sidebar_bg": "#F8FAFC",
     "header_bg": "#4F46E5",
-    "header_light": "#5E56F0",  # Lighter version for text
-    "white_transparent": "#FFFFFF",  # Solid white instead of RGBA
+    "header_light": "#5E56F0",
+    "white_transparent": "#FFFFFF",
 }
 
 # Badge colors mapping
@@ -50,48 +224,405 @@ BADGE_COLORS = {
     "normal": ("#F59E0B", "#FEF3C7", "#92400E"),
 }
 
+# -------------------- UI Refresh Function --------------------
+def refresh_ui_scaling():
+    """Refresh UI with new scaling settings"""
+    # Destroy current main container
+    global main_container, header, content_frame, left_column, right_column, status_bar
+    main_container.destroy()
+    
+    # Recreate UI with new scaling
+    create_main_ui()
+
+# -------------------- Main UI Creation Function --------------------
+def create_main_ui():
+    """Create the main UI with current scaling settings"""
+    global main_container, header, content_frame, left_column, right_column, status_bar
+    global entry_title, text_content, entry_date, entry_badge, file_info_label, remove_file_btn
+    global count_label, status_label, notices_canvas_frame, notices_canvas
+    
+    # Main container with reduced padding for 1366x768
+    main_container = tk.Frame(root, bg=COLORS["light"])
+    main_container.pack(fill="both", expand=True, 
+                       padx=resp.scale(8, "padding"), 
+                       pady=resp.scale(8, "padding"))
+
+    # Header with gradient effect
+    header = tk.Frame(main_container, bg=COLORS["header_bg"], height=resp.scale(80, "card"))
+    header.pack(fill="x", pady=(0, resp.scale(15, "padding")))
+
+    header_content = tk.Frame(header, bg=COLORS["header_bg"])
+    header_content.place(relx=0.5, rely=0.5, anchor="center")
+
+    tk.Label(
+        header_content,
+        text="📢 NOTICE MANAGEMENT SYSTEM",
+        bg=COLORS["header_bg"],
+        fg="white",
+        font=("Segoe UI", resp.font_size(18), "bold")
+    ).pack()
+
+    tk.Label(
+        header_content,
+        text="Professional Notice Management Solution",
+        bg=COLORS["header_bg"],
+        fg="#E0E7FF",
+        font=("Segoe UI", resp.font_size(10))
+    ).pack(pady=(3, 0))
+
+    # Settings button in header
+    settings_btn = tk.Button(header, text="⚙️", command=show_scaling_dialog,
+                           bg=COLORS["primary_light"], fg="white",
+                           font=("Segoe UI", resp.font_size(12), "bold"),
+                           bd=0, relief="flat", cursor="hand2",
+                           padx=resp.scale(10, "button"), pady=resp.scale(5, "button"))
+    settings_btn.place(relx=0.95, rely=0.5, anchor="e")
+
+    # Content frame with two columns
+    content_frame = tk.Frame(main_container, bg=COLORS["light"])
+    content_frame.pack(fill="both", expand=True)
+
+    # Left column - Form
+    left_column = create_card(content_frame)
+    left_column.pack(side="left", fill="both", expand=True, padx=(0, resp.scale(10, "padding")))
+    left_column.pack_propagate(False)
+    left_column.configure(width=resp.scale(400, "card"))  # Adjustable width
+
+    # Left column header
+    left_header = tk.Frame(left_column, bg=COLORS["primary_light"], height=resp.scale(45, "card"))
+    left_header.pack(fill="x")
+
+    tk.Label(
+        left_header,
+        text="📝 Create / Edit Notice",
+        bg=COLORS["primary_light"],
+        fg="white",
+        font=("Segoe UI", resp.font_size(14), "bold")
+    ).pack(expand=True)
+
+    # Form container with scrollbar
+    form_container = tk.Frame(left_column, bg=COLORS["white"])
+    form_container.pack(fill="both", expand=True, 
+                       padx=resp.scale(20, "padding"), 
+                       pady=resp.scale(15, "padding"))
+
+    form_canvas = tk.Canvas(form_container, bg=COLORS["white"], highlightthickness=0)
+    form_scrollbar = ttk.Scrollbar(form_container, orient="vertical", command=form_canvas.yview)
+    form_scrollable = tk.Frame(form_canvas, bg=COLORS["white"])
+
+    form_scrollable.bind(
+        "<Configure>",
+        lambda e: form_canvas.configure(scrollregion=form_canvas.bbox("all"))
+    )
+
+    form_canvas.create_window((0, 0), window=form_scrollable, anchor="nw")
+    form_canvas.configure(yscrollcommand=form_scrollbar.set)
+
+    form_canvas.pack(side="left", fill="both", expand=True)
+    form_scrollbar.pack(side="right", fill="y")
+
+    # Form fields
+    def create_form_label(text):
+        return tk.Label(
+            form_scrollable,
+            text=text,
+            bg=COLORS["white"],
+            fg=COLORS["dark"],
+            font=("Segoe UI", resp.font_size(10), "bold"),
+            anchor="w"
+        )
+
+    def create_form_entry():
+        entry = tk.Entry(
+            form_scrollable,
+            font=("Segoe UI", resp.font_size(10)),
+            bd=1,
+            relief="solid",
+            highlightbackground=COLORS["border"],
+            highlightthickness=1,
+            highlightcolor=COLORS["primary"],
+            bg=COLORS["light"],
+            fg=COLORS["dark"],
+            insertbackground=COLORS["primary"]
+        )
+        enable_paste(entry)
+        return entry
+
+    # Title
+    create_form_label("Notice Title").pack(fill="x", 
+                                          pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
+    entry_title = create_form_entry()
+    entry_title.pack(fill="x", pady=(0, resp.scale(12, "padding")), 
+                    ipady=resp.scale(6, "input"))
+
+    # Content
+    create_form_label("Notice Content").pack(fill="x", 
+                                            pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
+    text_content = tk.Text(
+        form_scrollable,
+        height=5,
+        font=("Segoe UI", resp.font_size(10)),
+        bd=1,
+        relief="solid",
+        highlightbackground=COLORS["border"],
+        highlightthickness=1,
+        highlightcolor=COLORS["primary"],
+        bg=COLORS["light"],
+        fg=COLORS["dark"],
+        wrap="word",
+        insertbackground=COLORS["primary"]
+    )
+    text_content.pack(fill="x", pady=(0, resp.scale(12, "padding")))
+    enable_paste(text_content)
+
+    # Date
+    create_form_label("Date (BS Format)").pack(fill="x", 
+                                              pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
+    tk.Label(
+        form_scrollable,
+        text="Format: YYYY/MM/DD",
+        bg=COLORS["white"],
+        fg=COLORS["text_light"],
+        font=("Segoe UI", resp.font_size(8))
+    ).pack(anchor="w")
+    entry_date = create_form_entry()
+    entry_date.pack(fill="x", 
+                   pady=(resp.scale(4, "padding"), resp.scale(12, "padding")), 
+                   ipady=resp.scale(6, "input"))
+
+    # Badge
+    create_form_label("Badge Type").pack(fill="x", 
+                                        pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
+    entry_badge = create_form_entry()
+    entry_badge.pack(fill="x", pady=(0, resp.scale(4, "padding")), 
+                    ipady=resp.scale(6, "input"))
+    entry_badge.insert(0, "Normal")
+    tk.Label(
+        form_scrollable,
+        text="Options: Urgent, Holiday, Important, Normal",
+        bg=COLORS["white"],
+        fg=COLORS["text_light"],
+        font=("Segoe UI", resp.font_size(8))
+    ).pack(anchor="w")
+
+    # File Upload Section
+    create_form_label("Attach File (Optional)").pack(fill="x", 
+                                                    pady=(resp.scale(20, "padding"), resp.scale(4, "padding")))
+
+    file_upload_frame = tk.Frame(form_scrollable, bg=COLORS["white"])
+    file_upload_frame.pack(fill="x", pady=(0, resp.scale(8, "padding")))
+
+    upload_btn = create_modern_button(file_upload_frame, "📁 Choose File", browse_file, COLORS["primary"])
+    upload_btn.config(padx=resp.scale(12, "button"), pady=resp.scale(6, "button"), 
+                     font=("Segoe UI", resp.font_size(9), "bold"))
+    upload_btn.pack(side="left")
+
+    remove_file_btn = tk.Button(
+        file_upload_frame,
+        text="Remove",
+        command=remove_selected_file,
+        bg=COLORS["danger"],
+        fg="white",
+        font=("Segoe UI", resp.font_size(9), "bold"),
+        padx=resp.scale(12, "button"),
+        pady=resp.scale(5, "button"),
+        relief="flat",
+        cursor="hand2",
+        state="disabled",
+        bd=0
+    )
+    remove_file_btn.pack(side="left", padx=(resp.scale(8, "padding"), 0))
+
+    file_info_label = tk.Label(
+        form_scrollable,
+        text="📁 No file selected",
+        bg=COLORS["white"],
+        fg=COLORS["text_light"],
+        font=("Segoe UI", resp.font_size(9)),
+        anchor="w"
+    )
+    file_info_label.pack(fill="x", pady=(resp.scale(4, "padding"), resp.scale(20, "padding")))
+
+    # Action buttons grid - compact for 1366x768
+    action_frame = tk.Frame(left_column, bg=COLORS["white"])
+    action_frame.pack(fill="x", pady=(0, resp.scale(20, "padding")), 
+                     padx=resp.scale(20, "padding"))
+
+    btn_grid = tk.Frame(action_frame, bg=COLORS["white"])
+    btn_grid.pack(fill="x")
+
+    buttons = [
+        ("➕ Add", submit_notice, COLORS["success"]),
+        ("🔍 Search", show_search_dialog, COLORS["primary"]),
+        ("✏️ Edit", edit_notice, COLORS["warning"]),
+        ("🗑 Delete", remove_notice, COLORS["danger"]),
+        ("🔄 Refresh", refresh_notices_list, COLORS["info"]),
+        ("🧹 Clear", clear_form, COLORS["text_secondary"]),
+    ]
+
+    for i, (text, command, color) in enumerate(buttons):
+        btn = create_modern_button(btn_grid, text, command, color)
+        btn.config(padx=resp.scale(12, "button"), pady=resp.scale(8, "button"), 
+                  font=("Segoe UI", resp.font_size(9), "bold"))
+        btn.grid(row=i//2, column=i%2, 
+                padx=resp.scale(3, "padding"), pady=resp.scale(3, "padding"), 
+                sticky="nsew")
+        btn_grid.grid_columnconfigure(i%2, weight=1)
+        btn_grid.grid_rowconfigure(i//2, weight=1)
+
+    # Folder info
+    folder_info = tk.Frame(left_column, bg=COLORS["sidebar_bg"], height=resp.scale(60, "card"))
+    folder_info.pack(fill="x", side="bottom")
+
+    folder_path = os.path.abspath(UPLOAD_FOLDER)
+    tk.Label(
+        folder_info,
+        text=f"📁 Files are saved to:\n{folder_path}",
+        bg=COLORS["sidebar_bg"],
+        fg=COLORS["text_secondary"],
+        font=("Segoe UI", resp.font_size(8)),
+        wraplength=resp.scale(350, "card"),
+        justify="left"
+    ).pack(pady=resp.scale(12, "padding"), padx=resp.scale(15, "padding"))
+
+    # Right column - Notices List
+    right_column = create_card(content_frame)
+    right_column.pack(side="right", fill="both", expand=True)
+
+    # Right column header
+    right_header = tk.Frame(right_column, bg=COLORS["sidebar_bg"], height=resp.scale(70, "card"))
+    right_header.pack(fill="x")
+
+    header_content = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
+    header_content.pack(expand=True, padx=resp.scale(25, "padding"))
+
+    tk.Label(
+        header_content,
+        text="📋 All Notices",
+        bg=COLORS["sidebar_bg"],
+        fg=COLORS["dark"],
+        font=("Segoe UI", resp.font_size(14), "bold")
+    ).pack(side="left")
+
+    count_label = tk.Label(
+        header_content,
+        text="(0 notices)",
+        bg=COLORS["sidebar_bg"],
+        fg=COLORS["text_secondary"],
+        font=("Segoe UI", resp.font_size(10))
+    )
+    count_label.pack(side="left", padx=(resp.scale(8, "padding"), 0))
+
+    # Filter frame
+    filter_frame = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
+    filter_frame.pack(fill="x", padx=resp.scale(25, "padding"), pady=(0, resp.scale(8, "padding")))
+
+    tk.Label(
+        filter_frame,
+        text="Click on any notice to edit | Double-click to open files",
+        bg=COLORS["sidebar_bg"],
+        fg=COLORS["text_secondary"],
+        font=("Segoe UI", resp.font_size(9))
+    ).pack(side="left")
+
+    # Mini refresh button
+    refresh_mini = create_modern_button(filter_frame, "🔄 Refresh", refresh_notices_list, COLORS["primary_light"])
+    refresh_mini.config(padx=resp.scale(8, "button"), pady=resp.scale(3, "button"), 
+                       font=("Segoe UI", resp.font_size(8), "bold"))
+    refresh_mini.pack(side="right")
+
+    # Notices container
+    notices_container = tk.Frame(right_column, bg=COLORS["white"])
+    notices_container.pack(fill="both", expand=True, 
+                          padx=resp.scale(25, "padding"), 
+                          pady=(0, resp.scale(20, "padding")))
+
+    notices_canvas = tk.Canvas(notices_container, bg=COLORS["white"], highlightthickness=0)
+    notices_scrollbar = ttk.Scrollbar(notices_container, orient="vertical", command=notices_canvas.yview)
+    notices_canvas_frame = tk.Frame(notices_canvas, bg=COLORS["white"])
+
+    notices_canvas_frame.bind(
+        "<Configure>",
+        lambda e: notices_canvas.configure(scrollregion=notices_canvas.bbox("all"))
+    )
+
+    notices_canvas.create_window((0, 0), window=notices_canvas_frame, anchor="nw")
+    notices_canvas.configure(yscrollcommand=notices_scrollbar.set)
+
+    notices_canvas.pack(side="left", fill="both", expand=True)
+    notices_scrollbar.pack(side="right", fill="y")
+
+    # Mousewheel scrolling
+    def on_mousewheel(event, canvas):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    notices_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, notices_canvas))
+    form_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, form_canvas))
+
+    notices_canvas_frame.bind("<Enter>", lambda e: notices_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, notices_canvas)))
+    notices_canvas_frame.bind("<Leave>", lambda e: notices_canvas.unbind_all("<MouseWheel>"))
+
+    form_scrollable.bind("<Enter>", lambda e: form_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, form_canvas)))
+    form_scrollable.bind("<Leave>", lambda e: form_canvas.unbind_all("<MouseWheel>"))
+
+    # Status bar
+    status_bar = tk.Frame(root, bg=COLORS["dark"], height=resp.scale(35, "card"))
+    status_bar.pack(side="bottom", fill="x")
+
+    status_label = tk.Label(
+        status_bar,
+        text="✅ Ready | Create, edit, and manage notices efficiently",
+        bg=COLORS["dark"],
+        fg="#D1D5DB",
+        font=("Segoe UI", resp.font_size(9))
+    )
+    status_label.pack(side="left", padx=resp.scale(15, "padding"))
+
+    # Version label with scaling info
+    scaling_info = f"UI Scale: {SCALING_SETTINGS['window_scale']:.1f}x"
+    tk.Label(
+        status_bar,
+        text=f"Notice Manager v2.0 | {scaling_info}",
+        bg=COLORS["dark"],
+        fg="#9CA3AF",
+        font=("Segoe UI", resp.font_size(8))
+    ).pack(side="right", padx=resp.scale(15, "padding"))
+
+    # Refresh notices list
+    refresh_notices_list()
+    update_count()
+
 # -------------------- Paste Functionality --------------------
 def enable_paste(widget):
     """Enable Ctrl+V/Cmd+V paste functionality for a widget"""
     def paste_text(event=None):
         try:
-            # Get clipboard content
             clipboard_text = widget.clipboard_get()
             
-            # Check if widget is Entry
             if isinstance(widget, tk.Entry):
-                # Delete selected text if any
                 if widget.selection_present():
                     widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                # Insert at cursor position
                 widget.insert(tk.INSERT, clipboard_text)
             
-            # Check if widget is Text
             elif isinstance(widget, tk.Text):
-                # Delete selected text if any
                 try:
                     if widget.tag_ranges(tk.SEL):
                         widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
                 except:
                     pass
-                # Insert at cursor position
                 widget.insert(tk.INSERT, clipboard_text)
             
-            return "break"  # Prevent default behavior
+            return "break"
             
         except tk.TclError:
-            # Clipboard might be empty or contain non-text
             pass
         except Exception as e:
             print(f"Paste error: {e}")
     
-    # Bind Ctrl+V (Windows/Linux) and Cmd+V (Mac)
     widget.bind('<Control-v>', paste_text)
-    widget.bind('<Command-v>', paste_text)  # For Mac
+    widget.bind('<Command-v>', paste_text)
     
-    # Also allow right-click paste context menu
     if isinstance(widget, tk.Entry) or isinstance(widget, tk.Text):
-        # Create right-click menu
         menu = tk.Menu(widget, tearoff=0)
         menu.add_command(label="Cut", 
                         command=lambda: widget.event_generate("<<Cut>>"))
@@ -103,11 +634,10 @@ def enable_paste(widget):
         menu.add_command(label="Select All", 
                         command=lambda: widget.select_range(0, tk.END) if isinstance(widget, tk.Entry) else widget.tag_add(tk.SEL, "1.0", tk.END))
         
-        # Bind right-click to show menu
         def show_menu(event):
             menu.tk_popup(event.x_root, event.y_root)
         
-        widget.bind("<Button-3>", show_menu)  # Right-click
+        widget.bind("<Button-3>", show_menu)
 
 # -------------------- Core Functions --------------------
 def ensure_upload_folder():
@@ -250,7 +780,6 @@ def create_row(title, content, date_bs, badge, badge_class, file_link):
     
     file_name = os.path.basename(file_link) if file_link else ""
     
-    # Add icon based on badge type
     badge_icon = ""
     if badge.lower() == "urgent":
         badge_icon = "🔥"
@@ -442,13 +971,13 @@ def create_modern_button(parent, text, command, color=COLORS["primary"], hover_c
     
     btn = tk.Button(
         parent, text=text, command=command,
-        bg=color, fg="white", font=("Segoe UI", 11, "bold"),
-        padx=24, pady=10, relief="flat", cursor="hand2",
+        bg=color, fg="white", font=("Segoe UI", resp.font_size(10), "bold"),
+        padx=resp.scale(20, "button"), pady=resp.scale(8, "button"), 
+        relief="flat", cursor="hand2",
         activebackground=hover_color, bd=0,
         highlightthickness=0
     )
     
-    # Add hover effect
     def on_enter(e):
         if btn['state'] == 'normal':
             btn['background'] = hover_color
@@ -476,18 +1005,18 @@ def create_card(parent, **kwargs):
 
 def create_section_label(parent, text, icon="🔹"):
     frame = tk.Frame(parent, bg=COLORS["white"])
-    frame.pack(fill="x", pady=(20, 10), padx=20)
+    frame.pack(fill="x", pady=(resp.scale(15, "padding"), resp.scale(8, "padding")), 
+              padx=resp.scale(15, "padding"))
     
     tk.Label(
         frame, 
         text=f"{icon}  {text}",
         bg=COLORS["white"],
         fg=COLORS["dark"],
-        font=("Segoe UI", 12, "bold"),
+        font=("Segoe UI", resp.font_size(11), "bold"),
         anchor="w"
     ).pack(fill="x")
     
-    # Separator line
     sep = tk.Frame(frame, height=2, bg=COLORS["primary_light"])
     sep.pack(fill="x", pady=(5, 0))
     
@@ -564,7 +1093,6 @@ def submit_notice():
         badge_class = "bg-yellow-100 text-yellow-800"
     
     if insert_notice(title, content, date_bs, badge, badge_class, file_link):
-        # Show success animation
         status_label.config(text=f"✅ Notice added successfully! | {len(get_all_notices())} total notices", fg=COLORS["success"])
         
         if file_link:
@@ -598,35 +1126,31 @@ def clear_form():
 def show_search_dialog():
     search_window = tk.Toplevel(root)
     search_window.title("🔍 Search Notice")
-    search_window.geometry("500x400")
+    search_window.geometry(f"{resp.scale(450)}x{resp.scale(350)}")
     search_window.configure(bg=COLORS["light"])
     search_window.transient(root)
     search_window.grab_set()
     
-    # Center the search window
     search_window.update_idletasks()
-    x = (root.winfo_screenwidth() // 2) - (500 // 2)
-    y = (root.winfo_screenheight() // 2) - (400 // 2)
-    search_window.geometry(f'500x400+{x}+{y}')
+    x = (root.winfo_screenwidth() // 2) - (resp.scale(450) // 2)
+    y = (root.winfo_screenheight() // 2) - (resp.scale(350) // 2)
+    search_window.geometry(f'{resp.scale(450)}x{resp.scale(350)}+{x}+{y}')
     
-    # Header
-    header = tk.Frame(search_window, bg=COLORS["primary"], height=80)
+    header = tk.Frame(search_window, bg=COLORS["primary"], height=resp.scale(70))
     header.pack(fill="x")
     header.pack_propagate(False)
     
     tk.Label(header, text="🔍 Search Notices", bg=COLORS["primary"], fg="white",
-             font=("Segoe UI", 16, "bold")).pack(expand=True)
+             font=("Segoe UI", resp.font_size(14), "bold")).pack(expand=True)
     
-    # Content
-    content = tk.Frame(search_window, bg=COLORS["light"], padx=30, pady=20)
+    content = tk.Frame(search_window, bg=COLORS["light"], padx=resp.scale(25), pady=resp.scale(15))
     content.pack(fill="both", expand=True)
     
-    # Search mode selection
     tk.Label(content, text="Search by:", bg=COLORS["light"], fg=COLORS["dark"],
-             font=("Segoe UI", 11, "bold")).pack(anchor="w", pady=(0, 10))
+             font=("Segoe UI", resp.font_size(10), "bold")).pack(anchor="w", pady=(0, resp.scale(8)))
     
     mode_frame = tk.Frame(content, bg=COLORS["light"])
-    mode_frame.pack(fill="x", pady=(0, 20))
+    mode_frame.pack(fill="x", pady=(0, resp.scale(15)))
     
     search_var = tk.StringVar(value="title")
     
@@ -640,27 +1164,26 @@ def show_search_dialog():
     for text, mode in modes:
         btn = tk.Radiobutton(
             mode_frame, text=text, variable=search_var, value=mode,
-            bg=COLORS["light"], fg=COLORS["dark_light"], font=("Segoe UI", 10),
+            bg=COLORS["light"], fg=COLORS["dark_light"], font=("Segoe UI", resp.font_size(9)),
             selectcolor=COLORS["primary_light"], indicatoron=0,
-            width=12, height=2, relief="solid", bd=1,
+            width=10, height=1, relief="solid", bd=1,
             activebackground=COLORS["primary_light"]
         )
-        btn.pack(side="left", padx=2)
+        btn.pack(side="left", padx=resp.scale(2))
     
-    # Search input
     input_frame = tk.Frame(content, bg=COLORS["light"])
-    input_frame.pack(fill="x", pady=20)
+    input_frame.pack(fill="x", pady=resp.scale(15))
     
     tk.Label(input_frame, text="Search term:", bg=COLORS["light"], fg=COLORS["dark"],
-             font=("Segoe UI", 11)).pack(side="left", padx=(0, 10))
+             font=("Segoe UI", resp.font_size(10))).pack(side="left", padx=(0, resp.scale(8)))
     
     search_entry = tk.Entry(
-        input_frame, font=("Segoe UI", 11), width=25,
+        input_frame, font=("Segoe UI", resp.font_size(10)), width=22,
         bd=1, relief="solid", highlightthickness=1,
         highlightcolor=COLORS["primary"]
     )
     search_entry.pack(side="left")
-    enable_paste(search_entry)  # Enable paste for search entry
+    enable_paste(search_entry)
     search_entry.focus()
     
     def perform_search():
@@ -678,20 +1201,18 @@ def show_search_dialog():
         
         results_window = tk.Toplevel(search_window)
         results_window.title(f"Search Results ({len(matches)} found)")
-        results_window.geometry("700x500")
+        results_window.geometry(f"{resp.scale(600)}x{resp.scale(400)}")
         results_window.configure(bg="white")
         
-        # Results header
-        results_header = tk.Frame(results_window, bg=COLORS["primary"], height=60)
+        results_header = tk.Frame(results_window, bg=COLORS["primary"], height=resp.scale(50))
         results_header.pack(fill="x")
         results_header.pack_propagate(False)
         
         tk.Label(results_header, text=f"🔍 Found {len(matches)} result(s)", 
-                 bg=COLORS["primary"], fg="white", font=("Segoe UI", 14, "bold")).pack(expand=True)
+                 bg=COLORS["primary"], fg="white", font=("Segoe UI", resp.font_size(12), "bold")).pack(expand=True)
         
-        # Results content
         results_container = tk.Frame(results_window, bg="white")
-        results_container.pack(fill="both", expand=True, padx=20, pady=20)
+        results_container.pack(fill="both", expand=True, padx=resp.scale(15), pady=resp.scale(15))
         
         results_canvas = tk.Canvas(results_container, bg="white", highlightthickness=0)
         scrollbar = ttk.Scrollbar(results_container, orient="vertical", command=results_canvas.yview)
@@ -713,37 +1234,34 @@ def show_search_dialog():
             date = match.find("td", {"data-label": "Date"}).get("data-date", "").strip()
             badge = match.find("span", class_="badge").text.strip()
             
-            result_card = create_card(results_content, padx=15, pady=12)
-            result_card.pack(fill="x", padx=5, pady=5)
+            result_card = create_card(results_content, padx=resp.scale(12), pady=resp.scale(10))
+            result_card.pack(fill="x", padx=resp.scale(5), pady=resp.scale(5))
             
-            # Header with index
             header_frame = tk.Frame(result_card, bg=COLORS["card_bg"])
-            header_frame.pack(fill="x", pady=(0, 8))
+            header_frame.pack(fill="x", pady=(0, resp.scale(6)))
             
             tk.Label(header_frame, text=f"{i+1}. {title}", bg=COLORS["card_bg"],
-                     fg=COLORS["dark"], font=("Segoe UI", 11, "bold")).pack(side="left")
+                     fg=COLORS["dark"], font=("Segoe UI", resp.font_size(10), "bold")).pack(side="left")
             
-            # Badge
             badge_lower = badge.lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
             badge_color, bg_color, text_color = BADGE_COLORS.get(badge_lower, (COLORS["warning"], COLORS["light"], COLORS["dark"]))
             
             badge_label = tk.Label(header_frame, text=badge,
                                    bg=bg_color, fg=text_color,
-                                   font=("Segoe UI", 9, "bold"),
-                                   padx=12, pady=3, bd=0, relief="flat")
+                                   font=("Segoe UI", resp.font_size(8), "bold"),
+                                   padx=resp.scale(10), pady=resp.scale(2), bd=0, relief="flat")
             badge_label.pack(side="right")
             
-            # Footer with date and load button
             footer_frame = tk.Frame(result_card, bg=COLORS["card_bg"])
             footer_frame.pack(fill="x")
             
             tk.Label(footer_frame, text=f"📅 {date}", bg=COLORS["card_bg"],
-                     fg=COLORS["text_secondary"], font=("Segoe UI", 9)).pack(side="left")
+                     fg=COLORS["text_secondary"], font=("Segoe UI", resp.font_size(8))).pack(side="left")
             
             tk.Button(footer_frame, text="📝 Load", 
                      command=lambda t=title, d=date: load_and_close(t, d, search_window, results_window),
-                     bg=COLORS["primary"], fg="white", font=("Segoe UI", 9, "bold"),
-                     padx=15, pady=4, relief="flat").pack(side="right")
+                     bg=COLORS["primary"], fg="white", font=("Segoe UI", resp.font_size(8), "bold"),
+                     padx=resp.scale(12), pady=resp.scale(3), relief="flat").pack(side="right")
         
         def load_and_close(title, date, *windows):
             load_notice_for_editing(title, date)
@@ -752,15 +1270,14 @@ def show_search_dialog():
         
         results_window.mainloop()
     
-    # Buttons
     button_frame = tk.Frame(content, bg=COLORS["light"])
-    button_frame.pack(pady=20)
+    button_frame.pack(pady=resp.scale(15))
     
-    create_modern_button(button_frame, "🔍 Search", perform_search, COLORS["primary"]).pack(side="left", padx=5)
+    create_modern_button(button_frame, "🔍 Search", perform_search, COLORS["primary"]).pack(side="left", padx=resp.scale(5))
     
     tk.Button(button_frame, text="Cancel", command=search_window.destroy,
-              bg=COLORS["text_light"], fg="white", font=("Segoe UI", 11),
-              padx=20, pady=8, relief="flat").pack(side="left", padx=5)
+              bg=COLORS["text_light"], fg="white", font=("Segoe UI", resp.font_size(10)),
+              padx=resp.scale(15), pady=resp.scale(6), relief="flat").pack(side="left", padx=resp.scale(5))
     
     search_entry.bind('<Return>', lambda e: perform_search())
 
@@ -796,7 +1313,6 @@ def load_notice_for_editing(title, date_bs):
                 entry_badge.delete(0, tk.END)
                 if badge_span:
                     badge_text = badge_span.text.strip()
-                    # Remove emoji from badge text
                     for emoji in ["🔥", "⭐", "🎉", "📌"]:
                         badge_text = badge_text.replace(emoji, "").strip()
                     entry_badge.insert(0, badge_text)
@@ -937,15 +1453,15 @@ def refresh_notices_list():
     notices = get_all_notices()
     
     if not notices:
-        empty_frame = tk.Frame(notices_canvas_frame, bg=COLORS["white"], height=200)
+        empty_frame = tk.Frame(notices_canvas_frame, bg=COLORS["white"], height=resp.scale(150, "card"))
         empty_frame.pack(fill="both", expand=True)
         
         tk.Label(empty_frame, text="📭 No notices found", 
-                 bg=COLORS["white"], fg=COLORS["text_light"], font=("Segoe UI", 14, "bold"),
-                 pady=20).pack(expand=True)
+                 bg=COLORS["white"], fg=COLORS["text_light"], font=("Segoe UI", resp.font_size(12), "bold"),
+                 pady=resp.scale(15, "padding")).pack(expand=True)
         
         tk.Label(empty_frame, text="Create your first notice using the form", 
-                 bg=COLORS["white"], fg=COLORS["text_secondary"], font=("Segoe UI", 11)).pack()
+                 bg=COLORS["white"], fg=COLORS["text_secondary"], font=("Segoe UI", resp.font_size(10))).pack()
         return
     
     for i, notice in enumerate(notices):
@@ -958,32 +1474,30 @@ def refresh_notices_list():
         
         notice_card = create_card(
             notices_canvas_frame,
-            padx=20,
-            pady=16
+            padx=resp.scale(15, "card"),
+            pady=resp.scale(12, "card")
         )
-        notice_card.pack(fill="x", padx=8, pady=8)
+        notice_card.pack(fill="x", padx=resp.scale(6, "padding"), pady=resp.scale(6, "padding"))
         
-        # Header with title and badge
         header_frame = tk.Frame(notice_card, bg=card_bg)
-        header_frame.pack(fill="x", pady=(0, 12))
+        header_frame.pack(fill="x", pady=(0, resp.scale(10, "padding")))
         
         title_text = notice["title"]
-        if len(title_text) > 50:
-            title_text = title_text[:47] + "..."
+        if len(title_text) > 40:
+            title_text = title_text[:37] + "..."
         
         title_label = tk.Label(
             header_frame,
             text=title_text,
             bg=card_bg,
             fg=COLORS["dark"],
-            font=("Segoe UI", 13, "bold"),
+            font=("Segoe UI", resp.font_size(11), "bold"),
             anchor="w",
             cursor="hand2"
         )
         title_label.pack(side="left", fill="x", expand=True)
         title_label.bind("<Button-1>", lambda e, t=notice["title"], d=notice["date"]: load_notice_for_editing(t, d))
         
-        # Badge
         badge_lower = notice["badge"].lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
         badge_color, bg_color, text_color = BADGE_COLORS.get(badge_lower, (COLORS["warning"], COLORS["light"], COLORS["dark"]))
         
@@ -992,44 +1506,40 @@ def refresh_notices_list():
             text=notice["badge"],
             bg=bg_color,
             fg=text_color,
-            font=("Segoe UI", 9, "bold"),
-            padx=15,
-            pady=4,
+            font=("Segoe UI", resp.font_size(8), "bold"),
+            padx=resp.scale(12, "button"),
+            pady=resp.scale(3, "button"),
             bd=0,
             relief="flat"
         )
         badge_label.pack(side="right")
         
-        # Content
         content_frame = tk.Frame(notice_card, bg=card_bg)
-        content_frame.pack(fill="x", pady=(0, 15))
+        content_frame.pack(fill="x", pady=(0, resp.scale(12, "padding")))
         
         content_text = notice["content"]
-        if len(content_text) > 180:
-            content_text = content_text[:177] + "..."
+        if len(content_text) > 120:
+            content_text = content_text[:117] + "..."
         
         content_label = tk.Label(
             content_frame,
             text=content_text,
             bg=card_bg,
             fg=COLORS["text_secondary"],
-            font=("Segoe UI", 11),
-            wraplength=550,
+            font=("Segoe UI", resp.font_size(10)),
+            wraplength=resp.scale(400, "card"),
             anchor="w",
             justify="left"
         )
         content_label.pack(fill="x")
         
-        # Footer
         footer_frame = tk.Frame(notice_card, bg=card_bg)
         footer_frame.pack(fill="x")
         
-        # Metadata
         meta_frame = tk.Frame(footer_frame, bg=card_bg)
         meta_frame.pack(side="left", fill="x", expand=True)
         
-        # Date
-        date_icon = tk.Label(meta_frame, text="📅", bg=card_bg, font=("Segoe UI", 10))
+        date_icon = tk.Label(meta_frame, text="📅", bg=card_bg, font=("Segoe UI", resp.font_size(9)))
         date_icon.pack(side="left")
         
         date_label = tk.Label(
@@ -1037,63 +1547,61 @@ def refresh_notices_list():
             text=f" {notice['date']}",
             bg=card_bg,
             fg=COLORS["text_secondary"],
-            font=("Segoe UI", 10)
+            font=("Segoe UI", resp.font_size(9))
         )
-        date_label.pack(side="left", padx=(0, 20))
+        date_label.pack(side="left", padx=(0, resp.scale(15, "padding")))
         
-        # File indicator
         if notice["has_file"]:
             file_color = COLORS["primary"] if notice.get("file_exists", True) else COLORS["danger"]
-            file_icon = tk.Label(meta_frame, text="📎", bg=card_bg, font=("Segoe UI", 10), fg=file_color)
+            file_icon = tk.Label(meta_frame, text="📎", bg=card_bg, font=("Segoe UI", resp.font_size(9)), fg=file_color)
             file_icon.pack(side="left")
             
             file_name = notice["file_name"]
-            if len(file_name) > 25:
-                file_name = file_name[:22] + "..."
+            if len(file_name) > 20:
+                file_name = file_name[:17] + "..."
             
             file_label = tk.Label(
                 meta_frame,
                 text=f" {file_name}",
                 bg=card_bg,
                 fg=file_color,
-                font=("Segoe UI", 10)
+                font=("Segoe UI", resp.font_size(9))
             )
             file_label.pack(side="left")
         
-        # Action buttons
         action_frame = tk.Frame(footer_frame, bg=card_bg)
         action_frame.pack(side="right")
         
-        # File button
         if notice["has_file"]:
             file_btn = create_modern_button(
                 action_frame,
-                "📂 Open File",
+                "📂 Open",
                 lambda t=notice["title"], d=notice["date"]: view_notice_file(t, d),
                 color=COLORS["secondary"]
             )
-            file_btn.config(padx=12, pady=5, font=("Segoe UI", 9, "bold"))
-            file_btn.pack(side="left", padx=(5, 0))
+            file_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
+                          font=("Segoe UI", resp.font_size(8), "bold"))
+            file_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
         
-        # View button
         view_btn = create_modern_button(
             action_frame,
             "👁 View",
             lambda t=notice["title"], d=notice["date"]: load_notice_for_editing(t, d),
             color=COLORS["primary"]
         )
-        view_btn.config(padx=12, pady=5, font=("Segoe UI", 9, "bold"))
-        view_btn.pack(side="left", padx=(5, 0))
+        view_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
+                       font=("Segoe UI", resp.font_size(8), "bold"))
+        view_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
         
-        # Delete button
         delete_btn = create_modern_button(
             action_frame,
             "🗑 Delete",
             lambda t=notice["title"], d=notice["date"]: delete_selected_notice(t, d),
             color=COLORS["danger"]
         )
-        delete_btn.config(padx=12, pady=5, font=("Segoe UI", 9, "bold"))
-        delete_btn.pack(side="left", padx=(5, 0))
+        delete_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
+                         font=("Segoe UI", resp.font_size(8), "bold"))
+        delete_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
     
     notices_canvas.configure(scrollregion=notices_canvas.bbox("all"))
 
@@ -1116,11 +1624,34 @@ def update_count():
 
 def toggle_maximize():
     global is_maximized
+    if is_maximized:
+        root.state('normal')
+        is_maximized = False
+    else:
+        root.state('zoomed')
+        is_maximized = True
 
-# -------------------- Modern UI Setup --------------------
+# -------------------- Responsive UI Setup --------------------
 root = tk.Tk()
 root.title("📢 Notice Management System")
-root.state('zoomed')
+
+# Initialize responsive configuration for main window
+resp = ResponsiveConfig(root)
+
+# Set window size for 1366x768
+window_width = resp.scale(1100)
+window_height = resp.scale(650)
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+x = (screen_width - window_width) // 2
+y = (screen_height - window_height) // 2
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+# Set minimum size for 1366x768
+min_width = resp.scale(600)
+min_height = resp.scale(450)
+root.minsize(min_width, min_height)
+
 root.configure(bg=COLORS["light"])
 
 try:
@@ -1128,336 +1659,14 @@ try:
 except:
     pass
 
-# Main container
-main_container = tk.Frame(root, bg=COLORS["light"])
-main_container.pack(fill="both", expand=True, padx=20, pady=20)
-
-# Header with gradient effect
-header = tk.Frame(main_container, bg=COLORS["header_bg"], height=100)
-header.pack(fill="x", pady=(0, 20))
-header.pack_propagate(False)
-
-header_content = tk.Frame(header, bg=COLORS["header_bg"])
-header_content.place(relx=0.5, rely=0.5, anchor="center")
-
-tk.Label(
-    header_content,
-    text="📢 NOTICE MANAGEMENT SYSTEM",
-    bg=COLORS["header_bg"],
-    fg="white",
-    font=("Segoe UI", 24, "bold")
-).pack()
-
-tk.Label(
-    header_content,
-    text="Professional Notice Management Solution",
-    bg=COLORS["header_bg"],
-    fg="#E0E7FF",  # Lighter color for subtitle
-    font=("Segoe UI", 12)
-).pack(pady=(5, 0))
-
-# Two column layout
-content_frame = tk.Frame(main_container, bg=COLORS["light"])
-content_frame.pack(fill="both", expand=True)
-
-# Left column - Form
-left_column = create_card(content_frame)
-left_column.pack(side="left", fill="both", expand=True, padx=(0, 15))
-left_column.pack_propagate(False)
-left_column.configure(width=500)
-
-# Left column header
-left_header = tk.Frame(left_column, bg=COLORS["primary_light"], height=50)
-left_header.pack(fill="x")
-left_header.pack_propagate(False)
-
-tk.Label(
-    left_header,
-    text="📝 Create / Edit Notice",
-    bg=COLORS["primary_light"],
-    fg="white",
-    font=("Segoe UI", 18, "bold")
-).pack(expand=True)
-
-# Form container with scrollbar
-form_container = tk.Frame(left_column, bg=COLORS["white"])
-form_container.pack(fill="both", expand=True, padx=25, pady=20)
-
-form_canvas = tk.Canvas(form_container, bg=COLORS["white"], highlightthickness=0)
-form_scrollbar = ttk.Scrollbar(form_container, orient="vertical", command=form_canvas.yview)
-form_scrollable = tk.Frame(form_canvas, bg=COLORS["white"])
-
-form_scrollable.bind(
-    "<Configure>",
-    lambda e: form_canvas.configure(scrollregion=form_canvas.bbox("all"))
-)
-
-form_canvas.create_window((0, 0), window=form_scrollable, anchor="nw")
-form_canvas.configure(yscrollcommand=form_scrollbar.set)
-
-form_canvas.pack(side="left", fill="both", expand=True)
-form_scrollbar.pack(side="right", fill="y")
-
-# Form fields
-def create_form_label(text):
-    return tk.Label(
-        form_scrollable,
-        text=text,
-        bg=COLORS["white"],
-        fg=COLORS["dark"],
-        font=("Segoe UI", 11, "bold"),
-        anchor="w"
-    )
-
-def create_form_entry():
-    entry = tk.Entry(
-        form_scrollable,
-        font=("Segoe UI", 11),
-        bd=1,
-        relief="solid",
-        highlightbackground=COLORS["border"],
-        highlightthickness=1,
-        highlightcolor=COLORS["primary"],
-        bg=COLORS["light"],
-        fg=COLORS["dark"],
-        insertbackground=COLORS["primary"]
-    )
-    enable_paste(entry)  # Enable paste for all Entry widgets
-    return entry
-
-# Title
-create_form_label("Notice Title").pack(fill="x", pady=(10, 5))
-entry_title = create_form_entry()
-entry_title.pack(fill="x", pady=(0, 15), ipady=8)
-
-# Content
-create_form_label("Notice Content").pack(fill="x", pady=(10, 5))
-text_content = tk.Text(
-    form_scrollable,
-    height=6,
-    font=("Segoe UI", 11),
-    bd=1,
-    relief="solid",
-    highlightbackground=COLORS["border"],
-    highlightthickness=1,
-    highlightcolor=COLORS["primary"],
-    bg=COLORS["light"],
-    fg=COLORS["dark"],
-    wrap="word",
-    insertbackground=COLORS["primary"]
-)
-text_content.pack(fill="x", pady=(0, 15))
-enable_paste(text_content)  # Enable paste for Text widget
-
-# Date
-create_form_label("Date (BS Format)").pack(fill="x", pady=(10, 5))
-tk.Label(
-    form_scrollable,
-    text="Format: YYYY/MM/DD",
-    bg=COLORS["white"],
-    fg=COLORS["text_light"],
-    font=("Segoe UI", 9)
-).pack(anchor="w")
-entry_date = create_form_entry()
-entry_date.pack(fill="x", pady=(5, 15), ipady=8)
-
-# Badge
-create_form_label("Badge Type").pack(fill="x", pady=(10, 5))
-entry_badge = create_form_entry()
-entry_badge.pack(fill="x", pady=(0, 5), ipady=8)
-entry_badge.insert(0, "Normal")
-tk.Label(
-    form_scrollable,
-    text="Options: Urgent, Holiday, Important, Normal",
-    bg=COLORS["white"],
-    fg=COLORS["text_light"],
-    font=("Segoe UI", 9)
-).pack(anchor="w")
-
-# File Upload Section
-create_form_label("Attach File (Optional)").pack(fill="x", pady=(25, 5))
-
-file_upload_frame = tk.Frame(form_scrollable, bg=COLORS["white"])
-file_upload_frame.pack(fill="x", pady=(0, 10))
-
-upload_btn = create_modern_button(file_upload_frame, "📁 Choose File", browse_file, COLORS["primary"])
-upload_btn.config(padx=15, pady=8, font=("Segoe UI", 10, "bold"))
-upload_btn.pack(side="left")
-
-remove_file_btn = tk.Button(
-    file_upload_frame,
-    text="Remove",
-    command=remove_selected_file,
-    bg=COLORS["danger"],
-    fg="white",
-    font=("Segoe UI", 10, "bold"),
-    padx=15,
-    pady=6,
-    relief="flat",
-    cursor="hand2",
-    state="disabled",
-    bd=0
-)
-remove_file_btn.pack(side="left", padx=(10, 0))
-
-file_info_label = tk.Label(
-    form_scrollable,
-    text="📁 No file selected",
-    bg=COLORS["white"],
-    fg=COLORS["text_light"],
-    font=("Segoe UI", 10),
-    anchor="w"
-)
-file_info_label.pack(fill="x", pady=(5, 25))
-
-# Action buttons grid
-action_frame = tk.Frame(left_column, bg=COLORS["white"])
-action_frame.pack(fill="x", pady=(0, 25), padx=25)
-
-btn_grid = tk.Frame(action_frame, bg=COLORS["white"])
-btn_grid.pack(fill="x")
-
-buttons = [
-    ("➕ Add Notice", submit_notice, COLORS["success"]),
-    ("🔍 Search", show_search_dialog, COLORS["primary"]),
-    ("✏️ Edit Notice", edit_notice, COLORS["warning"]),
-    ("🗑 Delete Notice", remove_notice, COLORS["danger"]),
-    ("🔄 Refresh", refresh_notices_list, COLORS["info"]),
-    ("🧹 Clear", clear_form, COLORS["text_secondary"]),
-]
-
-for i, (text, command, color) in enumerate(buttons):
-    btn = create_modern_button(btn_grid, text, command, color)
-    btn.config(padx=15, pady=10, font=("Segoe UI", 10, "bold"))
-    btn.grid(row=i//2, column=i%2, padx=5, pady=5, sticky="nsew")
-    btn_grid.grid_columnconfigure(i%2, weight=1)
-    btn_grid.grid_rowconfigure(i//2, weight=1)
-
-# Folder info
-folder_info = tk.Frame(left_column, bg=COLORS["sidebar_bg"], height=70)
-folder_info.pack(fill="x", side="bottom")
-folder_info.pack_propagate(False)
-
-folder_path = os.path.abspath(UPLOAD_FOLDER)
-tk.Label(
-    folder_info,
-    text=f"📁 Files are saved to:\n{folder_path}",
-    bg=COLORS["sidebar_bg"],
-    fg=COLORS["text_secondary"],
-    font=("Segoe UI", 9),
-    wraplength=400,
-    justify="left"
-).pack(pady=15, padx=20)
-
-# Right column - Notices List
-right_column = create_card(content_frame)
-right_column.pack(side="right", fill="both", expand=True)
-
-# Right column header
-right_header = tk.Frame(right_column, bg=COLORS["sidebar_bg"], height=90)
-right_header.pack(fill="x")
-right_header.pack_propagate(False)
-
-header_content = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
-header_content.pack(expand=True, padx=30)
-
-tk.Label(
-    header_content,
-    text="📋 All Notices",
-    bg=COLORS["sidebar_bg"],
-    fg=COLORS["dark"],
-    font=("Segoe UI", 18, "bold")
-).pack(side="left")
-
-count_label = tk.Label(
-    header_content,
-    text="(0 notices)",
-    bg=COLORS["sidebar_bg"],
-    fg=COLORS["text_secondary"],
-    font=("Segoe UI", 12)
-)
-count_label.pack(side="left", padx=(10, 0))
-
-# Filter frame
-filter_frame = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
-filter_frame.pack(fill="x", padx=30, pady=(0, 10))
-
-tk.Label(
-    filter_frame,
-    text="Click on any notice to edit | Double-click to open files",
-    bg=COLORS["sidebar_bg"],
-    fg=COLORS["text_secondary"],
-    font=("Segoe UI", 10)
-).pack(side="left")
-
-# Mini refresh button
-refresh_mini = create_modern_button(filter_frame, "🔄 Refresh", refresh_notices_list, COLORS["primary_light"])
-refresh_mini.config(padx=10, pady=4, font=("Segoe UI", 9, "bold"))
-refresh_mini.pack(side="right")
-
-# Notices container
-notices_container = tk.Frame(right_column, bg=COLORS["white"])
-notices_container.pack(fill="both", expand=True, padx=30, pady=(0, 25))
-
-notices_canvas = tk.Canvas(notices_container, bg=COLORS["white"], highlightthickness=0)
-notices_scrollbar = ttk.Scrollbar(notices_container, orient="vertical", command=notices_canvas.yview)
-notices_canvas_frame = tk.Frame(notices_canvas, bg=COLORS["white"])
-
-notices_canvas_frame.bind(
-    "<Configure>",
-    lambda e: notices_canvas.configure(scrollregion=notices_canvas.bbox("all"))
-)
-
-notices_canvas.create_window((0, 0), window=notices_canvas_frame, anchor="nw")
-notices_canvas.configure(yscrollcommand=notices_scrollbar.set)
-
-notices_canvas.pack(side="left", fill="both", expand=True)
-notices_scrollbar.pack(side="right", fill="y")
-
-# Mousewheel scrolling
-def on_mousewheel(event, canvas):
-    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-notices_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, notices_canvas))
-form_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, form_canvas))
-
-notices_canvas_frame.bind("<Enter>", lambda e: notices_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, notices_canvas)))
-notices_canvas_frame.bind("<Leave>", lambda e: notices_canvas.unbind_all("<MouseWheel>"))
-
-form_scrollable.bind("<Enter>", lambda e: form_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, form_canvas)))
-form_scrollable.bind("<Leave>", lambda e: form_canvas.unbind_all("<MouseWheel>"))
-
-# Status bar
-status_bar = tk.Frame(root, bg=COLORS["dark"], height=40)
-status_bar.pack(side="bottom", fill="x")
-status_bar.pack_propagate(False)
-
-status_label = tk.Label(
-    status_bar,
-    text="✅ Ready | Create, edit, and manage notices efficiently",
-    bg=COLORS["dark"],
-    fg="#D1D5DB",  # Light gray for better readability
-    font=("Segoe UI", 10)
-)
-status_label.pack(side="left", padx=20)
-
-# Version label
-tk.Label(
-    status_bar,
-    text="Notice Manager v2.0",
-    bg=COLORS["dark"],
-    fg="#9CA3AF",  # Gray-400 for subtle version text
-    font=("Segoe UI", 9)
-).pack(side="right", padx=20)
+# Create main UI
+create_main_ui()
 
 # Add global paste shortcuts
 def global_paste(event):
-    """Global paste to focused widget"""
     focused_widget = root.focus_get()
     if focused_widget:
-        # Check if it's an Entry or Text widget
         if isinstance(focused_widget, (tk.Entry, tk.Text)):
-            # Try to paste
             try:
                 clipboard_text = root.clipboard_get()
                 if isinstance(focused_widget, tk.Entry):
@@ -1475,11 +1684,6 @@ def global_paste(event):
                 pass
     return "break"
 
-# Bind global paste shortcuts
-root.bind('<Control-v>', global_paste)
-root.bind('<Command-v>', global_paste)  # For Mac
-
-# Also add other useful global shortcuts
 def global_select_all(event):
     focused = root.focus_get()
     if isinstance(focused, tk.Entry):
@@ -1513,31 +1717,32 @@ def global_cut(event):
             pass
     return "break"
 
+root.bind('<Control-v>', global_paste)
+root.bind('<Command-v>', global_paste)
 root.bind('<Control-a>', global_select_all)
-root.bind('<Command-a>', global_select_all)  # For Mac
+root.bind('<Command-a>', global_select_all)
 root.bind('<Control-c>', global_copy)
-root.bind('<Command-c>', global_copy)  # For Mac
+root.bind('<Command-c>', global_copy)
 root.bind('<Control-x>', global_cut)
-root.bind('<Command-x>', global_cut)  # For Mac
+root.bind('<Command-x>', global_cut)
 
-# Make sure the Text widget also has standard copy/cut shortcuts
 text_content.bind('<Control-a>', lambda e: text_content.tag_add(tk.SEL, "1.0", tk.END))
 text_content.bind('<Command-a>', lambda e: text_content.tag_add(tk.SEL, "1.0", tk.END))
-
-# Initial setup
-refresh_notices_list()
-update_count()
-
-# Center window
-root.update_idletasks()
-
-# Make window resizable
-root.minsize(1200, 700)
 
 # Bind F11 to toggle maximize
 root.bind("<F11>", lambda e: toggle_maximize())
 
 # Bind Escape to clear selection
 root.bind("<Escape>", lambda e: clear_form())
+
+# Bind F5 to refresh
+root.bind("<F5>", lambda e: refresh_notices_list())
+
+# Bind Ctrl+Alt+S to open scaling settings
+root.bind("<Control-Alt-s>", lambda e: show_scaling_dialog())
+root.bind("<Control-Alt-S>", lambda e: show_scaling_dialog())
+
+# Set focus to title field
+entry_title.focus_set()
 
 root.mainloop()
