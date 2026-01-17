@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, filedialog, simpledialog
+from tkinter import messagebox, ttk, filedialog
 from bs4 import BeautifulSoup
 import os
 import shutil
@@ -619,6 +619,7 @@ def enable_paste(widget):
         except Exception as e:
             print(f"Paste error: {e}")
     
+    # Only bind the Ctrl/Cmd+V combinations
     widget.bind('<Control-v>', paste_text)
     widget.bind('<Command-v>', paste_text)
     
@@ -1631,6 +1632,23 @@ def toggle_maximize():
         root.state('zoomed')
         is_maximized = True
 
+# -------------------- Keyboard Shortcuts --------------------
+def setup_keyboard_shortcuts():
+    """Set up proper keyboard shortcuts without interfering with normal typing"""
+    
+    # F11 for maximize
+    root.bind("<F11>", lambda e: toggle_maximize())
+    
+    # Escape to clear form
+    root.bind("<Escape>", lambda e: clear_form())
+    
+    # F5 to refresh
+    root.bind("<F5>", lambda e: refresh_notices_list())
+    
+    # Ctrl+Alt+S for scaling settings
+    root.bind("<Control-Alt-s>", lambda e: show_scaling_dialog())
+    root.bind("<Control-Alt-S>", lambda e: show_scaling_dialog())
+
 # -------------------- Responsive UI Setup --------------------
 root = tk.Tk()
 root.title("📢 Notice Management System")
@@ -1662,87 +1680,11 @@ except:
 # Create main UI
 create_main_ui()
 
-# Add global paste shortcuts
-def global_paste(event):
-    focused_widget = root.focus_get()
-    if focused_widget:
-        if isinstance(focused_widget, (tk.Entry, tk.Text)):
-            try:
-                clipboard_text = root.clipboard_get()
-                if isinstance(focused_widget, tk.Entry):
-                    if focused_widget.selection_present():
-                        focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                    focused_widget.insert(tk.INSERT, clipboard_text)
-                elif isinstance(focused_widget, tk.Text):
-                    try:
-                        if focused_widget.tag_ranges(tk.SEL):
-                            focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                    except:
-                        pass
-                    focused_widget.insert(tk.INSERT, clipboard_text)
-            except:
-                pass
-    return "break"
-
-def global_select_all(event):
-    focused = root.focus_get()
-    if isinstance(focused, tk.Entry):
-        focused.select_range(0, tk.END)
-    elif isinstance(focused, tk.Text):
-        focused.tag_add(tk.SEL, "1.0", tk.END)
-        focused.mark_set(tk.INSERT, "1.0")
-        focused.see(tk.INSERT)
-    return "break"
-
-def global_copy(event):
-    focused = root.focus_get()
-    if isinstance(focused, (tk.Entry, tk.Text)):
-        root.clipboard_clear()
-        try:
-            text = focused.selection_get()
-            root.clipboard_append(text)
-        except:
-            pass
-    return "break"
-
-def global_cut(event):
-    focused = root.focus_get()
-    if isinstance(focused, (tk.Entry, tk.Text)):
-        root.clipboard_clear()
-        try:
-            text = focused.selection_get()
-            root.clipboard_append(text)
-            focused.delete(tk.SEL_FIRST, tk.SEL_LAST)
-        except:
-            pass
-    return "break"
-
-root.bind('<Control-v>', global_paste)
-root.bind('<Command-v>', global_paste)
-root.bind('<Control-a>', global_select_all)
-root.bind('<Command-a>', global_select_all)
-root.bind('<Control-c>', global_copy)
-root.bind('<Command-c>', global_copy)
-root.bind('<Control-x>', global_cut)
-root.bind('<Command-x>', global_cut)
-
-text_content.bind('<Control-a>', lambda e: text_content.tag_add(tk.SEL, "1.0", tk.END))
-text_content.bind('<Command-a>', lambda e: text_content.tag_add(tk.SEL, "1.0", tk.END))
-
-# Bind F11 to toggle maximize
-root.bind("<F11>", lambda e: toggle_maximize())
-
-# Bind Escape to clear selection
-root.bind("<Escape>", lambda e: clear_form())
-
-# Bind F5 to refresh
-root.bind("<F5>", lambda e: refresh_notices_list())
-
-# Bind Ctrl+Alt+S to open scaling settings
-root.bind("<Control-Alt-s>", lambda e: show_scaling_dialog())
-root.bind("<Control-Alt-S>", lambda e: show_scaling_dialog())
+# Set up keyboard shortcuts
+setup_keyboard_shortcuts()
 
 # Set focus to title field
 entry_title.focus_set()
 
+# Start the main loop
 root.mainloop()
