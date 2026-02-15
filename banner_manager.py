@@ -20,8 +20,8 @@ class BannerManager:
         self.slides = []
         self.current_index = 0
         self.photo = None
+        self.banner_enabled = True   # Banner Status
 
-        # Ensure media folder exists
         os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
         self.load_html()
@@ -39,6 +39,10 @@ class BannerManager:
 
         with open(HTML_FILE, "r", encoding="utf-8") as f:
             content = f.read()
+
+        # Detect if banner is disabled
+        if "<!-- Banner Disabled" in content:
+            self.banner_enabled = False
 
         slide_blocks = re.findall(
             r'<div class="slide.*?">.*?</div>', content, re.DOTALL)
@@ -79,7 +83,6 @@ class BannerManager:
         main_frame = tk.Frame(self.root, bg="white")
         main_frame.pack(fill="both", expand=True)
 
-        # LEFT SIDE - Slide List
         left_frame = tk.Frame(main_frame, bg="white", width=300)
         left_frame.pack(side="left", fill="y", padx=10, pady=10)
 
@@ -95,7 +98,6 @@ class BannerManager:
         ttk.Button(left_frame, text="Move Down",
                    command=self.move_down).pack(pady=5)
 
-        # RIGHT SIDE - Preview
         right_frame = tk.Frame(main_frame, bg="white")
         right_frame.pack(side="right", fill="both", expand=True)
 
@@ -113,15 +115,46 @@ class BannerManager:
 
         ttk.Button(btn_frame, text="Add Slide",
                    command=self.add_slide).grid(row=0, column=0, padx=5)
+
         ttk.Button(btn_frame, text="Update Caption",
                    command=self.update_caption).grid(row=0, column=1, padx=5)
+
         ttk.Button(btn_frame, text="Delete Slide",
                    command=self.delete_slide).grid(row=0, column=2, padx=5)
+
         ttk.Button(btn_frame, text="Save Changes",
                    command=self.generate_html).grid(row=0, column=3, padx=5)
 
+        self.toggle_btn = ttk.Button(
+            btn_frame, text="Disable Banner",
+            command=self.toggle_banner)
+        self.toggle_btn.grid(row=0, column=4, padx=5)
+
+        self.update_toggle_button()
+
     # ---------------------------------------------------
-    # Refresh Listbox
+    # Update Toggle Button Text
+    # ---------------------------------------------------
+    def update_toggle_button(self):
+        if self.banner_enabled:
+            self.toggle_btn.config(text="Disable Banner")
+        else:
+            self.toggle_btn.config(text="Enable Banner")
+
+    # ---------------------------------------------------
+    # Toggle Banner
+    # ---------------------------------------------------
+    def toggle_banner(self):
+        self.banner_enabled = not self.banner_enabled
+        self.update_toggle_button()
+        self.generate_html()
+
+        status = "Enabled" if self.banner_enabled else "Disabled"
+        messagebox.showinfo("Banner Status",
+                            f"Banner is now {status}")
+
+    # ---------------------------------------------------
+    # Refresh List
     # ---------------------------------------------------
     def refresh_slide_list(self):
 
@@ -138,7 +171,6 @@ class BannerManager:
     # Select Slide
     # ---------------------------------------------------
     def on_select_slide(self, event):
-
         selection = self.slide_listbox.curselection()
         if selection:
             self.current_index = selection[0]
@@ -164,14 +196,12 @@ class BannerManager:
         file_path = os.path.join(MEDIA_FOLDER, slide["file"])
 
         if slide["type"] == "image" and os.path.exists(file_path):
-
             img = Image.open(file_path)
             img = img.resize((800, 450))
             self.photo = ImageTk.PhotoImage(img)
 
             tk.Label(self.preview_frame,
                      image=self.photo).pack(fill="both", expand=True)
-
         else:
             tk.Label(self.preview_frame,
                      text=f"VIDEO PREVIEW\n\n{slide['file']}",
@@ -190,7 +220,6 @@ class BannerManager:
         if self.current_index > 0:
             self.slides[self.current_index], self.slides[self.current_index - 1] = \
                 self.slides[self.current_index - 1], self.slides[self.current_index]
-
             self.current_index -= 1
             self.refresh_slide_list()
             self.display_slide()
@@ -202,7 +231,6 @@ class BannerManager:
         if self.current_index < len(self.slides) - 1:
             self.slides[self.current_index], self.slides[self.current_index + 1] = \
                 self.slides[self.current_index + 1], self.slides[self.current_index]
-
             self.current_index += 1
             self.refresh_slide_list()
             self.display_slide()
@@ -246,7 +274,7 @@ class BannerManager:
             messagebox.showinfo("Success", "Caption Updated Successfully")
 
     # ---------------------------------------------------
-    # Delete Slide + Delete Media File Permanently
+    # Delete Slide
     # ---------------------------------------------------
     def delete_slide(self):
 
@@ -289,8 +317,12 @@ class BannerManager:
     # ---------------------------------------------------
     def generate_html(self):
 
-        html_content = """<!-- Banner Start -->
-<div id="slideContainer">
+        if self.banner_enabled:
+            html_content = "<!-- Banner Start -->\n"
+        else:
+            html_content = "<!-- Banner Disabled\n"
+
+        html_content += """<div id="slideContainer">
     <button id="close" class="closeBtn">&times;</button>
     <button id="prev" class="sliderBtn">&lt;</button>
     <button id="next" class="sliderBtn">&gt;</button>
@@ -312,16 +344,21 @@ class BannerManager:
             html_content += f'        <a href="./banner/banner_img/{slide["file"]}" download="{slide["file"]}" class="downloadBtn">Download</a>\n'
             html_content += "    </div>\n"
 
-        html_content += """</div>
+        if self.banner_enabled:
+            html_content += """</div>
 <script src='./banner/script_banner.js'></script>
 <!-- Banner End -->
+"""
+        else:
+            html_content += """</div>
+<script src='./banner/script_banner.js'></script>
+Banner End -->
 """
 
         with open(HTML_FILE, "w", encoding="utf-8") as f:
             f.write(html_content)
 
-        messagebox.showinfo(
-            "Success", "Banner Order Updated Successfully")
+        messagebox.showinfo("Success", "Banner Updated Successfully")
 
 
 # ---------------------------------------------------
