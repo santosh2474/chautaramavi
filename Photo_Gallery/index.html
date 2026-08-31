@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Gallery | Shree Chautara Secondary School (श्री चौतारा माध्यमिक विद्यालय)</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts: Inter & Outfit & Mukta for Nepali/English typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mukta:wght@400;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Institutional Bar -->
+  <div class="top-nav-bar">
+    <div class="site-container top-nav-content">
+      <div class="top-info-left">
+        <span class="info-pill"><span class="pill-icon">🇳🇵</span> स्था. २०४५ (ESTD. 1988)</span>
+        <span class="info-pill"><span class="pill-icon">🏛️</span> NEB & CTEVT Affiliated</span>
+        <span class="info-pill hide-mobile"><span class="pill-icon">📍</span> सुनकोशी-५, डाँडाखर्क, ओखलढुङ्गा (Koshi Province)</span>
+      </div>
+      <div class="top-info-right">
+        <a href="mailto:info@chautaramavi.edu.np" class="top-link hide-mobile">✉️ info@chautaramavi.edu.np</a>
+        <a href="https://www.chautaramavi.edu.np" target="_blank" class="top-portal-btn">
+          <span>🌐 www.chautaramavi.edu.np</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Header & Branding -->
+  <header class="app-header">
+    <div class="site-container header-container">
+      <!-- School Logo & Title -->
+      <div class="brand">
+        <div class="school-emblem">
+          <img src="logo.png" alt="श्री चौतारा माध्यमिक विद्यालय लोगो" class="emblem-img">
+        </div>
+        <div class="brand-text">
+          <div class="brand-nepali">श्री चौतारा माध्यमिक विद्यालय (१-१२)</div>
+          <h1 class="brand-english">SHREE CHAUTARA SECONDARY SCHOOL</h1>
+          <p class="brand-tagline">सुनकोशी गाउँपालिका-५, डाँडाखर्क, ओखलढुङ्गा, कोशी प्रदेश • Digital Media & Photo Gallery</p>
+        </div>
+      </div>
+
+      <!-- Header Search Box -->
+      <div class="header-search">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Search categories, events, or photos..." autocomplete="off">
+          <button id="search-clear" class="search-clear-btn hidden" title="Clear Search">&times;</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Filter Showcase -->
+  <section class="hero-section">
+    <div class="site-container">
+      <div class="hero-content">
+        <div class="hero-badge">📸 Official School Gallery • विद्यालय फोटो ग्यालरी</div>
+        <h2 class="hero-title">Moments, Memories & Campus Heritage</h2>
+        <p class="hero-desc">Explore photographs capturing our school infrastructure, nature, academic life, sports, events, and student achievements.</p>
+        
+        <!-- Category Filter Tabs Bar -->
+        <div class="category-tabs-wrapper">
+          <div class="category-tabs" id="category-tabs">
+            <button class="tab-btn active" data-category="all">
+              <span class="tab-icon">🌟</span>
+              <span>All Categories</span>
+              <span class="tab-count" id="tab-count-all">0</span>
+            </button>
+            <!-- Dynamic category tabs inserted here by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats & Info Strip -->
+  <section class="stats-strip">
+    <div class="site-container stats-container">
+      <div class="stat-group">
+        <div class="stat-item">
+          <span class="stat-icon">📁</span>
+          <div>
+            <span class="stat-value" id="total-categories">0</span>
+            <span class="stat-label">Active Albums</span>
+          </div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-icon">🖼️</span>
+          <div>
+            <span class="stat-value" id="total-images">0</span>
+            <span class="stat-label">Total Photographs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-notice-pill">
+        <span class="live-dot"></span>
+        <span>Developer Mode: Use <code>admin_app.py</code> to manage photos & albums</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Gallery Content -->
+  <main class="main-content">
+    <div class="site-container">
+      <div id="gallery-container" class="gallery-container">
+        <!-- Category cards will be dynamically rendered here -->
+      </div>
+
+      <!-- Empty / No Results State -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-icon-wrap">
+          <span class="empty-icon">📁</span>
+        </div>
+        <h3 id="empty-title">No matching photos found</h3>
+        <p id="empty-message">Try searching with a different keyword, or use <code>admin_app.py</code> to add new photos.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div id="image-modal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn" title="Close Modal">&times;</button>
+      <div class="modal-body">
+        <div class="modal-image-wrapper">
+          <img id="modal-img" src="" alt="Full view preview">
+        </div>
+        <div class="modal-details">
+          <div class="modal-info">
+            <span id="modal-category" class="modal-category-badge">Category</span>
+            <h3 id="modal-filename" class="modal-filename">filename.jpg</h3>
+          </div>
+          <a id="modal-download-btn" class="btn btn-primary" download>
+            <span>📥 Download Original</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Institutional Footer -->
+  <footer class="app-footer">
+    <div class="site-container">
+      <div class="footer-grid">
+        <!-- Column 1: School Identity -->
+        <div class="footer-col brand-col">
+          <div class="footer-logo-wrap">
+            <img src="logo.png" alt="श्री चौतारा माध्यमिक विद्यालय" class="footer-logo-img">
+            <div>
+              <h3 class="footer-school-name">श्री चौतारा माध्यमिक विद्यालय (१-१२)</h3>
+              <p class="footer-school-sub">Shree Chautara Secondary School</p>
+            </div>
+          </div>
+          <p class="footer-motto">"तमसो मा ज्योतिर्गमय — Lead us from darkness to light"</p>
+          <p class="footer-about">Dedicated to quality secondary & CTEVT technical education in Okhaldhunga, nurturing future leaders and skilled professionals.</p>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div class="footer-col">
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="https://www.chautaramavi.edu.np" target="_blank">🌐 Official Website</a></li>
+            <li><a href="#gallery-container">🖼️ Photo Gallery Archive</a></li>
+            <li><a href="javascript:void(0)" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆️ Back to Top</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact & Info -->
+        <div class="footer-col">
+          <h4 class="footer-title">Location & Contact</h4>
+          <p class="footer-contact-item"><span>📍</span> सुनकोशी गाउँपालिका-५, डाँडाखर्क, ओखलढुङ्गा, कोशी प्रदेश, नेपाल</p>
+          <p class="footer-contact-item"><span>✉️</span> <a href="mailto:info@chautaramavi.edu.np">info@chautaramavi.edu.np</a></p>
+          <p class="footer-contact-item"><span>🌐</span> <a href="https://www.chautaramavi.edu.np" target="_blank">www.chautaramavi.edu.np</a></p>
+          <div class="footer-badge">Approved by Government of Nepal & NEB / CTEVT</div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 <strong>Shree Chautara Secondary School</strong> (श्री चौतारा माध्यमिक विद्यालय). All Rights Reserved.</p>
+        <p class="footer-subtext">Official Website: <a href="https://www.chautaramavi.edu.np" target="_blank">www.chautaramavi.edu.np</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Standalone Data Script Loaded First -->
+  <script src="categories-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
