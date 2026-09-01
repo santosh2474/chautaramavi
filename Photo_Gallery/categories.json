@@ -1,27 +1,8 @@
 [
   {
-    "category": "Architecture",
-    "images": [
-      "1.jpg",
-      "2.jpg",
-      "3.jpg",
-      "4.png"
-    ]
-  },
-  {
-    "category": "Nature",
-    "images": [
-      "33.jpg"
-    ]
-  },
-  {
     "category": "Testing",
     "images": [
-      "ORGINAL.png"
+      "Institute Image.jpg"
     ]
-  },
-  {
-    "category": "Wallpapers",
-    "images": []
   }
 ]
