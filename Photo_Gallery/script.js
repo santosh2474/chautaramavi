@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryTabsContainer = document.getElementById('category-tabs');
   const tabCountAllEl = document.getElementById('tab-count-all');
 
+  // Theme Toggle Elements
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeIconEl = document.getElementById('theme-icon');
+  const themeLabelEl = document.getElementById('theme-label');
+
   // Modal Elements
   const modal = document.getElementById('image-modal');
   const modalClose = document.getElementById('modal-close');
@@ -22,7 +27,59 @@ document.addEventListener('DOMContentLoaded', () => {
   let allCategories = [];
   let currentActiveTab = 'all';
 
-  // Category Icons & Nepali Labels Map
+  // -------------------------------------------------------------
+  // 1. Dark / Light Theme Manager
+  // -------------------------------------------------------------
+  function getPreferredTheme() {
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+      }
+    } catch (e) {
+      // Gracefully handle restricted sandboxes
+    }
+    
+    // Default to system preference if available
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      if (themeIconEl) themeIconEl.textContent = '☀️';
+      if (themeLabelEl) themeLabelEl.textContent = 'Light';
+      if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      if (themeIconEl) themeIconEl.textContent = '🌙';
+      if (themeLabelEl) themeLabelEl.textContent = 'Dark';
+      if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
+    }
+
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {}
+  }
+
+  function initTheme() {
+    const currentTheme = getPreferredTheme();
+    applyTheme(currentTheme);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+      });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 2. Category Metadata & Icons
+  // -------------------------------------------------------------
   const categoryIcons = {
     nature: { icon: '🌿', nepali: 'प्रकृति तथा परिसर' },
     architecture: { icon: '🏛️', nepali: 'भवन तथा पूर्वाधार' },
@@ -42,9 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return categoryIcons.default;
   }
 
-  // Load Gallery Data (Supports standalone file:// and HTTP servers)
+  // -------------------------------------------------------------
+  // 3. Load Gallery Data (file:// standalone + http fallback)
+  // -------------------------------------------------------------
   async function loadGalleryData() {
-    // 1. Direct standalone file:// loading using categories-data.js
+    // 1. Standalone file:// execution using categories-data.js
     if (typeof window.GALLERY_DATA !== 'undefined' && Array.isArray(window.GALLERY_DATA) && window.GALLERY_DATA.length > 0) {
       allCategories = window.GALLERY_DATA;
       initializeGallery(allCategories);
@@ -100,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryTabsContainer.innerHTML = `
       <button class="tab-btn active" data-category="all">
         <span class="tab-icon">🌟</span>
-        <span>All Categories</span>
+        <span>All Albums</span>
         <span class="tab-count" id="tab-count-all">0</span>
       </button>
     `;
@@ -204,9 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const meta = getCategoryMeta(categoryName);
 
-      // Category Card Element
+      // Category Card Element with Glass Panel
       const card = document.createElement('div');
-      card.className = 'category-card';
+      card.className = 'category-card glass-panel';
       card.dataset.category = categoryName.toLowerCase();
 
       // Card Header
@@ -214,13 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
       header.className = 'category-header';
       header.innerHTML = `
         <div class="category-title-wrap">
-          <span class="category-icon">${meta.icon}</span>
+          <span class="category-icon glass-card">${meta.icon}</span>
           <div>
             <h2 class="category-title">${escapeHTML(categoryName)}</h2>
-            <small style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">${meta.nepali}</small>
+            <small style="color: var(--text-muted); font-size: 0.78rem; font-weight: 500;">${meta.nepali}</small>
           </div>
         </div>
-        <span class="count-badge">${images.length} ${images.length === 1 ? 'Photo' : 'Photos'}</span>
+        <span class="count-badge glass-pill">${images.length} ${images.length === 1 ? 'Photo' : 'Photos'}</span>
       `;
 
       // Image Grid
@@ -231,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filePath = `categories/${encodeURIComponent(categoryName)}/${encodeURIComponent(filename)}`;
 
         const item = document.createElement('div');
-        item.className = 'image-item';
+        item.className = 'image-item glass-card';
         item.dataset.filename = filename.toLowerCase();
 
         item.innerHTML = `
@@ -241,9 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="preview-icon">👁️ Full View</span>
             </div>
           </div>
-          <div class="image-details">
+          <div class="image-details glass-surface">
             <span class="image-filename" title="${escapeHTML(filename)}">${escapeHTML(filename)}</span>
-            <a href="${filePath}" download="${escapeHTML(filename)}" class="btn btn-download" title="Download Image">
+            <a href="${filePath}" download="${escapeHTML(filename)}" class="btn btn-download glass-btn" title="Download Image">
               📥 Save
             </a>
           </div>
@@ -336,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  // Start initialization
+  // Start Theme Initialization and Gallery Data Load
+  initTheme();
   loadGalleryData();
 });
