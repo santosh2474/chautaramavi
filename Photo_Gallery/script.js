@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const galleryContainer = document.getElementById('gallery-container');
   const searchInput = document.getElementById('search-input');
   const searchClearBtn = document.getElementById('search-clear');
+  const dateFromInput = document.getElementById('date-from');
+  const dateToInput = document.getElementById('date-to');
+  const dateClearBtn = document.getElementById('date-clear-btn');
   const totalCategoriesEl = document.getElementById('total-categories');
   const totalImagesEl = document.getElementById('total-images');
   const emptyStateEl = document.getElementById('empty-state');
@@ -21,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalClose = document.getElementById('modal-close');
   const modalImg = document.getElementById('modal-img');
   const modalCategory = document.getElementById('modal-category');
+  const modalDate = document.getElementById('modal-date');
   const modalFilename = document.getElementById('modal-filename');
   const modalDownloadBtn = document.getElementById('modal-download-btn');
 
@@ -40,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Gracefully handle restricted sandboxes
     }
     
-    // Default to system preference if available
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
@@ -208,15 +211,35 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFilterAndRender();
   }
 
-  // Filter & Render Gallery
+  // Normalize date strings into standard YYYY/MM/DD
+  function normalizeDate(dateStr) {
+    if (!dateStr) return '';
+    return dateStr.trim().replace(/[-.]/g, '/');
+  }
+
+  // -------------------------------------------------------------
+  // 4. Filter & Render Gallery (Keywords + Category + Date Range)
+  // -------------------------------------------------------------
   function applyFilterAndRender() {
-    const query = searchInput.value.trim().toLowerCase();
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const dateFromRaw = dateFromInput ? dateFromInput.value.trim() : '';
+    const dateToRaw = dateToInput ? dateToInput.value.trim() : '';
+
+    const dateFrom = normalizeDate(dateFromRaw);
+    const dateTo = normalizeDate(dateToRaw);
 
     // Toggle search clear button
     if (query) {
-      searchClearBtn.classList.remove('hidden');
+      if (searchClearBtn) searchClearBtn.classList.remove('hidden');
     } else {
-      searchClearBtn.classList.add('hidden');
+      if (searchClearBtn) searchClearBtn.classList.add('hidden');
+    }
+
+    // Toggle date reset button
+    if (dateFromRaw || dateToRaw) {
+      if (dateClearBtn) dateClearBtn.classList.remove('hidden');
+    } else {
+      if (dateClearBtn) dateClearBtn.classList.add('hidden');
     }
 
     let filtered = allCategories.map(cat => {
@@ -227,12 +250,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
       }
 
-      // Check search filter
       let images = cat.images || [];
-      if (query) {
-        const matchCategory = catNameLower.includes(query);
-        images = images.filter(img => img.toLowerCase().includes(query) || matchCategory);
-      }
+
+      // Filter images inside category
+      images = images.filter(imgItem => {
+        const filename = typeof imgItem === 'string' ? imgItem : (imgItem.name || '');
+        const imgDate = typeof imgItem === 'object' && imgItem.date ? imgItem.date : '';
+        const normImgDate = normalizeDate(imgDate);
+
+        // 1. Keyword search (matches filename, category name, or date)
+        if (query) {
+          const matchQuery = filename.toLowerCase().includes(query) || 
+                             catNameLower.includes(query) || 
+                             (imgDate && imgDate.toLowerCase().includes(query)) ||
+                             (normImgDate && normImgDate.includes(query));
+          if (!matchQuery) return false;
+        }
+
+        // 2. Date Range Filter (From Date - To Date)
+        if (dateFrom && normImgDate) {
+          if (normImgDate < dateFrom) return false;
+        }
+        if (dateTo && normImgDate) {
+          if (normImgDate > dateTo) return false;
+        }
+
+        // If a date filter is active and image has no date, exclude it
+        if ((dateFrom || dateTo) && !normImgDate) {
+          return false;
+        }
+
+        return true;
+      });
 
       if (images.length === 0) return null;
 
@@ -286,22 +335,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const grid = document.createElement('div');
       grid.className = 'image-grid';
 
-      images.forEach(filename => {
+      images.forEach(imgItem => {
+        const filename = typeof imgItem === 'string' ? imgItem : (imgItem.name || '');
+        const imgDate = typeof imgItem === 'object' && imgItem.date ? imgItem.date : '';
         const filePath = `categories/${encodeURIComponent(categoryName)}/${encodeURIComponent(filename)}`;
 
         const item = document.createElement('div');
         item.className = 'image-item glass-card';
         item.dataset.filename = filename.toLowerCase();
+        item.dataset.date = imgDate;
 
         item.innerHTML = `
-          <div class="image-preview-box" data-filepath="${filePath}" data-category="${escapeHTML(categoryName)}" data-filename="${escapeHTML(filename)}">
+          <div class="image-preview-box" data-filepath="${filePath}" data-category="${escapeHTML(categoryName)}" data-filename="${escapeHTML(filename)}" data-date="${escapeHTML(imgDate)}">
             <img src="${filePath}" alt="${escapeHTML(filename)}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23999\\'>Image Error</text></svg>';">
             <div class="preview-overlay">
               <span class="preview-icon">👁️ Full View</span>
             </div>
+            ${imgDate ? `<span class="image-date-chip glass-pill">📅 ${escapeHTML(imgDate)}</span>` : ''}
           </div>
           <div class="image-details glass-surface">
-            <span class="image-filename" title="${escapeHTML(filename)}">${escapeHTML(filename)}</span>
+            <div class="image-meta-wrap">
+              <span class="image-filename" title="${escapeHTML(filename)}">${escapeHTML(filename)}</span>
+              ${imgDate ? `<span class="image-date-sub"><span class="cal-mini-icon">📅</span> ${escapeHTML(imgDate)}</span>` : ''}
+            </div>
             <a href="${filePath}" download="${escapeHTML(filename)}" class="btn btn-download glass-btn" title="Download Image">
               📥 Save
             </a>
@@ -324,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (visibleCategoriesCount === 0) {
       showErrorState(
         'No Photographs Found',
-        'No photos matched your current filter or search criteria. Use <code>admin_app.py</code> to manage photos.'
+        'No photos matched your current filter or search criteria. Try adjusting your keyword or date range.'
       );
     } else {
       emptyStateEl.classList.add('hidden');
@@ -336,26 +392,65 @@ document.addEventListener('DOMContentLoaded', () => {
         const filePath = box.dataset.filepath;
         const catName = box.dataset.category;
         const fileName = box.dataset.filename;
-        openModal(filePath, catName, fileName);
+        const fileDate = box.dataset.date;
+        openModal(filePath, catName, fileName, fileDate);
       });
     });
   }
 
+  // -------------------------------------------------------------
+  // 5. Input Event Listeners
+  // -------------------------------------------------------------
   // Search input handler
-  searchInput.addEventListener('input', applyFilterAndRender);
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilterAndRender);
+  }
 
   // Search clear button handler
-  searchClearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    applyFilterAndRender();
-    searchInput.focus();
-  });
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      applyFilterAndRender();
+      searchInput.focus();
+    });
+  }
 
-  // Lightbox Modal Handlers
-  function openModal(filePath, catName, fileName) {
+  // Date range inputs with input formatting helper
+  function setupDateInput(inputEl) {
+    if (!inputEl) return;
+    inputEl.addEventListener('input', (e) => {
+      applyFilterAndRender();
+    });
+  }
+
+  setupDateInput(dateFromInput);
+  setupDateInput(dateToInput);
+
+  // Date clear button handler
+  if (dateClearBtn) {
+    dateClearBtn.addEventListener('click', () => {
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+      applyFilterAndRender();
+    });
+  }
+
+  // -------------------------------------------------------------
+  // 6. Lightbox Modal Handlers
+  // -------------------------------------------------------------
+  function openModal(filePath, catName, fileName, fileDate) {
     modalImg.src = filePath;
     modalCategory.textContent = catName;
     modalFilename.textContent = fileName;
+    
+    if (modalDate) {
+      if (fileDate) {
+        modalDate.textContent = `📅 Uploaded: ${fileDate}`;
+        modalDate.classList.remove('hidden');
+      } else {
+        modalDate.classList.add('hidden');
+      }
+    }
 
     modalDownloadBtn.setAttribute('href', filePath);
     modalDownloadBtn.setAttribute('download', fileName);
@@ -372,10 +467,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   }
 
-  modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) {

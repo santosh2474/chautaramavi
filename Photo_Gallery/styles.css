@@ -390,7 +390,7 @@ body {
   align-items: center;
   gap: 0.65rem;
   flex: 1;
-  max-width: 460px;
+  max-width: 480px;
   justify-content: flex-end;
 }
 
@@ -477,7 +477,7 @@ body {
 }
 
 /* ==========================================================================
-   3. Minimalist Hero & Horizontal Scrolling Filter Tabs
+   3. Minimalist Hero, Filter Tabs & Date Range Filter
    ========================================================================== */
 .hero-section {
   padding: clamp(1.5rem, 3.5vw, 2.5rem) 0 clamp(1rem, 2.5vw, 1.5rem);
@@ -522,7 +522,6 @@ body {
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
   background: var(--hero-title-grad);
-  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -532,15 +531,15 @@ body {
   color: #cbd5e1;
   line-height: 1.55;
   max-width: 760px;
-  margin: 0 auto clamp(1.25rem, 2.5vw, 1.75rem);
+  margin: 0 auto clamp(1rem, 2vw, 1.5rem);
 }
 
-/* Category Filter Tabs with Touch Friendly Scrolling */
+/* Category Filter Tabs */
 .category-tabs-wrapper {
   overflow-x: auto;
   padding-bottom: 0.4rem;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Hide scrollbar for clean glass look */
+  scrollbar-width: none;
 }
 
 .category-tabs-wrapper::-webkit-scrollbar {
@@ -596,6 +595,117 @@ body {
 
 .tab-btn.active .tab-count {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* ==========================================================================
+   Date Range Filter Box (YYYY/MM/DD)
+   ========================================================================== */
+.date-filter-box {
+  margin-top: 1.15rem;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(6, 26, 61, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  max-width: 740px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+[data-theme="dark"] .date-filter-box {
+  background: rgba(3, 7, 18, 0.65);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.date-filter-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold-light);
+}
+
+.date-fields-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.date-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.date-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  padding: 0.32rem 0.75rem;
+  transition: var(--transition);
+}
+
+.date-input-wrap:focus-within {
+  border-color: var(--gold-light);
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.25);
+}
+
+.cal-mini {
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
+.date-input-wrap input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #ffffff;
+  width: 135px;
+}
+
+.date-input-wrap input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.date-arrow {
+  color: var(--gold-light);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.date-clear-btn {
+  padding: 0.32rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.date-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+  color: #ffffff;
 }
 
 /* ==========================================================================
@@ -813,6 +923,21 @@ body {
   gap: 0.35rem;
 }
 
+/* Floating Date Chip on Thumbnail */
+.image-date-chip {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(6, 26, 61, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.15rem 0.5rem;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 .image-details {
   padding: 0.75rem 0.85rem;
   display: flex;
@@ -823,6 +948,13 @@ body {
   border-top: 1px solid var(--glass-border-subtle);
 }
 
+.image-meta-wrap {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 0.15rem;
+}
+
 .image-filename {
   font-size: 0.8rem;
   font-weight: 600;
@@ -831,6 +963,19 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 130px;
+}
+
+.image-date-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cal-mini-icon {
+  font-size: 0.7rem;
 }
 
 /* Action Buttons */
@@ -1008,6 +1153,14 @@ body {
   gap: 0.85rem;
 }
 
+.modal-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
 .modal-category-badge {
   display: inline-block;
   font-size: 0.72rem;
@@ -1016,7 +1169,15 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 0.2rem 0.55rem;
-  margin-bottom: 0.2rem;
+}
+
+.modal-date-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+  background: var(--gold-bg);
+  padding: 0.2rem 0.55rem;
 }
 
 .modal-filename {
@@ -1235,6 +1396,26 @@ body {
   }
   .theme-toggle-btn {
     padding: 0.45rem;
+  }
+  .date-filter-box {
+    padding: 0.75rem 0.85rem;
+  }
+  .date-fields-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .date-field {
+    justify-content: space-between;
+  }
+  .date-arrow {
+    display: none;
+  }
+  .date-input-wrap {
+    flex: 1;
+  }
+  .date-input-wrap input {
+    width: 100%;
   }
   .image-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
