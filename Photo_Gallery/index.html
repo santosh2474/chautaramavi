@@ -170,10 +170,36 @@
   <!-- Glass Lightbox Modal -->
   <div id="image-modal" class="modal-overlay hidden" aria-hidden="true">
     <div class="modal-content glass-modal">
-      <button id="modal-close" class="modal-close-btn glass-btn" title="Close Modal">&times;</button>
+      <div class="modal-header-bar">
+        <div class="modal-counter-badge glass-pill" id="modal-counter">1 / 1</div>
+        <div class="modal-header-actions">
+          <button id="modal-fullscreen-btn" class="modal-fs-btn glass-btn" title="Toggle Fullscreen (F)">
+            <svg class="icon-expand" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg class="icon-compress hidden" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+            <span class="fs-text">Fullscreen</span>
+          </button>
+          <button id="modal-close" class="modal-close-btn glass-btn" title="Close Modal (Esc)">&times;</button>
+        </div>
+      </div>
       <div class="modal-body">
-        <div class="modal-image-wrapper">
-          <img id="modal-img" src="" alt="Full view preview">
+        <div class="modal-image-stage">
+          <button id="modal-prev-btn" class="modal-nav-btn modal-prev" title="Previous Image (← or Swipe Right)">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <div class="modal-image-wrapper">
+            <img id="modal-img" src="" alt="Full view preview">
+          </div>
+          <button id="modal-next-btn" class="modal-nav-btn modal-next" title="Next Image (→ or Swipe Left)">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
         <div class="modal-details glass-surface">
           <div class="modal-info">

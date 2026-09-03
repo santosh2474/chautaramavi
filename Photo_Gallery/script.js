@@ -27,9 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalDate = document.getElementById('modal-date');
   const modalFilename = document.getElementById('modal-filename');
   const modalDownloadBtn = document.getElementById('modal-download-btn');
+  const modalCounter = document.getElementById('modal-counter');
+  const modalFullscreenBtn = document.getElementById('modal-fullscreen-btn');
+  const modalPrevBtn = document.getElementById('modal-prev-btn');
+  const modalNextBtn = document.getElementById('modal-next-btn');
 
   let allCategories = [];
   let currentActiveTab = 'all';
+  let activeGalleryImages = [];
+  let currentModalIndex = 0;
 
   // -------------------------------------------------------------
   // 1. Dark / Light Theme Manager
@@ -297,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render Category Cards & Image Grid
   function renderGallery(categories) {
     galleryContainer.innerHTML = '';
+    activeGalleryImages = [];
 
     let visibleCategoriesCount = 0;
     let totalImagesCount = 0;
@@ -340,13 +347,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const imgDate = typeof imgItem === 'object' && imgItem.date ? imgItem.date : '';
         const filePath = `categories/${encodeURIComponent(categoryName)}/${encodeURIComponent(filename)}`;
 
+        const imageIndex = activeGalleryImages.length;
+        activeGalleryImages.push({
+          filePath,
+          categoryName,
+          filename,
+          imgDate
+        });
+
         const item = document.createElement('div');
         item.className = 'image-item glass-card';
         item.dataset.filename = filename.toLowerCase();
         item.dataset.date = imgDate;
 
         item.innerHTML = `
-          <div class="image-preview-box" data-filepath="${filePath}" data-category="${escapeHTML(categoryName)}" data-filename="${escapeHTML(filename)}" data-date="${escapeHTML(imgDate)}">
+          <div class="image-preview-box" data-image-index="${imageIndex}">
             <img src="${filePath}" alt="${escapeHTML(filename)}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23999\\'>Image Error</text></svg>';">
             <div class="preview-overlay">
               <span class="preview-icon">👁️ Full View</span>
@@ -389,11 +404,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach Preview Event Listeners
     document.querySelectorAll('.image-preview-box').forEach(box => {
       box.addEventListener('click', () => {
-        const filePath = box.dataset.filepath;
-        const catName = box.dataset.category;
-        const fileName = box.dataset.filename;
-        const fileDate = box.dataset.date;
-        openModal(filePath, catName, fileName, fileDate);
+        const idx = parseInt(box.dataset.imageIndex, 10);
+        if (!isNaN(idx)) {
+          openModal(idx);
+        }
       });
     });
   }
@@ -436,28 +450,77 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
-  // 6. Lightbox Modal Handlers
+  // 6. Lightbox Modal Handlers (Fullscreen, Arrow Keys, Mouse & Touch Sliding)
   // -------------------------------------------------------------
-  function openModal(filePath, catName, fileName, fileDate) {
-    modalImg.src = filePath;
-    modalCategory.textContent = catName;
-    modalFilename.textContent = fileName;
-    
+  function openModal(index) {
+    if (!activeGalleryImages || activeGalleryImages.length === 0) return;
+    currentModalIndex = Math.max(0, Math.min(index, activeGalleryImages.length - 1));
+
+    renderModalImage();
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function renderModalImage(animationClass = '') {
+    const imgObj = activeGalleryImages[currentModalIndex];
+    if (!imgObj) return;
+
+    modalImg.src = imgObj.filePath;
+    modalCategory.textContent = imgObj.categoryName;
+    modalFilename.textContent = imgObj.filename;
+
+    if (modalCounter) {
+      modalCounter.textContent = `${currentModalIndex + 1} / ${activeGalleryImages.length}`;
+    }
+
     if (modalDate) {
-      if (fileDate) {
-        modalDate.textContent = `📅 Uploaded: ${fileDate}`;
+      if (imgObj.imgDate) {
+        modalDate.textContent = `📅 Uploaded: ${imgObj.imgDate}`;
         modalDate.classList.remove('hidden');
       } else {
         modalDate.classList.add('hidden');
       }
     }
 
-    modalDownloadBtn.setAttribute('href', filePath);
-    modalDownloadBtn.setAttribute('download', fileName);
+    if (modalDownloadBtn) {
+      modalDownloadBtn.setAttribute('href', imgObj.filePath);
+      modalDownloadBtn.setAttribute('download', imgObj.filename);
+    }
 
-    modal.classList.remove('hidden');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    // Animation
+    modalImg.className = '';
+    if (animationClass) {
+      modalImg.classList.add(animationClass);
+    }
+
+    preloadAdjacentImages();
+  }
+
+  function showNextModalImage() {
+    if (activeGalleryImages.length <= 1) return;
+    currentModalIndex = (currentModalIndex + 1) % activeGalleryImages.length;
+    renderModalImage('slide-from-right');
+  }
+
+  function showPrevModalImage() {
+    if (activeGalleryImages.length <= 1) return;
+    currentModalIndex = (currentModalIndex - 1 + activeGalleryImages.length) % activeGalleryImages.length;
+    renderModalImage('slide-from-left');
+  }
+
+  function preloadAdjacentImages() {
+    if (activeGalleryImages.length <= 1) return;
+    const nextIdx = (currentModalIndex + 1) % activeGalleryImages.length;
+    const prevIdx = (currentModalIndex - 1 + activeGalleryImages.length) % activeGalleryImages.length;
+    const i1 = new Image();
+    i1.src = activeGalleryImages[nextIdx].filePath;
+    const i2 = new Image();
+    i2.src = activeGalleryImages[prevIdx].filePath;
+  }
+
+  function isModalInFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || modal.classList.contains('mobile-force-landscape'));
   }
 
   function closeModal() {
@@ -465,22 +528,228 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.setAttribute('aria-hidden', 'true');
     modalImg.src = '';
     document.body.style.overflow = '';
+
+    // Unlock device orientation if locked
+    try {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      } else if (screen.unlockOrientation) {
+        screen.unlockOrientation();
+      } else if (screen.webkitUnlockOrientation) {
+        screen.webkitUnlockOrientation();
+      }
+    } catch (err) {}
+
+    modal.classList.remove('mobile-force-landscape');
+
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen().catch(() => {});
+      }
+    }
+
+    updateFullscreenUI();
   }
 
-  if (modalClose) {
-    modalClose.addEventListener('click', closeModal);
+  // --- Fullscreen Toggle Option (with Auto Mobile Landscape Rotation) ---
+  async function toggleModalFullscreen() {
+    const isFs = isModalInFullscreen();
+
+    if (!isFs) {
+      // 1. Enter Native Fullscreen
+      let nativeFsSuccess = false;
+      try {
+        if (modal.requestFullscreen) {
+          await modal.requestFullscreen();
+          nativeFsSuccess = true;
+        } else if (modal.webkitRequestFullscreen) {
+          await modal.webkitRequestFullscreen();
+          nativeFsSuccess = true;
+        }
+      } catch (e) {
+        console.log('Native requestFullscreen note:', e);
+      }
+
+      // 2. Automatically Convert/Lock to Landscape on Mobile
+      let orientationLocked = false;
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+          orientationLocked = true;
+        } else if (screen.lockOrientation) {
+          orientationLocked = screen.lockOrientation('landscape');
+        } else if (screen.webkitLockOrientation) {
+          orientationLocked = screen.webkitLockOrientation('landscape');
+        } else if (screen.mozLockOrientation) {
+          orientationLocked = screen.mozLockOrientation('landscape');
+        }
+      } catch (err) {
+        console.log('Orientation lock note:', err);
+      }
+
+      // 3. Fallback for iOS / mobile browsers where screen.orientation.lock is restricted:
+      // If mobile screen is in portrait (height > width):
+      if (!orientationLocked && window.innerHeight > window.innerWidth && window.innerWidth <= 850) {
+        modal.classList.add('mobile-force-landscape');
+      }
+
+      updateFullscreenUI();
+    } else {
+      // Exit Fullscreen and Unlock Orientation
+      try {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        } else if (screen.unlockOrientation) {
+          screen.unlockOrientation();
+        } else if (screen.webkitUnlockOrientation) {
+          screen.webkitUnlockOrientation();
+        }
+      } catch (err) {}
+
+      modal.classList.remove('mobile-force-landscape');
+
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen().catch(() => {});
+        }
+      }
+
+      updateFullscreenUI();
+    }
   }
+
+  function updateFullscreenUI() {
+    const isFs = isModalInFullscreen();
+    if (modalFullscreenBtn) {
+      const expandIcon = modalFullscreenBtn.querySelector('.icon-expand');
+      const compressIcon = modalFullscreenBtn.querySelector('.icon-compress');
+      const fsText = modalFullscreenBtn.querySelector('.fs-text');
+
+      if (isFs) {
+        if (expandIcon) expandIcon.classList.add('hidden');
+        if (compressIcon) compressIcon.classList.remove('hidden');
+        if (fsText) fsText.textContent = 'Exit Fullscreen';
+      } else {
+        if (expandIcon) expandIcon.classList.remove('hidden');
+        if (compressIcon) compressIcon.classList.add('hidden');
+        if (fsText) fsText.textContent = 'Fullscreen';
+      }
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      try {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+      } catch (e) {}
+      modal.classList.remove('mobile-force-landscape');
+    }
+    updateFullscreenUI();
+  });
+
+  document.addEventListener('webkitfullscreenchange', () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      try {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+      } catch (e) {}
+      modal.classList.remove('mobile-force-landscape');
+    }
+    updateFullscreenUI();
+  });
+
+  // Handle device orientation change or window resize
+  window.addEventListener('orientationchange', () => {
+    if (window.innerWidth > window.innerHeight) {
+      modal.classList.remove('mobile-force-landscape');
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > window.innerHeight && modal.classList.contains('mobile-force-landscape')) {
+      modal.classList.remove('mobile-force-landscape');
+    }
+  });
+
+  // --- Mouse Click Listeners ---
+  if (modalClose) modalClose.addEventListener('click', closeModal);
+  if (modalFullscreenBtn) modalFullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleModalFullscreen(); });
+  if (modalPrevBtn) modalPrevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrevModalImage(); });
+  if (modalNextBtn) modalNextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNextModalImage(); });
+
   if (modal) {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
     });
   }
 
+  // --- Keyboard Navigation (Arrow Keys, ESC, F) ---
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    if (modal.classList.contains('hidden')) return;
+
+    if (e.key === 'Escape') {
       closeModal();
+    } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+      e.preventDefault();
+      showNextModalImage();
+    } else if (e.key === 'ArrowLeft' || e.key === 'Left') {
+      e.preventDefault();
+      showPrevModalImage();
+    } else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      toggleModalFullscreen();
     }
   });
+
+  // --- Mobile Touch Sliding (Swipe Left/Right in Portrait & Landscape) ---
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  modal.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = performance.now();
+    }
+  }, { passive: true });
+
+  modal.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length === 1) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX;
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
+      const duration = performance.now() - touchStartTime;
+
+      const isForceLandscape = modal.classList.contains('mobile-force-landscape');
+
+      if (isForceLandscape) {
+        // When CSS rotated 90deg, visual X axis aligns with physical Y axis:
+        if (Math.abs(deltaY) > 40 && Math.abs(deltaX) < 90 && duration < 500) {
+          if (deltaY < 0) {
+            showNextModalImage(); // Swiped visually left -> Next
+          } else {
+            showPrevModalImage(); // Swiped visually right -> Prev
+          }
+        }
+      } else {
+        // Native orientation or locked landscape:
+        if (Math.abs(deltaX) > 40 && Math.abs(deltaY) < 80 && duration < 500) {
+          if (deltaX < 0) {
+            showNextModalImage(); // Swiped left -> Next
+          } else {
+            showPrevModalImage(); // Swiped right -> Previous
+          }
+        }
+      }
+    }
+  }, { passive: true });
 
   function showErrorState(title, message) {
     emptyTitleEl.textContent = title;

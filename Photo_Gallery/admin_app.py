@@ -35,8 +35,8 @@ METADATA_FILE = os.path.join(SCRIPT_DIR, "categories_metadata.json")
 DEFAULT_PORT = 8000
 MOBILE_UPLOAD_PORT = 8765
 
-# Supported image extensions (including HEIC)
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".heic"}
+# Supported image extensions (including HEIC/HEIF from iPhone/Apple devices)
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".heic", ".heif"}
 
 
 def get_local_ip():
@@ -220,8 +220,8 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
                 errors.append(f"Skipped '{filename}' (unsupported format)")
                 continue
             
-            # Handle HEIC files
-            if ext == ".heic":
+            # Handle HEIC/HEIF files (Apple formats) — convert to JPEG
+            if ext in (".heic", ".heif"):
                 if HAS_HEIF:
                     try:
                         # Convert HEIC to JPEG
@@ -588,9 +588,12 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
   function addFiles(newFiles) {{
     // Merge, deduplicate by name+size
     const existing = new Set(selectedFiles.map(f => f.name + f.size));
-    const toAdd = Array.from(newFiles).filter(f =>
-      f.type.startsWith('image/') && !existing.has(f.name + f.size)
-    );
+    const heifExts = ['.heic', '.heif'];
+    const toAdd = Array.from(newFiles).filter(f => {{
+      const ext = f.name.toLowerCase().slice(f.name.lastIndexOf('.'));
+      const isImage = f.type.startsWith('image/') || heifExts.includes(ext);
+      return isImage && !existing.has(f.name + f.size);
+    }});
     selectedFiles = [...selectedFiles, ...toAdd];
     renderPreviews();
   }}
@@ -598,12 +601,17 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
   function renderPreviews() {{
     previewGrid.innerHTML = '';
     selectedFiles.forEach((file, idx) => {{
-      const reader = new FileReader();
-      reader.onload = (e) => {{
-        const item = document.createElement('div');
-        item.className = 'preview-item';
+      const item = document.createElement('div');
+      item.className = 'preview-item';
+      const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+      const isHeif = ext === '.heif' || ext === '.heic';
+
+      if (isHeif) {{
+        // Browser cannot decode HEIF — show placeholder with filename
         item.innerHTML = `
-          <img src="${{e.target.result}}" alt="${{file.name}}">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;height:72px;background:rgba(255,255,255,0.08);border-radius:8px;font-size:0.65rem;color:#cbd5e1;text-align:center;padding:4px;word-break:break-all;">
+            🖼️<br>${{file.name.slice(0, 20)}}
+          </div>
           <button class="remove-btn" data-idx="${{idx}}">✕</button>
         `;
         item.querySelector('.remove-btn').addEventListener('click', (ev) => {{
@@ -614,8 +622,24 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
           updateUI();
         }});
         previewGrid.appendChild(item);
-      }};
-      reader.readAsDataURL(file);
+      }} else {{
+        const reader = new FileReader();
+        reader.onload = (e) => {{
+          item.innerHTML = `
+            <img src="${{e.target.result}}" alt="${{file.name}}">
+            <button class="remove-btn" data-idx="${{idx}}">✕</button>
+          `;
+          item.querySelector('.remove-btn').addEventListener('click', (ev) => {{
+            ev.stopPropagation();
+            const i = parseInt(ev.target.dataset.idx);
+            selectedFiles.splice(i, 1);
+            renderPreviews();
+            updateUI();
+          }});
+          previewGrid.appendChild(item);
+        }};
+        reader.readAsDataURL(file);
+      }}
     }});
     updateUI();
   }}
@@ -1357,7 +1381,7 @@ class GalleryAdminApp:
         try:
             # Handle HEIC files for preview
             ext = os.path.splitext(img_path)[1].lower()
-            if ext == ".heic" and HAS_HEIF:
+            if ext in (".heic", ".heif") and HAS_HEIF:
                 try:
                     heif_file = pillow_heif.read_heif(img_path)
                     img = Image.frombytes(
@@ -1536,7 +1560,7 @@ class GalleryAdminApp:
 
         files = filedialog.askopenfilenames(
             title="Select Images to Upload",
-            filetypes=[("Image Files", "*.png *.jpg *.jpeg *.webp *.gif *.svg *.bmp *.heic"), ("All Files", "*.*")],
+            filetypes=[("Image Files", "*.png *.jpg *.jpeg *.webp *.gif *.svg *.bmp *.heic *.heif"), ("All Files", "*.*")],
             parent=self.root
         )
         if not files:
@@ -1553,9 +1577,9 @@ class GalleryAdminApp:
         for file_path in files:
             file_name = os.path.basename(file_path)
             
-            # Check if HEIC and convert if possible
+            # Check if HEIC/HEIF and convert if possible
             ext = os.path.splitext(file_path)[1].lower()
-            if ext == ".heic" and HAS_HEIF:
+            if ext in (".heic", ".heif") and HAS_HEIF:
                 try:
                     with open(file_path, "rb") as f:
                         heic_data = f.read()
