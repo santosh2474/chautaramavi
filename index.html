@@ -20,7 +20,6 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <link href="banner/style_banner.css" rel="stylesheet">
 
 </head>
 
@@ -155,60 +154,7 @@ function highlightNavItem(element) {
 
 <!-- Navbar End -->
 
-<!-- Banner Include -->
-<div id="banner-container"></div>
 
-<!-- Banner Include -->
-<div id="banner-container"></div>
-
-<script>
-    // Function to initialize banner after content is loaded
-    function initializeBanner() {
-        // Check if script_banner.js is already loaded
-        if (typeof bannerScriptLoaded === 'undefined') {
-            // Load script_banner.js dynamically
-            var bannerScript = document.createElement('script');
-            bannerScript.src = './banner/script_banner.js';
-            document.head.appendChild(bannerScript);
-            window.bannerScriptLoaded = true;
-        }
-    }
-
-    // Load banner.html content
-    fetch('banner.html')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Banner file not found');
-            }
-            return response.text();
-        })
-        .then(data => {
-            document.getElementById('banner-container').innerHTML = data;
-            // Initialize banner after content is loaded
-            initializeBanner();
-        })
-        .catch(error => {
-            console.error('Error loading banner:', error);
-            // Fallback in case banner.html is not found
-            document.getElementById('banner-container').innerHTML = `
-                <!-- Banner Start -->
-                <div id="slideContainer">
-                    <button id="close" class="closeBtn">&times;</button>
-                    <button id="prev" class="sliderBtn">&lt;</button>
-                    <button id="next" class="sliderBtn">&gt;</button>
-                    <div class="slide show">
-                        <img src="./banner/banner_img/wish.png" alt="Slide 1" />
-                        <p>"चौतारा माध्यमिक विद्यालयको तर्फबाट क्रिसमस तथा नयाँ वर्ष 2026 को हार्दिक शुभकामना!"</p>
-                        <a href="./banner/banner_img/slide1.jpg" download="slide1.jpg" class="downloadBtn">Download</a>
-                    </div>
-                </div>
-            `;
-            // Load script_banner.js for fallback too
-            var bannerScript = document.createElement('script');
-            bannerScript.src = './banner/script_banner.js';
-            document.head.appendChild(bannerScript);
-        });
-</script>
 
 <!-- Header Start -->
 <div class="jumbotron position-relative overlay-bottom" style="height: 85vh; margin-bottom: 40px;">
