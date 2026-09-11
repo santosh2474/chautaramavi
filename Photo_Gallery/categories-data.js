@@ -106,6 +106,22 @@ window.GALLERY_DATA = [
       {
         "name": "1000108082.jpg",
         "date": "2026/09/02"
+      },
+      {
+        "name": "IMG_7068.jpeg",
+        "date": "2026/09/11"
+      },
+      {
+        "name": "IMG_7069.jpeg",
+        "date": "2026/09/11"
+      },
+      {
+        "name": "IMG_7073.jpeg",
+        "date": "2026/09/11"
+      },
+      {
+        "name": "IMG_7074.jpeg",
+        "date": "2026/09/11"
       }
     ]
   },
