@@ -108,6 +108,10 @@ window.GALLERY_DATA = [
         "date": "2026/09/02"
       },
       {
+        "name": "20260909_155614.jpg",
+        "date": "2026/09/11"
+      },
+      {
         "name": "IMG_7068.jpeg",
         "date": "2026/09/11"
       },
@@ -124,10 +128,6 @@ window.GALLERY_DATA = [
         "date": "2026/09/11"
       }
     ]
-  },
-  {
-    "category": "Cultural Activities",
-    "images": []
   },
   {
     "category": "Meetings",
