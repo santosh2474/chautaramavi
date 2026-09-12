@@ -112,6 +112,19 @@
             <button id="date-clear-btn" class="date-clear-btn glass-btn hidden" title="Clear Date Filter">
               <span>✕ Reset Dates</span>
             </button>
+            <span class="filter-divider hide-xs">|</span>
+            <div class="date-field sort-field">
+              <label for="sort-select" class="date-label">Sort (क्रम):</label>
+              <div class="date-input-wrap sort-select-wrap">
+                <span class="cal-mini">🔃</span>
+                <select id="sort-select" class="sort-select" title="Sort photographs order">
+                  <option value="newest" selected>🕒 Recently Uploaded (Newest First)</option>
+                  <option value="oldest">📅 Oldest Uploaded First</option>
+                  <option value="name-asc">🔤 Name (A → Z)</option>
+                  <option value="name-desc">🔤 Name (Z → A)</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 

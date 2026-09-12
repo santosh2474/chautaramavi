@@ -708,6 +708,53 @@ body {
   color: #ffffff;
 }
 
+.filter-divider {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 300;
+  margin: 0 0.15rem;
+  user-select: none;
+}
+
+.sort-select-wrap {
+  position: relative;
+  padding-right: 1.5rem;
+}
+
+.sort-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold-light);
+  pointer-events: none;
+  font-size: 0.75rem;
+}
+
+.sort-select {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.sort-select option {
+  background: #0b2b64;
+  color: #f8fafc;
+  padding: 4px;
+}
+
+[data-theme="dark"] .sort-select option {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 /* ==========================================================================
    4. Stats & Status Strip
    ========================================================================== */
