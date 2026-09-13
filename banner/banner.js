@@ -15,6 +15,7 @@
             this.mediaList = (typeof bannerMedia !== "undefined" && Array.isArray(bannerMedia)) ? [...bannerMedia] : [];
             this.meta = (typeof bannerMeta !== "undefined" && typeof bannerMeta === "object") ? bannerMeta : {};
             this.settings = Object.assign({
+                enabled: true,
                 autoOpen: true,
                 slideshow: false,
                 slideshowInterval: 5000,
@@ -68,6 +69,16 @@
         }
 
         async init() {
+            // If the entire banner media viewer is disabled, do not initialize anything
+            if (this.settings.enabled === false) {
+                const existingTrigger = document.getElementById("scsFloatingTrigger");
+                if (existingTrigger) existingTrigger.style.display = "none";
+                const existingOverlay = document.getElementById("scsBannerOverlay");
+                if (existingOverlay) existingOverlay.style.display = "none";
+                console.log("[ScsBanner] Banner media viewer is disabled in bannerSettings.");
+                return;
+            }
+
             // Check PHP auto-detection only if enabled and running on http/https web server
             // (Browsers block fetch on file:// protocol with CORS error)
             const isWebProtocol = window.location.protocol === "http:" || window.location.protocol === "https:";

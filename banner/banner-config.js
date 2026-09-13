@@ -19,6 +19,9 @@
 
 // General Banner Settings
 const bannerSettings = {
+    // Master switch: Enable or disable the entire banner media viewer feature on the website
+    enabled: true,
+
     // Automatically open popup when index.html loads
     autoOpen: true,
 

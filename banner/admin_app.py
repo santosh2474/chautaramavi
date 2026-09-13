@@ -450,7 +450,9 @@ class BannerAdminApp:
         self.media_items = []
         self.media_titles = {}       # rel_path -> title string
         self.current_selected_rel_path = None
+        self.var_banner_enabled = tk.BooleanVar(value=True)
         self.settings = {
+            "enabled": True,
             "autoOpen": True,
             "slideshow": False,
             "slideshowInterval": 5000,
@@ -461,6 +463,7 @@ class BannerAdminApp:
         self.init_directories()
         self.setup_styles()
         self.create_widgets()
+        self.var_banner_enabled.trace_add("write", lambda *args: self.update_banner_toggle_ui())
         self.load_settings()
         self.refresh_all()
 
@@ -539,6 +542,22 @@ class BannerAdminApp:
 
         btn_box = tk.Frame(self.header_frame, bg=self.c_panel)
         btn_box.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.btn_master_toggle = tk.Button(
+            btn_box,
+            text="🟢 Banner: ENABLED",
+            bg=self.c_success,
+            fg="#FFFFFF",
+            activebackground="#059669",
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=14,
+            pady=6,
+            cursor="hand2",
+            command=self.toggle_banner_feature
+        )
+        self.btn_master_toggle.pack(side=tk.LEFT, padx=6)
 
         self.btn_preview_srv = tk.Button(
             btn_box,
@@ -902,6 +921,67 @@ class BannerAdminApp:
             anchor="w"
         ).pack(fill=tk.X, pady=(6, 0))
 
+        # ── Master Enable / Disable Feature Card ─────────────────────────────
+        lbl_master_title = tk.Label(
+            scrollable_frame,
+            text="🛡️ Master Banner Feature Switch",
+            font=("Segoe UI", 11, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_panel
+        )
+        lbl_master_title.pack(anchor="w", pady=(4, 6))
+
+        self.card_master = tk.Frame(
+            scrollable_frame,
+            bg=self.c_card,
+            padx=14,
+            pady=12,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground="#10B981"
+        )
+        self.card_master.pack(fill=tk.X, pady=(0, 10))
+
+        master_top_row = tk.Frame(self.card_master, bg=self.c_card)
+        master_top_row.pack(fill=tk.X)
+
+        self.lbl_master_status = tk.Label(
+            master_top_row,
+            text="🟢 Banner Viewer: ACTIVE",
+            font=("Segoe UI", 10, "bold"),
+            fg="#10B981",
+            bg=self.c_card
+        )
+        self.lbl_master_status.pack(side=tk.LEFT)
+
+        self.btn_card_toggle = tk.Button(
+            master_top_row,
+            text="🔴 Turn OFF Banner",
+            bg="#EF4444",
+            fg="#FFFFFF",
+            activebackground="#DC2626",
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 8, "bold"),
+            relief="flat",
+            padx=10,
+            pady=4,
+            cursor="hand2",
+            command=self.toggle_banner_feature
+        )
+        self.btn_card_toggle.pack(side=tk.RIGHT)
+
+        self.lbl_master_desc = tk.Label(
+            self.card_master,
+            text="When enabled, the popup and floating notice icon appear on the website. Turn OFF to completely disable and hide the entire banner viewer from visitors.",
+            font=("Segoe UI", 8),
+            fg=self.c_muted,
+            bg=self.c_card,
+            justify="left",
+            anchor="w",
+            wraplength=420
+        )
+        self.lbl_master_desc.pack(fill=tk.X, pady=(6, 0))
+
         # 2. Banner Behavior Settings Card Header
         lbl_cfg_title = tk.Label(
             scrollable_frame,
@@ -953,6 +1033,14 @@ class BannerAdminApp:
             )
             desc.pack(fill=tk.X)
             return chk
+
+        # Option 0: Master Feature Enable
+        self.chk_master = create_option_row(
+            cfg_card,
+            "0. Master Feature Switch (enabled)",
+            "Enable or disable the entire banner media viewer and floating notice icon on the website.",
+            self.var_banner_enabled
+        )
 
         # Option 1: Auto Open
         self.var_auto_open = tk.BooleanVar(value=True)
@@ -1047,6 +1135,67 @@ class BannerAdminApp:
         )
         btn_save_cfg.pack(fill=tk.X, pady=(12, 16))
 
+    def update_banner_toggle_ui(self):
+        is_enabled = self.var_banner_enabled.get()
+        if is_enabled:
+            if hasattr(self, 'btn_master_toggle'):
+                self.btn_master_toggle.config(
+                    text="🟢 Banner: ENABLED",
+                    bg=self.c_success,
+                    activebackground="#059669"
+                )
+            if hasattr(self, 'lbl_master_status'):
+                self.lbl_master_status.config(
+                    text="🟢 Banner Viewer: ACTIVE",
+                    fg="#10B981"
+                )
+            if hasattr(self, 'btn_card_toggle'):
+                self.btn_card_toggle.config(
+                    text="🔴 Turn OFF Banner",
+                    bg="#EF4444",
+                    activebackground="#DC2626"
+                )
+            if hasattr(self, 'card_master'):
+                self.card_master.config(highlightbackground="#10B981")
+        else:
+            if hasattr(self, 'btn_master_toggle'):
+                self.btn_master_toggle.config(
+                    text="🔴 Banner: DISABLED",
+                    bg=self.c_danger,
+                    activebackground="#DC2626"
+                )
+            if hasattr(self, 'lbl_master_status'):
+                self.lbl_master_status.config(
+                    text="🔴 Banner Viewer: DISABLED",
+                    fg="#EF4444"
+                )
+            if hasattr(self, 'btn_card_toggle'):
+                self.btn_card_toggle.config(
+                    text="🟢 Turn ON Banner",
+                    bg="#10B981",
+                    activebackground="#059669"
+                )
+            if hasattr(self, 'card_master'):
+                self.card_master.config(highlightbackground="#EF4444")
+
+    def toggle_banner_feature(self):
+        new_state = not self.var_banner_enabled.get()
+        self.var_banner_enabled.set(new_state)
+        self.update_banner_toggle_ui()
+        self.save_settings(silent=True)
+        if new_state:
+            self.lbl_status.config(text="✅ Banner Media Viewer ENABLED on website.")
+            messagebox.showinfo(
+                "Banner Feature Enabled",
+                "✅ Banner Media Viewer is now ENABLED.\n\nVisitors on www.chautaramavi.edu.np will see the announcement popup and floating notice icon."
+            )
+        else:
+            self.lbl_status.config(text="⛔ Banner Media Viewer DISABLED on website.")
+            messagebox.showinfo(
+                "Banner Feature Disabled",
+                "⛔ Banner Media Viewer is now DISABLED.\n\nThe entire banner viewer, popup modal, and floating notice icon are now completely hidden from website visitors."
+            )
+
     def load_settings(self):
         if not os.path.exists(CONFIG_JS):
             return
@@ -1054,6 +1203,12 @@ class BannerAdminApp:
         try:
             with open(CONFIG_JS, "r", encoding="utf-8") as f:
                 content = f.read()
+
+            m_enabled = re.search(r"enabled\s*:\s*(true|false)", content)
+            if m_enabled:
+                self.var_banner_enabled.set(m_enabled.group(1) == "true")
+            else:
+                self.var_banner_enabled.set(True)
 
             m_auto = re.search(r"autoOpen\s*:\s*(true|false)", content)
             if m_auto:
@@ -1076,6 +1231,8 @@ class BannerAdminApp:
                 sec_val = int(int(m_sec.group(1)) / 1000)
                 self.ent_interval.delete(0, tk.END)
                 self.ent_interval.insert(0, str(sec_val))
+
+            self.update_banner_toggle_ui()
         except Exception as e:
             print(f"Error loading settings: {e}")
 
@@ -1088,7 +1245,7 @@ class BannerAdminApp:
         except Exception as e:
             print(f"Error loading banner_meta.json: {e}")
 
-    def save_settings(self):
+    def save_settings(self, silent=False):
         if not os.path.exists(CONFIG_JS):
             messagebox.showerror("Error", f"Could not find configuration file:\n{CONFIG_JS}")
             return
@@ -1100,6 +1257,19 @@ class BannerAdminApp:
 
             with open(CONFIG_JS, "r", encoding="utf-8") as f:
                 content = f.read()
+
+            if re.search(r"enabled\s*:\s*(true|false)", content):
+                content = re.sub(
+                    r"enabled\s*:\s*(true|false)",
+                    f"enabled: {'true' if self.var_banner_enabled.get() else 'false'}",
+                    content
+                )
+            else:
+                content = re.sub(
+                    r"const bannerSettings\s*=\s*\{",
+                    f"const bannerSettings = {{\n    enabled: {'true' if self.var_banner_enabled.get() else 'false'},",
+                    content
+                )
 
             content = re.sub(
                 r"autoOpen\s*:\s*(true|false)",
@@ -1151,8 +1321,10 @@ class BannerAdminApp:
             with open(BANNER_META_JSON, "w", encoding="utf-8") as f:
                 json.dump(meta_json, f, ensure_ascii=False, indent=2)
 
+            self.update_banner_toggle_ui()
             self.lbl_status.config(text="✅ Settings & media sequence saved to banner-config.js")
-            messagebox.showinfo("Success", "Settings and media items saved successfully to banner-config.js!")
+            if not silent:
+                messagebox.showinfo("Success", "Settings and media items saved successfully to banner-config.js!")
         except Exception as e:
             messagebox.showerror("Save Error", f"Could not save settings:\n{e}")
 
