@@ -117,6 +117,7 @@ body.scs-banner-active {
 
 /* Modal Header / Top Toolbar */
 .scs-banner-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -343,7 +344,7 @@ body.scs-banner-active {
 
 .scs-floating-label {
   display: inline-block;
-  font-weight: 700;
+  font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   position: relative;
   z-index: 1;
@@ -458,13 +459,13 @@ body.scs-banner-active {
 /* Modal Body / Media Viewport */
 .scs-banner-body {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: #0b091f;
-  min-height: 240px;
   box-sizing: border-box;
 }
 
@@ -813,16 +814,51 @@ body.scs-banner-active {
 
 /* Modal Footer */
 .scs-banner-footer {
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: rgba(18, 15, 45, 0.95);
+  flex-direction: column;
+  background: rgba(18, 15, 45, 0.98);
   border-top: 1px solid var(--scs-border);
   font-size: 0.8rem;
   color: var(--scs-text-muted);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Footer Caption Strip — Dedicated, prominent on BOTH Desktop and Mobile */
+.scs-banner-footer-caption {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: "Jost", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.4px;
+  padding: 8px 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(90deg, rgba(13, 71, 161, 0.25) 0%, rgba(33, 150, 243, 0.35) 50%, rgba(13, 71, 161, 0.25) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  display: block;
+}
+
+.scs-banner-footer-caption:empty {
+  display: none !important;
+}
+
+/* Footer Controls (Checkbox, Dots, Hint) */
+.scs-banner-footer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  width: 100%;
+  box-sizing: border-box;
   gap: 12px;
-  min-height: 42px;
+  min-height: 38px;
 }
 
 .scs-banner-footer-left {
@@ -991,6 +1027,17 @@ body.scs-banner-active {
     display: none;
   }
 
+  /* Caption responsive styles on tablets & mobile */
+  .scs-banner-footer-caption {
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 6px 12px;
+  }
+
+  .scs-banner-footer-controls {
+    padding: 5px 12px;
+  }
+
   .scs-floating-trigger {
     bottom: 20px;
     left: 16px;
@@ -1009,7 +1056,16 @@ body.scs-banner-active {
   }
 
   .scs-banner-footer {
-    padding: 6px 10px;
+    padding: 0;
+  }
+
+  .scs-banner-footer-caption {
+    font-size: 0.82rem;
+    padding: 5px 8px;
+  }
+
+  .scs-banner-footer-controls {
+    padding: 4px 8px;
   }
 
   .scs-banner-zoom-btn.zoom-fit,

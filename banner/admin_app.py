@@ -32,6 +32,7 @@ BANNER_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BANNER_DIR)
 MEDIA_DIR = os.path.join(BANNER_DIR, 'banner_img')
 CONFIG_JS = os.path.join(BANNER_DIR, 'banner-config.js')
+BANNER_META_JSON = os.path.join(BANNER_DIR, 'banner_meta.json')
 INDEX_HTML = os.path.join(PROJECT_ROOT, 'index.html')
 
 PREVIEW_PORT = 8080
@@ -447,6 +448,8 @@ class BannerAdminApp:
         self.current_preview_photo = None
 
         self.media_items = []
+        self.media_titles = {}       # rel_path -> title string
+        self.current_selected_rel_path = None
         self.settings = {
             "autoOpen": True,
             "slideshow": False,
@@ -821,7 +824,83 @@ class BannerAdminApp:
             wraplength=420,
             justify="left"
         )
-        self.lbl_preview_info.pack(fill=tk.X, pady=(4, 12))
+        self.lbl_preview_info.pack(fill=tk.X, pady=(4, 8))
+
+        # ── Caption / Title Card ──────────────────────────────────────────────
+        caption_header = tk.Frame(scrollable_frame, bg=self.c_panel)
+        caption_header.pack(fill=tk.X, pady=(0, 4))
+
+        tk.Label(
+            caption_header,
+            text="✏️ Media Caption / Title",
+            font=("Segoe UI", 11, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_panel
+        ).pack(side=tk.LEFT)
+
+        caption_card = tk.Frame(
+            scrollable_frame,
+            bg=self.c_card,
+            padx=14,
+            pady=12,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        caption_card.pack(fill=tk.X, pady=(0, 12))
+
+        tk.Label(
+            caption_card,
+            text="Displayed caption for the currently selected media item:",
+            font=("Segoe UI", 8),
+            fg=self.c_muted,
+            bg=self.c_card,
+            anchor="w"
+        ).pack(fill=tk.X, pady=(0, 6))
+
+        caption_entry_wrap = tk.Frame(
+            caption_card,
+            bg=self.c_border,
+            padx=1,
+            pady=1,
+        )
+        caption_entry_wrap.pack(fill=tk.X)
+
+        self.ent_caption = tk.Entry(
+            caption_entry_wrap,
+            font=("Segoe UI", 10),
+            bg=self.c_panel,
+            fg="#FFFFFF",
+            insertbackground="#58A6FF",
+            relief="flat",
+            highlightthickness=0,
+        )
+        self.ent_caption.pack(fill=tk.X, ipady=7, padx=1, pady=1)
+        self.ent_caption.insert(0, "Select a media item to edit its caption")
+        self.ent_caption.config(fg=self.c_muted)
+        self.ent_caption.config(state="disabled")
+
+        def _on_caption_focus_in(event):
+            if self.ent_caption.cget("fg") == self.c_muted:
+                self.ent_caption.delete(0, tk.END)
+                self.ent_caption.config(fg="#FFFFFF")
+
+        def _on_caption_key_release(event):
+            if self.current_selected_rel_path:
+                val = self.ent_caption.get().strip()
+                self.media_titles[self.current_selected_rel_path] = val
+
+        self.ent_caption.bind("<FocusIn>", _on_caption_focus_in)
+        self.ent_caption.bind("<KeyRelease>", _on_caption_key_release)
+
+        tk.Label(
+            caption_card,
+            text="💡 Tip: Caption is shown at the footer of the media viewer for visitors.",
+            font=("Segoe UI", 7, "italic"),
+            fg="#58A6FF",
+            bg=self.c_card,
+            anchor="w"
+        ).pack(fill=tk.X, pady=(6, 0))
 
         # 2. Banner Behavior Settings Card Header
         lbl_cfg_title = tk.Label(
@@ -1000,6 +1079,15 @@ class BannerAdminApp:
         except Exception as e:
             print(f"Error loading settings: {e}")
 
+        # Load media titles from banner_meta.json
+        try:
+            if os.path.exists(BANNER_META_JSON):
+                with open(BANNER_META_JSON, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                self.media_titles = {k: v.get("title", "") for k, v in meta.items() if isinstance(v, dict)}
+        except Exception as e:
+            print(f"Error loading banner_meta.json: {e}")
+
     def save_settings(self):
         if not os.path.exists(CONFIG_JS):
             messagebox.showerror("Error", f"Could not find configuration file:\n{CONFIG_JS}")
@@ -1043,8 +1131,25 @@ class BannerAdminApp:
             replacement_array = f"const bannerMedia = [\n{media_lines}\n];"
             content = re.sub(r"const bannerMedia\s*=\s*\[[\s\S]*?\];", replacement_array, content)
 
+            # Build bannerMeta block (only include items that have a non-empty title)
+            non_empty_titles = {k: v for k, v in self.media_titles.items() if v.strip()}
+            meta_pairs = ",\n".join(
+                [f'    "{k}": {{"title": "{v}"}}' for k, v in non_empty_titles.items()]
+            )
+            meta_block = f"const bannerMeta = {{\n{meta_pairs}\n}};"
+            # Replace existing bannerMeta block or insert before bannerMedia
+            if re.search(r"const bannerMeta\s*=\s*\{[\s\S]*?\};", content):
+                content = re.sub(r"const bannerMeta\s*=\s*\{[\s\S]*?\};", meta_block, content)
+            else:
+                content = content.replace("const bannerMedia =", f"{meta_block}\n\nconst bannerMedia =")
+
             with open(CONFIG_JS, "w", encoding="utf-8") as f:
                 f.write(content)
+
+            # Save banner_meta.json as well
+            meta_json = {k: {"title": v} for k, v in self.media_titles.items() if v.strip()}
+            with open(BANNER_META_JSON, "w", encoding="utf-8") as f:
+                json.dump(meta_json, f, ensure_ascii=False, indent=2)
 
             self.lbl_status.config(text="✅ Settings & media sequence saved to banner-config.js")
             messagebox.showinfo("Success", "Settings and media items saved successfully to banner-config.js!")
@@ -1191,10 +1296,25 @@ class BannerAdminApp:
 
             media_lines = ",\n".join([f'    "{item["rel_path"]}"' for item in self.media_items])
             replacement_array = f"const bannerMedia = [\n{media_lines}\n];"
-            new_content = re.sub(r"const bannerMedia\s*=\s*\[[\s\S]*?\];", replacement_array, content)
+            content = re.sub(r"const bannerMedia\s*=\s*\[[\s\S]*?\];", replacement_array, content)
+
+            # Also ensure bannerMeta block is synchronized
+            non_empty_titles = {k: v for k, v in self.media_titles.items() if v.strip()}
+            meta_pairs = ",\n".join(
+                [f'    "{k}": {{"title": "{v}"}}' for k, v in non_empty_titles.items()]
+            )
+            meta_block = f"const bannerMeta = {{\n{meta_pairs}\n}};"
+            if re.search(r"const bannerMeta\s*=\s*\{[\s\S]*?\};", content):
+                content = re.sub(r"const bannerMeta\s*=\s*\{[\s\S]*?\};", meta_block, content)
+            else:
+                content = content.replace("const bannerMedia =", f"{meta_block}\n\nconst bannerMedia =")
 
             with open(CONFIG_JS, "w", encoding="utf-8") as f:
-                f.write(new_content)
+                f.write(content)
+
+            meta_json = {k: {"title": v} for k, v in self.media_titles.items() if v.strip()}
+            with open(BANNER_META_JSON, "w", encoding="utf-8") as f:
+                json.dump(meta_json, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"Error writing to config: {e}")
 
@@ -1206,7 +1326,19 @@ class BannerAdminApp:
         values = self.tree.item(selected[0], "values")
         idx = int(values[0]) - 1
         item = self.media_items[idx]
+        self.current_selected_rel_path = item["rel_path"]
         self.show_preview(item)
+
+        # Populate the caption entry
+        title_val = self.media_titles.get(item["rel_path"], "")
+        self.ent_caption.config(state="normal")
+        self.ent_caption.delete(0, tk.END)
+        if title_val:
+            self.ent_caption.insert(0, title_val)
+            self.ent_caption.config(fg="#FFFFFF")
+        else:
+            self.ent_caption.insert(0, "")
+            self.ent_caption.config(fg="#FFFFFF")
 
     def show_preview(self, item):
         fn = item["filename"]

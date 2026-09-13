@@ -37,6 +37,10 @@ const bannerSettings = {
 };
 
 // Media Items to Display
+const bannerMeta = {
+    "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg": {"title": "ECA_Program_Pic_1"}
+};
+
 const bannerMedia = [
     "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg",
     "banner/banner_img/2083_05_26_ECA_Program_IMG_2.jpeg",

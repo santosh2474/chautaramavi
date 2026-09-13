@@ -13,6 +13,7 @@
         constructor() {
             // Configuration & media
             this.mediaList = (typeof bannerMedia !== "undefined" && Array.isArray(bannerMedia)) ? [...bannerMedia] : [];
+            this.meta = (typeof bannerMeta !== "undefined" && typeof bannerMeta === "object") ? bannerMeta : {};
             this.settings = Object.assign({
                 autoOpen: true,
                 slideshow: false,
@@ -61,6 +62,7 @@
             this.closeBtn = null;
             this.dontShowCheckbox = null;
             this.loaderEl = null;
+            this.footerCaptionEl = null;
 
             this.init();
         }
@@ -151,6 +153,13 @@
                 .replace(/\b\w/g, char => char.toUpperCase());
         }
 
+        getTitle(url) {
+            if (this.meta && this.meta[url] && this.meta[url].title) {
+                return this.meta[url].title;
+            }
+            return this.formatTitle(url);
+        }
+
         buildDOM() {
             // 1. Build floating trigger icon (Always visible at left corner)
             let trigger = document.getElementById("scsFloatingTrigger");
@@ -166,7 +175,7 @@
                         <i class="fas fa-bullhorn"></i>
                         <span class="scs-floating-count" id="scsFloatingCount">${this.mediaList.length}</span>
                     </div>
-                    <span class="scs-floating-label">Notices</span>
+                    <span class="scs-floating-label">Recent Events/Notices</span>
                 `;
                 document.body.appendChild(trigger);
             }
@@ -188,7 +197,7 @@
                         <!-- Top Toolbar / Header -->
                         <div class="scs-banner-header">
                             <div class="scs-banner-header-left">
-                                <span class="scs-banner-badge"><i class="fas fa-bullhorn"></i> Notice</span>
+                                <span class="scs-banner-badge"><i class="fas fa-bullhorn"></i>Events/Notices</span>
                                 <span class="scs-banner-counter" id="scsBannerCounter">1 / 1</span>
                                 <span class="scs-banner-title" id="scsBannerTitle">Announcement</span>
                             </div>
@@ -236,18 +245,24 @@
 
                         <!-- Bottom Bar / Footer -->
                         <div class="scs-banner-footer">
-                            <div class="scs-banner-footer-left">
-                                <label class="scs-banner-checkbox-label">
-                                    <input type="checkbox" id="scsDontShowAgain">
-                                    <span>Don't show again today</span>
-                                </label>
-                            </div>
+                            <!-- Prominent Media Title / Caption Strip -->
+                            <div class="scs-banner-footer-caption" id="scsBannerFooterCaption"></div>
 
-                            <!-- Indicator Dots -->
-                            <div class="scs-banner-dots" id="scsBannerDots"></div>
+                            <!-- Footer Navigation & Controls Row -->
+                            <div class="scs-banner-footer-controls">
+                                <div class="scs-banner-footer-left">
+                                    <label class="scs-banner-checkbox-label">
+                                        <input type="checkbox" id="scsDontShowAgain">
+                                        <span>Don't show again today</span>
+                                    </label>
+                                </div>
 
-                            <div class="scs-banner-footer-hint">
-                                <span id="scsFooterHint"><i class="fas fa-mouse"></i> Scroll or drag to zoom & pan</span>
+                                <!-- Indicator Dots -->
+                                <div class="scs-banner-dots" id="scsBannerDots"></div>
+
+                                <div class="scs-banner-footer-hint">
+                                    <span id="scsFooterHint"><i class="fas fa-mouse"></i> Scroll or drag to zoom & pan</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -273,6 +288,7 @@
             this.dontShowCheckbox = document.getElementById("scsDontShowAgain");
             this.loaderEl = document.getElementById("scsBannerLoader");
             this.footerHintEl = document.getElementById("scsFooterHint");
+            this.footerCaptionEl = document.getElementById("scsBannerFooterCaption");
 
             this.buildDots();
         }
@@ -510,9 +526,14 @@
             // Counter
             this.counterEl.textContent = `${this.currentIndex + 1} / ${this.mediaList.length}`;
             
-            // Title
-            this.titleEl.textContent = this.formatTitle(currentMedia);
-            this.titleEl.title = this.titleEl.textContent;
+            // Title (header) + footer caption
+            const resolvedTitle = this.getTitle(currentMedia);
+            this.titleEl.textContent = resolvedTitle;
+            this.titleEl.title = resolvedTitle;
+            if (this.footerCaptionEl) {
+                this.footerCaptionEl.textContent = resolvedTitle;
+                this.footerCaptionEl.style.display = resolvedTitle ? "block" : "none";
+            }
 
             // Nav buttons state (if only 1 item, disable both)
             if (this.mediaList.length <= 1) {
