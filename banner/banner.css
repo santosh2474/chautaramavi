@@ -1,0 +1,1089 @@
+/* ==========================================================================
+   Shree Chautara Secondary School - Responsive Banner / Popup Media Viewer
+   Namespace: scs-banner-*
+   Compatible with Bootstrap 4 and mobile/desktop viewports
+   ========================================================================== */
+
+:root {
+  --scs-primary: #2878EB;
+  --scs-primary-hover: #1c62c9;
+  --scs-dark: #120F2D;
+  --scs-dark-surface: #1B1839;
+  --scs-light: #ECF4FF;
+  --scs-text-muted: #A3ADC2;
+  --scs-border: rgba(255, 255, 255, 0.12);
+  --scs-radius: 12px;
+  --scs-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --scs-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Prevent body scrolling when modal is active */
+body.scs-banner-active {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Overlay Backdrop */
+.scs-banner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 12, 26, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.scs-banner-overlay.scs-show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal Window */
+.scs-banner-modal {
+  position: relative;
+  background: var(--scs-dark-surface);
+  border: 1px solid var(--scs-border);
+  border-radius: var(--scs-radius);
+  box-shadow: var(--scs-shadow);
+  display: flex;
+  flex-direction: column;
+  max-width: 95vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  overflow: hidden;
+  transform: scale(0.92) translateY(10px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, height 0.25s ease, max-width 0.25s ease;
+  font-family: "Jost", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #ffffff;
+}
+
+.scs-banner-overlay.scs-show .scs-banner-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Intelligent Adaptive Sizing */
+.scs-banner-modal.scs-mode-image-portrait {
+  width: 92vw;
+  max-width: 540px;
+  height: auto;
+  max-height: 88vh;
+}
+
+.scs-banner-modal.scs-mode-image-landscape {
+  width: 92vw;
+  max-width: 960px;
+  height: auto;
+  max-height: 88vh;
+}
+
+.scs-banner-modal.scs-mode-image-square {
+  width: 90vw;
+  max-width: 680px;
+  height: auto;
+  max-height: 86vh;
+}
+
+.scs-banner-modal.scs-mode-video {
+  width: 92vw;
+  max-width: 960px;
+  height: auto;
+  max-height: 88vh;
+}
+
+.scs-banner-modal.scs-mode-video-portrait {
+  width: 90vw;
+  max-width: 480px;
+  height: auto;
+  max-height: 88vh;
+}
+
+.scs-banner-modal.scs-mode-pdf {
+  width: 94vw;
+  max-width: 1040px;
+  height: 90vh;
+}
+
+/* Modal Header / Top Toolbar */
+.scs-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(18, 15, 45, 0.95);
+  border-bottom: 1px solid var(--scs-border);
+  z-index: 10;
+  gap: 12px;
+  min-height: 52px;
+  box-sizing: border-box;
+}
+
+.scs-banner-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.scs-banner-badge {
+  background: var(--scs-primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.scs-banner-counter {
+  font-size: 0.85rem;
+  color: var(--scs-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.scs-banner-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.scs-banner-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+/* Button Styling */
+.scs-banner-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--scs-border);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: var(--scs-transition);
+  user-select: none;
+  line-height: 1;
+  min-height: 32px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.scs-banner-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+}
+
+.scs-banner-btn:active {
+  transform: scale(0.96);
+}
+
+.scs-banner-btn-primary {
+  background: var(--scs-primary);
+  border-color: var(--scs-primary);
+}
+
+.scs-banner-btn-primary:hover {
+  background: var(--scs-primary-hover);
+  border-color: var(--scs-primary-hover);
+}
+
+.scs-banner-btn-close {
+  background: rgba(241, 77, 93, 0.15);
+  border: 1px solid rgba(241, 77, 93, 0.3);
+  color: #ff6b7a;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1.25rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.scs-banner-btn-close:hover {
+  background: #f14d5d;
+  color: #ffffff;
+  border-color: #f14d5d;
+}
+
+/* Fullscreen Modal Override */
+.scs-banner-modal:fullscreen,
+.scs-banner-modal:-webkit-full-screen,
+.scs-banner-modal:-moz-full-screen,
+.scs-banner-modal:-ms-fullscreen {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+/* Floating Notice Trigger Icon (Always visible on page) */
+.scs-floating-trigger {
+  position: fixed;
+  bottom: 26px;
+  left: 24px;
+  z-index: 99998;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 50%, #0a3880 100%);
+  color: #ffffff !important;
+  padding: 11px 20px;
+  border-radius: 50px;
+  box-shadow: 
+    0 8px 24px -2px rgba(13, 71, 161, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: "Jost", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  user-select: none;
+  text-decoration: none !important;
+  overflow: visible;
+}
+
+/* Pulsing animated radar ripple ring behind the button */
+.scs-floating-trigger::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 54px;
+  background: radial-gradient(circle, rgba(33, 150, 243, 0.4) 0%, rgba(21, 101, 192, 0) 72%);
+  z-index: -1;
+  opacity: 0.8;
+  animation: scs-radar-pulse 2.8s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Shimmer shine overlay across the button */
+.scs-floating-trigger::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  border-radius: 50px;
+  animation: scs-shimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.scs-floating-trigger:hover {
+  transform: translateY(-4px) scale(1.04);
+  background: linear-gradient(135deg, #2196f3 0%, #1565c0 50%, #0d47a1 100%);
+  box-shadow: 
+    0 14px 32px -2px rgba(21, 101, 192, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.22),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #ffffff !important;
+}
+
+.scs-floating-trigger:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow: 0 4px 14px rgba(13, 71, 161, 0.4);
+}
+
+.scs-floating-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  color: #ffffff;
+}
+
+.scs-floating-icon-wrap .fa-bullhorn {
+  display: inline-block;
+  transform-origin: 20% 80%;
+  animation: scs-ring-bullhorn 4.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.scs-floating-label {
+  display: inline-block;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+/* Modern Notification Badge Counter */
+.scs-floating-count {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff3366 0%, #e60039 100%);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  box-shadow: 
+    0 2px 6px rgba(230, 0, 57, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid #ffffff;
+  z-index: 2;
+  animation: scs-badge-bounce 4.5s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes scs-radar-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.32);
+    opacity: 0;
+  }
+}
+
+@keyframes scs-shimmer {
+  0%, 75% {
+    left: -120%;
+  }
+  85%, 100% {
+    left: 200%;
+  }
+}
+
+@keyframes scs-ring-bullhorn {
+  0%, 82%, 100% { transform: rotate(0deg); }
+  85% { transform: rotate(-16deg) scale(1.1); }
+  89% { transform: rotate(14deg) scale(1.1); }
+  93% { transform: rotate(-10deg); }
+  96% { transform: rotate(6deg); }
+  98% { transform: rotate(0deg); }
+}
+
+@keyframes scs-badge-bounce {
+  0%, 82%, 100% { transform: scale(1); }
+  85% { transform: scale(1.22); }
+  89% { transform: scale(0.95); }
+  93% { transform: scale(1.12); }
+  96% { transform: scale(1); }
+}
+
+/* Image Zoom Toolbar */
+.scs-banner-zoom-toolbar {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--scs-border);
+}
+
+.scs-banner-zoom-toolbar.scs-active {
+  display: flex;
+}
+
+.scs-banner-zoom-btn {
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+  padding: 5px 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: var(--scs-transition);
+}
+
+.scs-banner-zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.scs-banner-zoom-level {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--scs-text-muted);
+  min-width: 42px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Modal Body / Media Viewport */
+.scs-banner-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0b091f;
+  min-height: 240px;
+  box-sizing: border-box;
+}
+
+/* Media Elements */
+.scs-banner-media-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Image styling & pan/zoom */
+.scs-banner-image-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.scs-banner-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transform-origin: center center;
+  transition: transform 0.12s ease-out;
+  user-select: none;
+  -webkit-user-drag: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+.scs-banner-img.scs-dragging {
+  cursor: grabbing !important;
+  transition: none !important;
+}
+
+/* ============================================================
+   Custom Video Player
+   ============================================================ */
+
+/* Wrapper: video on top, custom controls bar below */
+.scs-banner-video-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: #000;
+  overflow: hidden;
+}
+
+/* The <video> element fills remaining height above the controls */
+.scs-banner-video {
+  flex: 1;
+  min-height: 0;        /* KEY: lets flex shrink below intrinsic video height */
+  max-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  object-fit: contain;  /* preserves aspect ratio, no zoom/crop */
+  background: #000;
+  cursor: pointer;
+  outline: none;
+  display: block;
+}
+
+/* ── Controls Bar ────────────────────────────────────────── */
+.scs-video-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(10,8,28,0.95) 0%, rgba(10,8,28,0.75) 100%);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  min-height: 52px;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+/* Generic icon button inside controls */
+.scs-video-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.scs-video-btn:hover {
+  background: var(--scs-primary);
+  border-color: var(--scs-primary);
+  transform: scale(1.1);
+}
+
+.scs-video-btn:active {
+  transform: scale(0.95);
+}
+
+/* Play/Pause: slightly larger */
+.scs-video-play {
+  width: 38px;
+  height: 38px;
+  font-size: 0.95rem;
+  background: var(--scs-primary);
+  border-color: var(--scs-primary);
+}
+
+.scs-video-play:hover {
+  background: var(--scs-primary-hover);
+  border-color: var(--scs-primary-hover);
+}
+
+/* Time display */
+.scs-video-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+  min-width: 88px;
+}
+
+/* Progress track (clickable seek bar) */
+.scs-video-progress-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: height 0.15s ease;
+}
+
+.scs-video-progress-track:hover {
+  height: 8px;
+}
+
+.scs-video-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--scs-primary);
+  border-radius: 99px;
+  pointer-events: none;
+  transition: width 0.1s linear;
+}
+
+.scs-video-progress-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 13px;
+  height: 13px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  pointer-events: all;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.scs-video-progress-track:hover .scs-video-progress-thumb {
+  opacity: 1;
+}
+
+/* Mute button */
+.scs-video-mute {
+  flex-shrink: 0;
+}
+
+/* Volume slider */
+.scs-video-volume {
+  width: 72px;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--scs-primary);
+}
+
+.scs-video-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+
+.scs-video-volume::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+
+/* ── Responsive: hide volume slider on very small screens ── */
+@media (max-width: 480px) {
+  .scs-video-volume {
+    display: none;
+  }
+  .scs-video-time {
+    min-width: 72px;
+    font-size: 0.7rem;
+  }
+  .scs-video-controls {
+    padding: 6px 8px;
+    gap: 6px;
+    min-height: 42px;
+  }
+}
+
+/* ── Video Mode: prevent flex-grow from over-expanding the video ── */
+/* Let the video determine the height naturally based on its aspect ratio. */
+.scs-banner-modal.scs-mode-video .scs-banner-body,
+.scs-banner-modal.scs-mode-video-portrait .scs-banner-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.scs-banner-modal.scs-mode-video .scs-banner-media-container,
+.scs-banner-modal.scs-mode-video-portrait .scs-banner-media-container {
+  height: auto;
+  overflow: visible;
+}
+
+.scs-banner-modal.scs-mode-video .scs-banner-video-wrapper,
+.scs-banner-modal.scs-mode-video-portrait .scs-banner-video-wrapper {
+  height: auto;
+  overflow: visible;
+}
+
+.scs-banner-modal.scs-mode-video .scs-banner-video,
+.scs-banner-modal.scs-mode-video-portrait .scs-banner-video {
+  flex: none;
+  width: 100%;
+  height: auto;
+  max-height: calc(88vh - 140px); /* viewport minus header + footer + controls bar */
+}
+
+/* PDF Styling */
+.scs-banner-pdf-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #2a2a2e;
+}
+
+.scs-banner-pdf-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+  background: #fff;
+}
+
+.scs-banner-pdf-fallback {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  color: #fff;
+  height: 100%;
+}
+
+/* Navigation Arrow Buttons */
+.scs-banner-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(18, 15, 45, 0.75);
+  border: 1px solid var(--scs-border);
+  color: #ffffff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 20;
+  backdrop-filter: blur(4px);
+  transition: var(--scs-transition);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.scs-banner-nav:hover {
+  background: var(--scs-primary);
+  color: #ffffff;
+  border-color: var(--scs-primary);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.scs-banner-nav.prev {
+  left: 14px;
+}
+
+.scs-banner-nav.next {
+  right: 14px;
+}
+
+.scs-banner-nav:disabled,
+.scs-banner-nav.scs-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Modal Footer */
+.scs-banner-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(18, 15, 45, 0.95);
+  border-top: 1px solid var(--scs-border);
+  font-size: 0.8rem;
+  color: var(--scs-text-muted);
+  gap: 12px;
+  min-height: 42px;
+}
+
+.scs-banner-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scs-banner-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  color: var(--scs-text-muted);
+}
+
+.scs-banner-checkbox-label:hover {
+  color: #ffffff;
+}
+
+.scs-banner-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--scs-text-muted);
+}
+
+/* Loading Spinner */
+.scs-banner-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--scs-primary);
+  border-radius: 50%;
+  animation: scs-spin 0.8s linear infinite;
+  z-index: 5;
+  display: none;
+}
+
+.scs-banner-loader.scs-active {
+  display: block;
+}
+
+@keyframes scs-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Small Indicator Dots (Slide Thumbnails / Pagers) */
+.scs-banner-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.scs-banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: var(--scs-transition);
+}
+
+.scs-banner-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.scs-banner-dot.scs-active {
+  background: var(--scs-primary);
+  width: 18px;
+  border-radius: 4px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .scs-banner-overlay {
+    padding: 8px;
+  }
+  
+  .scs-banner-modal {
+    max-width: 98vw;
+    max-height: 94vh;
+    border-radius: 8px;
+  }
+
+  .scs-banner-modal.scs-mode-image-portrait,
+  .scs-banner-modal.scs-mode-image-landscape,
+  .scs-banner-modal.scs-mode-image-square {
+    width: 96vw;
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .scs-banner-modal.scs-mode-image-portrait .scs-banner-body,
+  .scs-banner-modal.scs-mode-image-landscape .scs-banner-body,
+  .scs-banner-modal.scs-mode-image-square .scs-banner-body {
+    flex: 0 1 auto;
+    min-height: 180px;
+    max-height: calc(90vh - 100px);
+  }
+
+  .scs-banner-modal.scs-mode-video,
+  .scs-banner-modal.scs-mode-video-portrait {
+    width: 96vw;
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .scs-banner-modal.scs-mode-pdf {
+    width: 96vw;
+    height: 88vh;
+  }
+
+  .scs-banner-title {
+    display: none;
+  }
+
+  .scs-banner-header-actions {
+    gap: 4px;
+  }
+
+  .scs-banner-btn {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    min-height: 30px;
+  }
+
+  .scs-banner-zoom-toolbar {
+    padding: 1px 2px;
+  }
+
+  .scs-banner-zoom-btn {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+
+  .scs-banner-zoom-level {
+    display: none;
+  }
+
+  .scs-banner-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .scs-banner-nav.prev {
+    left: 8px;
+  }
+
+  .scs-banner-nav.next {
+    right: 8px;
+  }
+
+  .scs-banner-footer-hint {
+    display: none;
+  }
+
+  .scs-floating-trigger {
+    bottom: 20px;
+    left: 16px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    box-shadow: 
+      0 8px 20px -2px rgba(13, 71, 161, 0.5),
+      0 3px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@media (max-width: 480px) {
+  .scs-banner-header {
+    padding: 6px 10px;
+    min-height: 46px;
+  }
+
+  .scs-banner-footer {
+    padding: 6px 10px;
+  }
+
+  .scs-banner-zoom-btn.zoom-fit,
+  .scs-banner-zoom-btn.zoom-reset {
+    display: none;
+  }
+
+  .scs-banner-header-left .scs-banner-badge {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+
+  .scs-banner-btn {
+    padding: 4px 6px;
+  }
+
+  /* Compact Circular Floating Action Button (FAB) on mobile */
+  .scs-floating-trigger {
+    bottom: 18px;
+    left: 16px;
+    padding: 0;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 50%;
+    justify-content: center;
+    box-shadow: 
+      0 8px 22px rgba(13, 71, 161, 0.55),
+      0 3px 8px rgba(0, 0, 0, 0.25),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.65);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .scs-floating-trigger::before {
+    inset: -5px;
+    border-radius: 50%;
+  }
+
+  .scs-floating-trigger::after {
+    border-radius: 50%;
+  }
+
+  .scs-floating-label {
+    display: none;
+  }
+
+  .scs-floating-icon-wrap {
+    font-size: 1.25rem;
+  }
+
+  .scs-floating-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    border-width: 2px;
+    box-shadow: 0 2px 8px rgba(230, 0, 57, 0.65);
+  }
+}
+
+/* ==========================================================================
+   Tawk.to Chat Widget – Keep above the banner overlay at all times
+   ========================================================================== */
+#tawk-bubble-container,
+.tawk-bubble-container,
+#tawkchat-container,
+.tawk-chat-widget,
+.tawk-widget,
+iframe[src*="tawk.to"],
+div[class*="widget-visible"] {
+  z-index: 2147483647 !important;
+}
