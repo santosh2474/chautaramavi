@@ -44,7 +44,7 @@ const bannerMeta = {
     "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg": {"title": "ECA_Program_Pic_1"},
     "banner/banner_img/1000109365.jpg": {"title": "CTEVT परीक्षा - 2083 सञ्चालन सम्बन्धी अत्यन्त जरुरी सूचना"},
     "banner/banner_img/2083_05_26_ECA_Program_IMG_2.jpeg": {"title": "ECA_Program_Pic_2"},
-    "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg": {"title": "ECA_Program_Pic_2"}
+    "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg": {"title": "ECA_Program_Pic_1"}
 };
 
 const bannerMedia = [

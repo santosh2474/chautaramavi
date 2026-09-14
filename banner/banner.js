@@ -456,14 +456,16 @@
                 this.next();
             });
 
-            // "Don't show again" checkbox
+            // "Don't show again today" checkbox
+            // Dismiss is stored when the viewer closes via close().
+            // If the user un-checks, we clear the stored dismissal immediately.
             if (this.dontShowCheckbox) {
                 this.dontShowCheckbox.addEventListener("change", (e) => {
-                    if (e.target.checked) {
-                        this.dismiss();
-                    } else {
+                    if (!e.target.checked) {
                         this.clearDismiss();
                     }
+                    // When checked, dismissal is saved by close() when the user closes the viewer,
+                    // ensuring the media fingerprint is always up-to-date at dismiss time.
                 });
             }
 
