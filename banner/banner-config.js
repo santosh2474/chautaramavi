@@ -20,7 +20,7 @@
 // General Banner Settings
 const bannerSettings = {
     // Master switch: Enable or disable the entire banner media viewer feature on the website
-    enabled: true,
+    enabled: false,
 
     // Automatically open popup when index.html loads
     autoOpen: true,
@@ -39,7 +39,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1789388558345
+    lastUpdated: 1789389728626
 };
 
 // Media Items to Display
