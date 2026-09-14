@@ -1297,6 +1297,16 @@ class BannerAdminApp:
                 content
             )
 
+            now_ms = int(datetime.now().timestamp() * 1000)
+            if re.search(r"lastUpdated\s*:\s*\d+", content):
+                content = re.sub(r"lastUpdated\s*:\s*\d+", f"lastUpdated: {now_ms}", content)
+            else:
+                content = re.sub(
+                    r"const bannerSettings\s*=\s*\{",
+                    f"const bannerSettings = {{\n    lastUpdated: {now_ms},",
+                    content
+                )
+
             media_lines = ",\n".join([f'    "{item["rel_path"]}"' for item in self.media_items])
             replacement_array = f"const bannerMedia = [\n{media_lines}\n];"
             content = re.sub(r"const bannerMedia\s*=\s*\[[\s\S]*?\];", replacement_array, content)
@@ -1480,6 +1490,16 @@ class BannerAdminApp:
                 content = re.sub(r"const bannerMeta\s*=\s*\{[\s\S]*?\};", meta_block, content)
             else:
                 content = content.replace("const bannerMedia =", f"{meta_block}\n\nconst bannerMedia =")
+
+            now_ms = int(datetime.now().timestamp() * 1000)
+            if re.search(r"lastUpdated\s*:\s*\d+", content):
+                content = re.sub(r"lastUpdated\s*:\s*\d+", f"lastUpdated: {now_ms}", content)
+            else:
+                content = re.sub(
+                    r"const bannerSettings\s*=\s*\{",
+                    f"const bannerSettings = {{\n    lastUpdated: {now_ms},",
+                    content
+                )
 
             with open(CONFIG_JS, "w", encoding="utf-8") as f:
                 f.write(content)

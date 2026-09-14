@@ -36,7 +36,10 @@ const bannerSettings = {
 
     // Auto-detect files using server-side PHP (if your hosting supports PHP)
     // If enabled and get_banners.php is found, it will automatically scan banner/banner_img/
-    autoDetectPhp: true
+    autoDetectPhp: true,
+
+    // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
+    lastUpdated: 1773468900000
 };
 
 // Media Items to Display
