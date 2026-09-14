@@ -125,73 +125,109 @@
         }
 
         /**
-         * Compute a fingerprint of the current media list.
-         * Stored as a JSON array of sorted file paths.
+         * Compute a fingerprint string of the current media list.
+         * Stores: sorted paths + count so any addition/removal is detectable.
          */
         getMediaFingerprint() {
-            return JSON.stringify([...this.mediaList].sort());
+            const sorted = [...this.mediaList].sort();
+            return JSON.stringify({ count: sorted.length, items: sorted });
         }
 
         /**
-         * Returns the indices of items that were NOT present in the media list
-         * at the time the user last clicked "Don't show again today".
+         * Returns array of {url, idx} for items NOT in the dismissed fingerprint.
+         *
+         * Special cases handled:
+         *  - No fingerprint at all (first visit, never dismissed) → [] — viewer opens normally.
+         *  - Timestamp exists but NO fingerprint (legacy/old code dismissal) → ALL items returned
+         *    so suppression is broken and everything shows. This ensures existing dismissed
+         *    users are not permanently locked out after the code update.
+         *  - Count changed (items added or removed) → all items not in the old list returned.
          */
         getNewItemsSinceDismissal() {
             try {
+                const dismissedTime = localStorage.getItem("scs_banner_closed_timestamp");
                 const storedFingerprint = localStorage.getItem("scs_banner_dismissed_fingerprint");
-                if (!storedFingerprint) return [];
-                const dismissedList = JSON.parse(storedFingerprint);
-                if (!Array.isArray(dismissedList)) return [];
-                const dismissedSet = new Set(dismissedList);
-                return this.mediaList
+
+                // No dismissal at all — fresh visitor, show normally, nothing is "new"
+                if (!dismissedTime) return [];
+
+                // Dismissed previously but WITHOUT a fingerprint (legacy session before this fix).
+                // We cannot know what was shown, so break suppression entirely → show everything.
+                if (!storedFingerprint) {
+                    return this.mediaList.map((url, idx) => ({ url, idx }));
+                }
+
+                const parsed = JSON.parse(storedFingerprint);
+
+                // Support both old format (plain array) and new format ({count, items})
+                const dismissedItems = Array.isArray(parsed) ? parsed
+                    : (parsed && Array.isArray(parsed.items) ? parsed.items : null);
+
+                if (!dismissedItems) {
+                    // Corrupt fingerprint — break suppression to be safe
+                    return this.mediaList.map((url, idx) => ({ url, idx }));
+                }
+
+                // If the count changed, something was added or removed — find what's new
+                const dismissedSet = new Set(dismissedItems);
+                const newItems = this.mediaList
                     .map((url, idx) => ({ url, idx }))
                     .filter(({ url }) => !dismissedSet.has(url));
+
+                return newItems;
             } catch (e) {
-                return [];
+                // On any error, be safe and break suppression (show everything)
+                return this.mediaList.map((url, idx) => ({ url, idx }));
             }
         }
 
         /**
-         * Returns the index of the first new item, or 0 if none found.
+         * Returns index of the first new item, or 0 fallback.
          */
         getFirstNewItemIndex() {
-            if (this.newItemsSinceDismissal.length > 0) {
-                return this.newItemsSinceDismissal[0].idx;
-            }
-            return 0;
+            return this.newItemsSinceDismissal.length > 0
+                ? this.newItemsSinceDismissal[0].idx
+                : 0;
         }
 
         /**
-         * isDismissedWithoutNewItems returns true ONLY if:
-         * - User clicked "Don't show again today" within the last 24 hours, AND
-         * - No new items have been added to the media list since that dismissal.
-         * If new items were added, we always return false (show the viewer).
+         * Returns true (suppress popup) ONLY when ALL of these are true:
+         *   1. User clicked "Don't show again today" within the past 24 hours
+         *   2. A valid fingerprint was saved at dismiss time
+         *   3. The current media list has NO new items vs that fingerprint
+         *   4. The total count has not changed
+         * Any other situation → returns false → viewer opens.
          */
         isDismissedWithoutNewItems() {
             try {
                 const dismissedTime = localStorage.getItem("scs_banner_closed_timestamp");
-                if (!dismissedTime) return false;
+                if (!dismissedTime) return false;   // Never dismissed
 
                 const oneDayMs = 24 * 60 * 60 * 1000;
-                const now = Date.now();
-                const withinDay = (now - parseInt(dismissedTime, 10)) < oneDayMs;
+                if ((Date.now() - parseInt(dismissedTime, 10)) >= oneDayMs) return false;  // Expired
 
-                if (!withinDay) return false;
+                // No fingerprint = legacy dismissal → never suppress (show everything)
+                const storedFingerprint = localStorage.getItem("scs_banner_dismissed_fingerprint");
+                if (!storedFingerprint) return false;
 
-                // Even within 24 hours: if new items were added, show anyway
-                if (this.newItemsSinceDismissal.length > 0) {
-                    return false;
-                }
+                // New items detected → break suppression
+                if (this.newItemsSinceDismissal.length > 0) return false;
 
-                return true;
+                // Also check the total count hasn't changed (catches removals too)
+                try {
+                    const parsed = JSON.parse(storedFingerprint);
+                    const savedCount = Array.isArray(parsed) ? parsed.length
+                        : (parsed && typeof parsed.count === "number" ? parsed.count : -1);
+                    if (savedCount !== -1 && savedCount !== this.mediaList.length) return false;
+                } catch (e) { return false; }
+
+                return true;  // Truly unchanged within 24 hours → suppress
             } catch (e) {
                 return false;
             }
         }
 
-        /**
-         * Legacy helper kept for compatibility.
-         */
+        /** Legacy alias. */
         isDismissed() {
             return this.isDismissedWithoutNewItems();
         }
@@ -199,9 +235,7 @@
         dismiss() {
             try {
                 localStorage.setItem("scs_banner_closed_timestamp", Date.now().toString());
-                // Store fingerprint of current media list so we can detect new additions later
                 localStorage.setItem("scs_banner_dismissed_fingerprint", this.getMediaFingerprint());
-                // Reset new-items tracking so the trigger badge clears
                 this.newItemsSinceDismissal = [];
                 this.updateFloatingTriggerNewBadge();
             } catch (e) {}
