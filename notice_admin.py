@@ -1,1690 +1,2059 @@
-import tkinter as tk
-from tkinter import messagebox, ttk, filedialog
-from bs4 import BeautifulSoup
 import os
+import sys
+import io
+import re
+import json
 import shutil
 import uuid
+import socket
+import threading
+import socketserver
+import http.server
+import urllib.parse
 import webbrowser
 import subprocess
 import platform
+from datetime import datetime
+import tkinter as tk
+from tkinter import ttk, messagebox, filedialog, simpledialog
+from PIL import Image, ImageTk
+from bs4 import BeautifulSoup
 
-HTML_FILE = "notice.html"
-UPLOAD_FOLDER = "notices"
+try:
+    import qrcode
+    HAS_QRCODE = True
+except ImportError:
+    HAS_QRCODE = False
 
-selected_notice = None
-current_file_path = None
-search_mode = "title"
-is_maximized = True
+try:
+    import pillow_heif
+    HAS_HEIF = True
+except ImportError:
+    HAS_HEIF = False
 
-# -------------------- Global Scaling Configuration --------------------
-SCALING_SETTINGS = {
-    "window_scale": 1.0,
-    "font_scale": 1.0,
-    "padding_scale": 1.0,
-    "button_scale": 1.0,
-    "card_scale": 1.4,
-    "input_scale": 1.0,
-}
 
-# -------------------- Responsive Configuration --------------------
-class ResponsiveConfig:
-    def __init__(self, root):
-        self.root = root
-        self.base_width = 1366
-        self.base_height = 768
-        self.scale_factor = self.calculate_scale_factor()
-        
-    def calculate_scale_factor(self):
-        """Calculate scale factor based on screen resolution"""
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        
-        width_scale = screen_width / self.base_width
-        height_scale = screen_height / self.base_height
-        
-        scale = min(width_scale, height_scale)
-        
-        if scale < 0.7:
-            scale = 0.7
-        elif scale > 1.2:
-            scale = 1.2
-            
-        return scale * SCALING_SETTINGS["window_scale"]
-    
-    def scale(self, value, scale_type="general"):
-        """Scale a value based on screen resolution and scaling settings"""
-        if scale_type == "font":
-            return int(value * self.scale_factor * 0.85 * SCALING_SETTINGS["font_scale"])
-        elif scale_type == "padding":
-            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["padding_scale"])
-        elif scale_type == "button":
-            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["button_scale"])
-        elif scale_type == "card":
-            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["card_scale"])
-        elif scale_type == "input":
-            return int(value * self.scale_factor * 0.9 * SCALING_SETTINGS["input_scale"])
-        else:
-            return int(value * self.scale_factor * 0.9)
-    
-    def font_size(self, base_size):
-        """Get responsive font size"""
-        scaled_size = base_size * self.scale_factor * 0.85 * SCALING_SETTINGS["font_scale"]
-        return max(int(scaled_size), 9)
+# ── File Paths & Constants ──────────────────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HTML_FILE = os.path.join(BASE_DIR, "notice.html")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "notices")
+PREVIEW_PORT = 8082
+MOBILE_UPLOAD_PORT = 8767
 
-# Initialize responsive config early
-temp_root = tk.Tk()
-temp_root.withdraw()
-resp = ResponsiveConfig(temp_root)
-temp_root.destroy()
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.heic', '.heif'}
+DOC_EXTENSIONS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'}
 
-# -------------------- Scaling Settings Dialog --------------------
-def show_scaling_dialog():
-    """Show dialog to adjust scaling settings"""
-    scaling_window = tk.Toplevel(root)
-    scaling_window.title("⚙️ UI Scaling Settings")
-    scaling_window.geometry(f"{resp.scale(500)}x{resp.scale(500)}")
-    scaling_window.configure(bg=COLORS["light"])
-    scaling_window.transient(root)
-    scaling_window.grab_set()
-    
-    scaling_window.update_idletasks()
-    x = (root.winfo_screenwidth() // 2) - (resp.scale(500) // 2)
-    y = (root.winfo_screenheight() // 2) - (resp.scale(500) // 2)
-    scaling_window.geometry(f'{resp.scale(500)}x{resp.scale(500)}+{x}+{y}')
-    
-    # Header
-    header = tk.Frame(scaling_window, bg=COLORS["primary"], height=resp.scale(70))
-    header.pack(fill="x")
-    header.pack_propagate(False)
-    
-    tk.Label(header, text="⚙️ UI Scaling Settings", bg=COLORS["primary"], fg="white",
-             font=("Segoe UI", resp.font_size(16), "bold")).pack(expand=True)
-    
-    # Content
-    content = tk.Frame(scaling_window, bg=COLORS["light"], padx=resp.scale(30), pady=resp.scale(20))
-    content.pack(fill="both", expand=True)
-    
-    # Scaling controls
-    tk.Label(content, text="Adjust UI element sizes:", bg=COLORS["light"], fg=COLORS["dark"],
-             font=("Segoe UI", resp.font_size(12), "bold")).pack(anchor="w", pady=(0, resp.scale(20)))
-    
-    # Create sliders for each scaling setting
-    sliders = {}
-    slider_frame = tk.Frame(content, bg=COLORS["light"])
-    slider_frame.pack(fill="both", expand=True)
-    
-    settings_info = {
-        "window_scale": ("Window Size", 0.5, 1.5, 0.1),
-        "font_scale": ("Font Size", 0.5, 2.0, 0.1),
-        "padding_scale": ("Padding", 0.5, 2.0, 0.1),
-        "button_scale": ("Buttons", 0.5, 2.0, 0.1),
-        "card_scale": ("Notice Cards", 0.5, 2.0, 0.1),
-        "input_scale": ("Input Fields", 0.5, 2.0, 0.1),
+# Badge mapping configuration
+BADGE_CONFIG = {
+    "urgent": {
+        "label": "Urgent",
+        "icon": "🔥",
+        "bg_class": "bg-red-100 text-red-800",
+        "color": "#EF4444",
+        "bg_pill": "#3B1822",
+        "border_pill": "#EF4444"
+    },
+    "important": {
+        "label": "Important",
+        "icon": "⭐",
+        "bg_class": "bg-blue-100 text-blue-800",
+        "color": "#3B82F6",
+        "bg_pill": "#152642",
+        "border_pill": "#3B82F6"
+    },
+    "holiday": {
+        "label": "Holiday",
+        "icon": "🎉",
+        "bg_class": "bg-green-100 text-green-800",
+        "color": "#10B981",
+        "bg_pill": "#0F2E23",
+        "border_pill": "#10B981"
+    },
+    "normal": {
+        "label": "Normal",
+        "icon": "📌",
+        "bg_class": "bg-yellow-100 text-yellow-800",
+        "color": "#F59E0B",
+        "bg_pill": "#33240F",
+        "border_pill": "#F59E0B"
     }
-    
-    for i, (key, (label, min_val, max_val, resolution)) in enumerate(settings_info.items()):
-        frame = tk.Frame(slider_frame, bg=COLORS["light"])
-        frame.pack(fill="x", pady=resp.scale(10))
-        
-        # Label and current value
-        label_frame = tk.Frame(frame, bg=COLORS["light"])
-        label_frame.pack(fill="x")
-        
-        tk.Label(label_frame, text=label, bg=COLORS["light"], fg=COLORS["dark"],
-                 font=("Segoe UI", resp.font_size(10), "bold"), width=15).pack(side="left")
-        
-        value_label = tk.Label(label_frame, text=f"{SCALING_SETTINGS[key]:.1f}x", 
-                              bg=COLORS["light"], fg=COLORS["primary"],
-                              font=("Segoe UI", resp.font_size(10), "bold"))
-        value_label.pack(side="right")
-        
-        # Slider
-        slider = tk.Scale(frame, from_=min_val, to=max_val, resolution=resolution,
-                         orient=tk.HORIZONTAL, length=resp.scale(300),
-                         bg=COLORS["light"], fg=COLORS["dark"],
-                         highlightthickness=0, troughcolor=COLORS["border"],
-                         command=lambda val, k=key, vl=value_label: update_slider_value(k, float(val), vl))
-        slider.set(SCALING_SETTINGS[key])
-        slider.pack(fill="x")
-        sliders[key] = slider
-        
-        # Min/Max labels
-        minmax_frame = tk.Frame(frame, bg=COLORS["light"])
-        minmax_frame.pack(fill="x")
-        
-        tk.Label(minmax_frame, text=f"{min_val:.1f}x", bg=COLORS["light"], fg=COLORS["text_secondary"],
-                 font=("Segoe UI", resp.font_size(8))).pack(side="left")
-        tk.Label(minmax_frame, text=f"{max_val:.1f}x", bg=COLORS["light"], fg=COLORS["text_secondary"],
-                 font=("Segoe UI", resp.font_size(8))).pack(side="right")
-    
-    def update_slider_value(key, value, value_label):
-        SCALING_SETTINGS[key] = value
-        value_label.config(text=f"{value:.1f}x")
-    
-    # Preview button
-    def preview_changes():
-        messagebox.showinfo("Preview", "Apply settings to see changes in the main window.")
-    
-    # Apply button
-    def apply_scaling():
-        # Update responsive config with new scaling
-        resp.scale_factor = resp.calculate_scale_factor()
-        
-        # Rebuild UI with new scaling
-        refresh_ui_scaling()
-        scaling_window.destroy()
-        messagebox.showinfo("Success", "UI scaling applied successfully!")
-    
-    # Reset button
-    def reset_scaling():
-        for key in SCALING_SETTINGS:
-            SCALING_SETTINGS[key] = 1.0
-            sliders[key].set(1.0)
-    
-    # Button frame
-    button_frame = tk.Frame(content, bg=COLORS["light"])
-    button_frame.pack(fill="x", pady=resp.scale(20))
-    
-    create_modern_button(button_frame, "🔍 Preview", preview_changes, COLORS["info"]).pack(side="left", padx=resp.scale(5))
-    create_modern_button(button_frame, "🔄 Reset", reset_scaling, COLORS["warning"]).pack(side="left", padx=resp.scale(5))
-    create_modern_button(button_frame, "✅ Apply", apply_scaling, COLORS["success"]).pack(side="left", padx=resp.scale(5))
-    create_modern_button(button_frame, "❌ Cancel", scaling_window.destroy, COLORS["danger"]).pack(side="left", padx=resp.scale(5))
-
-# -------------------- Modern Color Scheme --------------------
-COLORS = {
-    "primary": "#4F46E5",      # Indigo
-    "primary_light": "#6366F1",
-    "primary_dark": "#4338CA",
-    "secondary": "#EC4899",    # Pink
-    "success": "#10B981",      # Emerald
-    "warning": "#F59E0B",      # Amber
-    "danger": "#EF4444",       # Red
-    "info": "#3B82F6",         # Blue
-    "dark": "#1F2937",         # Gray-800
-    "dark_light": "#374151",   # Gray-700
-    "light": "#F9FAFB",        # Gray-50
-    "light_dark": "#F3F4F6",   # Gray-100
-    "border": "#E5E7EB",       # Gray-200
-    "text_primary": "#111827", # Gray-900
-    "text_secondary": "#6B7280", # Gray-500
-    "text_light": "#9CA3AF",   # Gray-400
-    "white": "#FFFFFF",
-    "card_bg": "#FFFFFF",
-    "sidebar_bg": "#F8FAFC",
-    "header_bg": "#4F46E5",
-    "header_light": "#5E56F0",
-    "white_transparent": "#FFFFFF",
 }
 
-# Badge colors mapping
-BADGE_COLORS = {
-    "urgent": ("#EF4444", "#FEE2E2", "white"),
-    "important": ("#3B82F6", "#DBEAFE", "white"),
-    "holiday": ("#10B981", "#D1FAE5", "white"),
-    "normal": ("#F59E0B", "#FEF3C7", "#92400E"),
-}
 
-# -------------------- UI Refresh Function --------------------
-def refresh_ui_scaling():
-    """Refresh UI with new scaling settings"""
-    # Destroy current main container
-    global main_container, header, content_frame, left_column, right_column, status_bar
-    main_container.destroy()
-    
-    # Recreate UI with new scaling
-    create_main_ui()
+def get_local_ip():
+    """Detect local LAN IP address reliably."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
 
-# -------------------- Main UI Creation Function --------------------
-def create_main_ui():
-    """Create the main UI with current scaling settings"""
-    global main_container, header, content_frame, left_column, right_column, status_bar
-    global entry_title, text_content, entry_date, entry_badge, file_info_label, remove_file_btn
-    global count_label, status_label, notices_canvas_frame, notices_canvas
-    
-    # Main container with reduced padding for 1366x768
-    main_container = tk.Frame(root, bg=COLORS["light"])
-    main_container.pack(fill="both", expand=True, 
-                       padx=resp.scale(8, "padding"), 
-                       pady=resp.scale(8, "padding"))
 
-    # Header with gradient effect
-    header = tk.Frame(main_container, bg=COLORS["header_bg"], height=resp.scale(80, "card"))
-    header.pack(fill="x", pady=(0, resp.scale(15, "padding")))
-
-    header_content = tk.Frame(header, bg=COLORS["header_bg"])
-    header_content.place(relx=0.5, rely=0.5, anchor="center")
-
-    tk.Label(
-        header_content,
-        text="📢 NOTICE MANAGEMENT SYSTEM",
-        bg=COLORS["header_bg"],
-        fg="white",
-        font=("Segoe UI", resp.font_size(18), "bold")
-    ).pack()
-
-    tk.Label(
-        header_content,
-        text="Professional Notice Management Solution",
-        bg=COLORS["header_bg"],
-        fg="#E0E7FF",
-        font=("Segoe UI", resp.font_size(10))
-    ).pack(pady=(3, 0))
-
-    # Settings button in header
-    settings_btn = tk.Button(header, text="⚙️", command=show_scaling_dialog,
-                           bg=COLORS["primary_light"], fg="white",
-                           font=("Segoe UI", resp.font_size(12), "bold"),
-                           bd=0, relief="flat", cursor="hand2",
-                           padx=resp.scale(10, "button"), pady=resp.scale(5, "button"))
-    settings_btn.place(relx=0.95, rely=0.5, anchor="e")
-
-    # Content frame with two columns
-    content_frame = tk.Frame(main_container, bg=COLORS["light"])
-    content_frame.pack(fill="both", expand=True)
-
-    # Left column - Form
-    left_column = create_card(content_frame)
-    left_column.pack(side="left", fill="both", expand=True, padx=(0, resp.scale(10, "padding")))
-    left_column.pack_propagate(False)
-    left_column.configure(width=resp.scale(400, "card"))  # Adjustable width
-
-    # Left column header
-    left_header = tk.Frame(left_column, bg=COLORS["primary_light"], height=resp.scale(45, "card"))
-    left_header.pack(fill="x")
-
-    tk.Label(
-        left_header,
-        text="📝 Create / Edit Notice",
-        bg=COLORS["primary_light"],
-        fg="white",
-        font=("Segoe UI", resp.font_size(14), "bold")
-    ).pack(expand=True)
-
-    # Form container with scrollbar
-    form_container = tk.Frame(left_column, bg=COLORS["white"])
-    form_container.pack(fill="both", expand=True, 
-                       padx=resp.scale(20, "padding"), 
-                       pady=resp.scale(15, "padding"))
-
-    form_canvas = tk.Canvas(form_container, bg=COLORS["white"], highlightthickness=0)
-    form_scrollbar = ttk.Scrollbar(form_container, orient="vertical", command=form_canvas.yview)
-    form_scrollable = tk.Frame(form_canvas, bg=COLORS["white"])
-
-    form_scrollable.bind(
-        "<Configure>",
-        lambda e: form_canvas.configure(scrollregion=form_canvas.bbox("all"))
-    )
-
-    form_canvas.create_window((0, 0), window=form_scrollable, anchor="nw")
-    form_canvas.configure(yscrollcommand=form_scrollbar.set)
-
-    form_canvas.pack(side="left", fill="both", expand=True)
-    form_scrollbar.pack(side="right", fill="y")
-
-    # Form fields
-    def create_form_label(text):
-        return tk.Label(
-            form_scrollable,
-            text=text,
-            bg=COLORS["white"],
-            fg=COLORS["dark"],
-            font=("Segoe UI", resp.font_size(10), "bold"),
-            anchor="w"
+def convert_heic_to_jpeg(heic_data):
+    """Convert HEIC image data to JPEG bytes."""
+    if not HAS_HEIF:
+        return None
+    try:
+        heif_file = pillow_heif.read_heif(heic_data)
+        img = Image.frombytes(
+            heif_file.mode,
+            heif_file.size,
+            heif_file.data,
+            "raw",
+            heif_file.mode,
+            heif_file.stride
         )
-
-    def create_form_entry():
-        entry = tk.Entry(
-            form_scrollable,
-            font=("Segoe UI", resp.font_size(10)),
-            bd=1,
-            relief="solid",
-            highlightbackground=COLORS["border"],
-            highlightthickness=1,
-            highlightcolor=COLORS["primary"],
-            bg=COLORS["light"],
-            fg=COLORS["dark"],
-            insertbackground=COLORS["primary"]
-        )
-        enable_paste(entry)
-        return entry
-
-    # Title
-    create_form_label("Notice Title").pack(fill="x", 
-                                          pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
-    entry_title = create_form_entry()
-    entry_title.pack(fill="x", pady=(0, resp.scale(12, "padding")), 
-                    ipady=resp.scale(6, "input"))
-
-    # Content
-    create_form_label("Notice Content").pack(fill="x", 
-                                            pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
-    text_content = tk.Text(
-        form_scrollable,
-        height=5,
-        font=("Segoe UI", resp.font_size(10)),
-        bd=1,
-        relief="solid",
-        highlightbackground=COLORS["border"],
-        highlightthickness=1,
-        highlightcolor=COLORS["primary"],
-        bg=COLORS["light"],
-        fg=COLORS["dark"],
-        wrap="word",
-        insertbackground=COLORS["primary"]
-    )
-    text_content.pack(fill="x", pady=(0, resp.scale(12, "padding")))
-    enable_paste(text_content)
-
-    # Date
-    create_form_label("Date (BS Format)").pack(fill="x", 
-                                              pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
-    tk.Label(
-        form_scrollable,
-        text="Format: YYYY/MM/DD",
-        bg=COLORS["white"],
-        fg=COLORS["text_light"],
-        font=("Segoe UI", resp.font_size(8))
-    ).pack(anchor="w")
-    entry_date = create_form_entry()
-    entry_date.pack(fill="x", 
-                   pady=(resp.scale(4, "padding"), resp.scale(12, "padding")), 
-                   ipady=resp.scale(6, "input"))
-
-    # Badge
-    create_form_label("Badge Type").pack(fill="x", 
-                                        pady=(resp.scale(8, "padding"), resp.scale(4, "padding")))
-    entry_badge = create_form_entry()
-    entry_badge.pack(fill="x", pady=(0, resp.scale(4, "padding")), 
-                    ipady=resp.scale(6, "input"))
-    entry_badge.insert(0, "Normal")
-    tk.Label(
-        form_scrollable,
-        text="Options: Urgent, Holiday, Important, Normal",
-        bg=COLORS["white"],
-        fg=COLORS["text_light"],
-        font=("Segoe UI", resp.font_size(8))
-    ).pack(anchor="w")
-
-    # File Upload Section
-    create_form_label("Attach File (Optional)").pack(fill="x", 
-                                                    pady=(resp.scale(20, "padding"), resp.scale(4, "padding")))
-
-    file_upload_frame = tk.Frame(form_scrollable, bg=COLORS["white"])
-    file_upload_frame.pack(fill="x", pady=(0, resp.scale(8, "padding")))
-
-    upload_btn = create_modern_button(file_upload_frame, "📁 Choose File", browse_file, COLORS["primary"])
-    upload_btn.config(padx=resp.scale(12, "button"), pady=resp.scale(6, "button"), 
-                     font=("Segoe UI", resp.font_size(9), "bold"))
-    upload_btn.pack(side="left")
-
-    remove_file_btn = tk.Button(
-        file_upload_frame,
-        text="Remove",
-        command=remove_selected_file,
-        bg=COLORS["danger"],
-        fg="white",
-        font=("Segoe UI", resp.font_size(9), "bold"),
-        padx=resp.scale(12, "button"),
-        pady=resp.scale(5, "button"),
-        relief="flat",
-        cursor="hand2",
-        state="disabled",
-        bd=0
-    )
-    remove_file_btn.pack(side="left", padx=(resp.scale(8, "padding"), 0))
-
-    file_info_label = tk.Label(
-        form_scrollable,
-        text="📁 No file selected",
-        bg=COLORS["white"],
-        fg=COLORS["text_light"],
-        font=("Segoe UI", resp.font_size(9)),
-        anchor="w"
-    )
-    file_info_label.pack(fill="x", pady=(resp.scale(4, "padding"), resp.scale(20, "padding")))
-
-    # Action buttons grid - compact for 1366x768
-    action_frame = tk.Frame(left_column, bg=COLORS["white"])
-    action_frame.pack(fill="x", pady=(0, resp.scale(20, "padding")), 
-                     padx=resp.scale(20, "padding"))
-
-    btn_grid = tk.Frame(action_frame, bg=COLORS["white"])
-    btn_grid.pack(fill="x")
-
-    buttons = [
-        ("➕ Add", submit_notice, COLORS["success"]),
-        ("🔍 Search", show_search_dialog, COLORS["primary"]),
-        ("✏️ Edit", edit_notice, COLORS["warning"]),
-        ("🗑 Delete", remove_notice, COLORS["danger"]),
-        ("🔄 Refresh", refresh_notices_list, COLORS["info"]),
-        ("🧹 Clear", clear_form, COLORS["text_secondary"]),
-    ]
-
-    for i, (text, command, color) in enumerate(buttons):
-        btn = create_modern_button(btn_grid, text, command, color)
-        btn.config(padx=resp.scale(12, "button"), pady=resp.scale(8, "button"), 
-                  font=("Segoe UI", resp.font_size(9), "bold"))
-        btn.grid(row=i//2, column=i%2, 
-                padx=resp.scale(3, "padding"), pady=resp.scale(3, "padding"), 
-                sticky="nsew")
-        btn_grid.grid_columnconfigure(i%2, weight=1)
-        btn_grid.grid_rowconfigure(i//2, weight=1)
-
-    # Folder info
-    folder_info = tk.Frame(left_column, bg=COLORS["sidebar_bg"], height=resp.scale(60, "card"))
-    folder_info.pack(fill="x", side="bottom")
-
-    folder_path = os.path.abspath(UPLOAD_FOLDER)
-    tk.Label(
-        folder_info,
-        text=f"📁 Files are saved to:\n{folder_path}",
-        bg=COLORS["sidebar_bg"],
-        fg=COLORS["text_secondary"],
-        font=("Segoe UI", resp.font_size(8)),
-        wraplength=resp.scale(350, "card"),
-        justify="left"
-    ).pack(pady=resp.scale(12, "padding"), padx=resp.scale(15, "padding"))
-
-    # Right column - Notices List
-    right_column = create_card(content_frame)
-    right_column.pack(side="right", fill="both", expand=True)
-
-    # Right column header
-    right_header = tk.Frame(right_column, bg=COLORS["sidebar_bg"], height=resp.scale(70, "card"))
-    right_header.pack(fill="x")
-
-    header_content = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
-    header_content.pack(expand=True, padx=resp.scale(25, "padding"))
-
-    tk.Label(
-        header_content,
-        text="📋 All Notices",
-        bg=COLORS["sidebar_bg"],
-        fg=COLORS["dark"],
-        font=("Segoe UI", resp.font_size(14), "bold")
-    ).pack(side="left")
-
-    count_label = tk.Label(
-        header_content,
-        text="(0 notices)",
-        bg=COLORS["sidebar_bg"],
-        fg=COLORS["text_secondary"],
-        font=("Segoe UI", resp.font_size(10))
-    )
-    count_label.pack(side="left", padx=(resp.scale(8, "padding"), 0))
-
-    # Filter frame
-    filter_frame = tk.Frame(right_header, bg=COLORS["sidebar_bg"])
-    filter_frame.pack(fill="x", padx=resp.scale(25, "padding"), pady=(0, resp.scale(8, "padding")))
-
-    tk.Label(
-        filter_frame,
-        text="Click on any notice to edit | Double-click to open files",
-        bg=COLORS["sidebar_bg"],
-        fg=COLORS["text_secondary"],
-        font=("Segoe UI", resp.font_size(9))
-    ).pack(side="left")
-
-    # Mini refresh button
-    refresh_mini = create_modern_button(filter_frame, "🔄 Refresh", refresh_notices_list, COLORS["primary_light"])
-    refresh_mini.config(padx=resp.scale(8, "button"), pady=resp.scale(3, "button"), 
-                       font=("Segoe UI", resp.font_size(8), "bold"))
-    refresh_mini.pack(side="right")
-
-    # Notices container
-    notices_container = tk.Frame(right_column, bg=COLORS["white"])
-    notices_container.pack(fill="both", expand=True, 
-                          padx=resp.scale(25, "padding"), 
-                          pady=(0, resp.scale(20, "padding")))
-
-    notices_canvas = tk.Canvas(notices_container, bg=COLORS["white"], highlightthickness=0)
-    notices_scrollbar = ttk.Scrollbar(notices_container, orient="vertical", command=notices_canvas.yview)
-    notices_canvas_frame = tk.Frame(notices_canvas, bg=COLORS["white"])
-
-    notices_canvas_frame.bind(
-        "<Configure>",
-        lambda e: notices_canvas.configure(scrollregion=notices_canvas.bbox("all"))
-    )
-
-    notices_canvas.create_window((0, 0), window=notices_canvas_frame, anchor="nw")
-    notices_canvas.configure(yscrollcommand=notices_scrollbar.set)
-
-    notices_canvas.pack(side="left", fill="both", expand=True)
-    notices_scrollbar.pack(side="right", fill="y")
-
-    # Mousewheel scrolling
-    def on_mousewheel(event, canvas):
-        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-    notices_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, notices_canvas))
-    form_canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, form_canvas))
-
-    notices_canvas_frame.bind("<Enter>", lambda e: notices_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, notices_canvas)))
-    notices_canvas_frame.bind("<Leave>", lambda e: notices_canvas.unbind_all("<MouseWheel>"))
-
-    form_scrollable.bind("<Enter>", lambda e: form_canvas.bind_all("<MouseWheel>", lambda ev: on_mousewheel(ev, form_canvas)))
-    form_scrollable.bind("<Leave>", lambda e: form_canvas.unbind_all("<MouseWheel>"))
-
-    # Status bar
-    status_bar = tk.Frame(root, bg=COLORS["dark"], height=resp.scale(35, "card"))
-    status_bar.pack(side="bottom", fill="x")
-
-    status_label = tk.Label(
-        status_bar,
-        text="✅ Ready | Create, edit, and manage notices efficiently",
-        bg=COLORS["dark"],
-        fg="#D1D5DB",
-        font=("Segoe UI", resp.font_size(9))
-    )
-    status_label.pack(side="left", padx=resp.scale(15, "padding"))
-
-    # Version label with scaling info
-    scaling_info = f"UI Scale: {SCALING_SETTINGS['window_scale']:.1f}x"
-    tk.Label(
-        status_bar,
-        text=f"Notice Manager v2.0 | {scaling_info}",
-        bg=COLORS["dark"],
-        fg="#9CA3AF",
-        font=("Segoe UI", resp.font_size(8))
-    ).pack(side="right", padx=resp.scale(15, "padding"))
-
-    # Refresh notices list
-    refresh_notices_list()
-    update_count()
-
-# -------------------- Paste Functionality --------------------
-def enable_paste(widget):
-    """Enable Ctrl+V/Cmd+V paste functionality for a widget"""
-    def paste_text(event=None):
-        try:
-            clipboard_text = widget.clipboard_get()
-            
-            if isinstance(widget, tk.Entry):
-                if widget.selection_present():
-                    widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                widget.insert(tk.INSERT, clipboard_text)
-            
-            elif isinstance(widget, tk.Text):
-                try:
-                    if widget.tag_ranges(tk.SEL):
-                        widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                except:
-                    pass
-                widget.insert(tk.INSERT, clipboard_text)
-            
-            return "break"
-            
-        except tk.TclError:
-            pass
-        except Exception as e:
-            print(f"Paste error: {e}")
-    
-    # Only bind the Ctrl/Cmd+V combinations
-    widget.bind('<Control-v>', paste_text)
-    widget.bind('<Command-v>', paste_text)
-    
-    if isinstance(widget, tk.Entry) or isinstance(widget, tk.Text):
-        menu = tk.Menu(widget, tearoff=0)
-        menu.add_command(label="Cut", 
-                        command=lambda: widget.event_generate("<<Cut>>"))
-        menu.add_command(label="Copy", 
-                        command=lambda: widget.event_generate("<<Copy>>"))
-        menu.add_command(label="Paste", 
-                        command=paste_text)
-        menu.add_separator()
-        menu.add_command(label="Select All", 
-                        command=lambda: widget.select_range(0, tk.END) if isinstance(widget, tk.Entry) else widget.tag_add(tk.SEL, "1.0", tk.END))
-        
-        def show_menu(event):
-            menu.tk_popup(event.x_root, event.y_root)
-        
-        widget.bind("<Button-3>", show_menu)
-
-# -------------------- Core Functions --------------------
-def ensure_upload_folder():
-    """Create upload folder if it doesn't exist"""
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-
-def save_uploaded_file(file_path):
-    """Save uploaded file to notices folder and return the relative path"""
-    ensure_upload_folder()
-    
-    if not file_path or not os.path.exists(file_path):
-        return ""
-    
-    file_ext = os.path.splitext(file_path)[1]
-    original_name = os.path.splitext(os.path.basename(file_path))[0]
-    safe_name = "".join(c for c in original_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-    unique_filename = f"{safe_name}_{uuid.uuid4().hex[:8]}{file_ext}"
-    destination_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-    
-    try:
-        shutil.copy2(file_path, destination_path)
-        relative_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-        return relative_path.replace("\\", "/")
+        out = io.BytesIO()
+        img.save(out, format="JPEG", quality=92)
+        return out.getvalue()
     except Exception as e:
-        messagebox.showerror("Upload Error", f"Failed to save file: {str(e)}")
-        return ""
-
-def open_file(file_path):
-    """Open file using default system application"""
-    if not file_path or not os.path.exists(file_path):
-        messagebox.showwarning("File Not Found", f"The file does not exist or has been deleted.\nPath: {file_path}")
-        return False
-    
-    try:
-        if not os.path.isabs(file_path):
-            file_path = os.path.abspath(file_path)
-        
-        if platform.system() == 'Darwin':
-            subprocess.call(('open', file_path))
-        elif platform.system() == 'Windows':
-            os.startfile(file_path)
-        else:
-            subprocess.call(('xdg-open', file_path))
-        return True
-    except Exception as e:
-        try:
-            webbrowser.open(f"file://{file_path}")
-            return True
-        except:
-            messagebox.showerror("Error", f"Cannot open file: {str(e)}")
-            return False
-
-def load_table():
-    try:
-        if not os.path.exists(HTML_FILE):
-            with open(HTML_FILE, "w", encoding="utf-8") as f:
-                f.write("""<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .badge { 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: bold; 
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .bg-red-100 { background-color: #fee2e2; } .text-red-800 { color: #991b1b; }
-        .bg-blue-100 { background-color: #dbeafe; } .text-blue-800 { color: #1e40af; }
-        .bg-green-100 { background-color: #d1fae5; } .text-green-800 { color: #065f46; }
-        .bg-yellow-100 { background-color: #fef3c7; } .text-yellow-800 { color: #92400e; }
-        .bg-gray-100 { background-color: #f3f4f6; } .text-gray-800 { color: #374151; }
-        .notice-content { 
-            margin-bottom: 10px; 
-            line-height: 1.5;
-        }
-        .download-link { 
-            margin-right: 12px; 
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .download-link:hover {
-            color: #3b82f6;
-        }
-    </style>
-</head>
-<body>
-    <table id="noticeTable">
-        <thead><tr><th>Title</th><th>Content</th><th>Date</th></tr></thead>
-        <tbody></tbody>
-    </table>
-</body>
-</html>""")
-            
-        with open(HTML_FILE, "r", encoding="utf-8") as file:
-            soup = BeautifulSoup(file, "html.parser")
-        
-        table = soup.find("table", id="noticeTable")
-        if not table:
-            table = soup.new_tag("table", id="noticeTable")
-            thead = soup.new_tag("thead")
-            tr = soup.new_tag("tr")
-            for header in ["Title", "Content", "Date"]:
-                th = soup.new_tag("th")
-                th.string = header
-                tr.append(th)
-            thead.append(tr)
-            table.append(thead)
-            tbody = soup.new_tag("tbody")
-            table.append(tbody)
-            soup.body.append(table)
-            
-        tbody = table.find("tbody")
-        if not tbody:
-            tbody = soup.new_tag("tbody")
-            table.append(tbody)
-            
-        return soup, tbody
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to load HTML: {str(e)}")
+        print(f"HEIC conversion error: {e}")
         return None
 
-def save_table(soup):
-    try:
-        with open(HTML_FILE, "w", encoding="utf-8") as file:
-            file.write(str(soup.prettify() if soup else ""))
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to save: {str(e)}")
 
-def create_row(title, content, date_bs, badge, badge_class, file_link):
-    year, month, day = date_bs.split("/")
-    sort_date = f"{year}{month.zfill(2)}{day.zfill(2)}"
-    
-    file_name = os.path.basename(file_link) if file_link else ""
-    
-    badge_icon = ""
-    if badge.lower() == "urgent":
-        badge_icon = "🔥"
-    elif badge.lower() == "important":
-        badge_icon = "⭐"
-    elif badge.lower() == "holiday":
-        badge_icon = "🎉"
-    else:
-        badge_icon = "📌"
-    
-    row_html = f"""
+def parse_multipart(data, boundary):
+    """Parse multipart/form-data bytes. Returns list of (name, filename, content) tuples."""
+    parts = []
+    boundary_bytes = ("--" + boundary).encode()
+    raw_parts = data.split(boundary_bytes)
+
+    for part in raw_parts:
+        if not part or part == b"--\r\n" or part == b"--":
+            continue
+        part = part.lstrip(b"\r\n")
+        if b"\r\n\r\n" not in part:
+            continue
+        headers_raw, _, body = part.partition(b"\r\n\r\n")
+        body = body.rstrip(b"\r\n")
+
+        name = None
+        filename = None
+        headers_str = headers_raw.decode("utf-8", errors="replace")
+        for line in headers_str.splitlines():
+            lower = line.lower()
+            if "content-disposition" in lower:
+                for seg in line.split(";"):
+                    seg = seg.strip()
+                    if seg.startswith("name="):
+                        name = seg[5:].strip('"')
+                    elif seg.startswith("filename="):
+                        filename = seg[9:].strip('"')
+        if name is not None:
+            parts.append((name, filename, body))
+    return parts
+
+
+# ── Mobile Upload Server Handler ─────────────────────────────────────────────
+class MobileNoticeUploadHandler(http.server.BaseHTTPRequestHandler):
+    """Mobile-friendly web UI for uploading notice files/documents from smartphone."""
+
+    app_ref = None
+
+    def log_message(self, format, *args):
+        pass
+
+    def send_json(self, data, code=200):
+        body = json.dumps(data).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/status":
+            self.send_json({"status": "ok", "app": "NoticeAdmin"})
+            return
+
+        html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Notice File Uploader | Shree Chautara Mavi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0F121C;
+    color: #E2E8F0;
+    min-height: 100vh;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    background: #181D2D;
+    border: 1px solid #2E3852;
+    border-radius: 16px;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .school-badge {
+    display: inline-block;
+    background: rgba(40,120,235,0.18);
+    color: #58A6FF;
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 1.35rem; font-weight: 800; color: #FFFFFF; margin-bottom: 6px; }
+  p.sub { font-size: 0.85rem; color: #94A3B8; margin-bottom: 20px; line-height: 1.4; }
+  .drop-zone {
+    border: 2px dashed #2E3852;
+    border-radius: 12px;
+    padding: 28px 16px;
+    text-align: center;
+    background: #20273C;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+  .drop-zone:active { border-color: #2878EB; background: rgba(40,120,235,0.1); }
+  .drop-icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .drop-text { font-size: 0.95rem; font-weight: 600; color: #FFFFFF; }
+  .drop-sub { font-size: 0.75rem; color: #94A3B8; margin-top: 4px; }
+  input[type="file"] { display: none; }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: #2878EB;
+    color: white;
+    box-shadow: 0 4px 14px rgba(40,120,235,0.4);
+    display: block;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { background: #374151; color: #6B7280; box-shadow: none; }
+  .file-list { margin: 16px 0; max-height: 200px; overflow-y: auto; }
+  .file-item {
+    background: #20273C;
+    border: 1px solid #2E3852;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+  .progress-wrap {
+    display: none;
+    margin-top: 16px;
+    background: #20273C;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 10px;
+  }
+  .progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #2878EB, #10B981);
+    transition: width 0.2s;
+  }
+  .msg {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: none;
+    text-align: center;
+    font-weight: 600;
+  }
+  .msg.success { background: rgba(16,185,129,0.2); border: 1px solid #10B981; color: #34D399; }
+  .msg.error { background: rgba(239,68,68,0.2); border: 1px solid #EF4444; color: #F87171; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="school-badge">📢 Shree Chautara Mavi</div>
+  <h1>Notice File Uploader</h1>
+  <p class="sub">Select documents, notice photos, or PDFs from your smartphone to upload directly to the computer's Notice Manager.</p>
+
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="drop-icon">📄</div>
+    <div class="drop-text">Tap to Choose File or Take Photo</div>
+    <div class="drop-sub">PDF, Word, Excel, JPG, PNG, HEIC from camera/gallery</div>
+  </div>
+
+  <input type="file" id="fileInput" multiple accept="*/*" onchange="handleFiles(this.files)">
+
+  <div class="file-list" id="fileList"></div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <button class="btn" id="uploadBtn" disabled onclick="uploadFiles()">Upload to Notice Manager</button>
+
+  <div class="msg" id="msgBox"></div>
+</div>
+
+<script>
+let selectedFiles = [];
+
+function handleFiles(files) {
+  selectedFiles = Array.from(files);
+  const listEl = document.getElementById('fileList');
+  listEl.innerHTML = '';
+  if (selectedFiles.length === 0) {
+    document.getElementById('uploadBtn').disabled = true;
+    return;
+  }
+  selectedFiles.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    const sz = (f.size / (1024*1024)).toFixed(2);
+    item.innerHTML = '<span>📎 ' + f.name + '</span><span style="color:#94A3B8">' + sz + ' MB</span>';
+    listEl.appendChild(item);
+  });
+  document.getElementById('uploadBtn').disabled = false;
+}
+
+function uploadFiles() {
+  if (selectedFiles.length === 0) return;
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+
+  const pWrap = document.getElementById('progressWrap');
+  const pBar = document.getElementById('progressBar');
+  pWrap.style.display = 'block';
+  pBar.style.width = '20%';
+
+  const formData = new FormData();
+  selectedFiles.forEach(f => formData.append('files', f));
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/upload', true);
+
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 100);
+      pBar.style.width = pct + '%';
+    }
+  };
+
+  xhr.onload = function() {
+    pBar.style.width = '100%';
+    const msg = document.getElementById('msgBox');
+    msg.style.display = 'block';
+    if (xhr.status === 200) {
+      msg.className = 'msg success';
+      msg.innerHTML = '✅ Successfully uploaded ' + selectedFiles.length + ' file(s)! Check your computer screen.';
+      document.getElementById('fileList').innerHTML = '';
+      selectedFiles = [];
+      btn.textContent = 'Upload Complete';
+    } else {
+      msg.className = 'msg error';
+      msg.textContent = '❌ Upload failed (' + xhr.status + '). Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Upload to Notice Manager';
+    }
+  };
+
+  xhr.onerror = function() {
+    const msg = document.getElementById('msgBox');
+    msg.style.display = 'block';
+    msg.className = 'msg error';
+    msg.textContent = '❌ Network connection error.';
+    btn.disabled = false;
+    btn.textContent = 'Upload to Notice Manager';
+  };
+
+  xhr.send(formData);
+}
+</script>
+</body>
+</html>
+"""
+        encoded = html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
+
+    def do_POST(self):
+        if self.path != "/upload":
+            self.send_error(404, "Not Found")
+            return
+
+        ctype = self.headers.get("Content-Type", "")
+        if "multipart/form-data" not in ctype:
+            self.send_error(400, "Bad Request: Expected multipart")
+            return
+
+        boundary = None
+        for seg in ctype.split(";"):
+            seg = seg.strip()
+            if seg.startswith("boundary="):
+                boundary = seg[9:].strip('"')
+                break
+
+        if not boundary:
+            self.send_error(400, "Bad Request: Missing boundary")
+            return
+
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            raw_body = self.rfile.read(length)
+            parts = parse_multipart(raw_body, boundary)
+
+            uploaded_names = []
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+            for name, filename, body in parts:
+                if not filename or not body:
+                    continue
+                clean_name = os.path.basename(filename)
+                ext = os.path.splitext(clean_name)[1].lower()
+
+                # HEIC conversion
+                if ext in {".heic", ".heif"}:
+                    conv = convert_heic_to_jpeg(body)
+                    if conv:
+                        body = conv
+                        clean_name = os.path.splitext(clean_name)[0] + ".jpg"
+                        ext = ".jpg"
+
+                base_name = os.path.splitext(clean_name)[0]
+                safe_base = "".join(c for c in base_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                unique_fn = f"{safe_base}_{uuid.uuid4().hex[:8]}{ext}"
+                dest_p = os.path.join(UPLOAD_FOLDER, unique_fn)
+
+                with open(dest_p, "wb") as f:
+                    f.write(body)
+
+                uploaded_names.append(unique_fn)
+
+            if self.app_ref and hasattr(self.app_ref, "on_mobile_upload_success"):
+                self.app_ref.root.after(100, lambda: self.app_ref.on_mobile_upload_success(uploaded_names))
+
+            self.send_json({"status": "ok", "uploaded": uploaded_names})
+        except Exception as e:
+            print(f"Mobile upload handler error: {e}")
+            self.send_json({"status": "error", "message": str(e)}, 500)
+
+
+# ── Main Notice Admin App ───────────────────────────────────────────────────
+class NoticeAdminApp:
+    """Modern, responsive, feature-rich admin suite for Shree Chautara Mavi Notice Portal."""
+
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Shree Chautara Mavi - Notice Management Suite")
+        self.root.geometry("1280x760")
+        self.root.minsize(980, 600)
+
+        # State tracking
+        self.notices = []
+        self.selected_notice_tuple = None  # (title, date_bs)
+        self.current_attached_file_path = None
+        self.preview_thumbnail_photo = None
+        self.qr_photo = None
+        self.active_filter_badge = "all"
+
+        # Servers
+        self.preview_httpd = None
+        self.preview_thread = None
+        self.preview_running = False
+
+        self.mobile_httpd = None
+        self.mobile_thread = None
+        self.mobile_running = False
+
+        self.init_directories()
+        self.setup_styles()
+        self.create_widgets()
+        self.setup_keyboard_shortcuts()
+        self.refresh_notices()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def init_directories(self):
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        if not os.path.exists(HTML_FILE):
+            self.create_default_html_file()
+
+    def create_default_html_file(self):
+        default_html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notice Portal | Chautara Mavi</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-50">
+<div class="container mx-auto p-4">
+  <table id="noticeTable" class="w-full">
+    <thead>
+      <tr><th>Title</th><th>Content</th><th>Date (BS)</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+</body>
+</html>"""
+        with open(HTML_FILE, "w", encoding="utf-8") as f:
+            f.write(default_html)
+
+    def setup_styles(self):
+        self.style = ttk.Style()
+        try:
+            self.style.theme_use("clam")
+        except Exception:
+            pass
+
+        # Color Theme: Deep dark obsidian & modern sapphire
+        self.c_bg = "#0F121C"
+        self.c_panel = "#181D2D"
+        self.c_card = "#20273C"
+        self.c_card_active = "#26324D"
+        self.c_border = "#2E3852"
+        self.c_text = "#E2E8F0"
+        self.c_muted = "#94A3B8"
+        self.c_primary = "#2878EB"
+        self.c_primary_hover = "#1C62C9"
+        self.c_success = "#10B981"
+        self.c_danger = "#EF4444"
+        self.c_warning = "#F59E0B"
+        self.c_purple = "#8B5CF6"
+
+        self.root.configure(bg=self.c_bg)
+
+        # Scrollbar Styling
+        self.style.configure(
+            "Notice.Vertical.TScrollbar",
+            background=self.c_card,
+            troughcolor=self.c_panel,
+            bordercolor=self.c_panel,
+            arrowcolor=self.c_muted
+        )
+
+    def create_widgets(self):
+        self.root.grid_rowconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+
+        # ── 1. Top Header Toolbar ───────────────────────────────────────────
+        self.header_frame = tk.Frame(self.root, bg=self.c_panel, height=65, padx=20, pady=10)
+        self.header_frame.grid(row=0, column=0, sticky="ew")
+
+        title_box = tk.Frame(self.header_frame, bg=self.c_panel)
+        title_box.pack(side=tk.LEFT, fill=tk.Y)
+
+        lbl_school = tk.Label(
+            title_box,
+            text="📢 Shree Chautara Secondary School",
+            font=("Segoe UI", 13, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_panel
+        )
+        lbl_school.pack(anchor="w")
+
+        lbl_sub = tk.Label(
+            title_box,
+            text="Notice & Announcement Portal Management Suite (HTML & DataTables)",
+            font=("Segoe UI", 9),
+            fg=self.c_muted,
+            bg=self.c_panel
+        )
+        lbl_sub.pack(anchor="w")
+
+        btn_box = tk.Frame(self.header_frame, bg=self.c_panel)
+        btn_box.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.btn_preview_srv = tk.Button(
+            btn_box,
+            text="🌐 Launch Live Website Preview",
+            bg=self.c_primary,
+            fg="#FFFFFF",
+            activebackground=self.c_primary_hover,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=14,
+            pady=6,
+            cursor="hand2",
+            command=self.toggle_preview_server
+        )
+        self.btn_preview_srv.pack(side=tk.LEFT, padx=6)
+
+        self.btn_mobile_srv = tk.Button(
+            btn_box,
+            text="📱 Mobile QR Upload",
+            bg="#3B82F6",
+            fg="#FFFFFF",
+            activebackground="#2563EB",
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=14,
+            pady=6,
+            cursor="hand2",
+            command=self.open_mobile_upload_dialog
+        )
+        self.btn_mobile_srv.pack(side=tk.LEFT, padx=6)
+
+        # ── 2. Main Paned Window (Left Notices, Right Form) ─────────────────
+        self.paned = tk.PanedWindow(
+            self.root,
+            orient=tk.HORIZONTAL,
+            bg=self.c_border,
+            sashwidth=6,
+            relief="flat"
+        )
+        self.paned.grid(row=1, column=0, sticky="nsew")
+
+        self.left_frame = tk.Frame(self.paned, bg=self.c_bg, padx=14, pady=14)
+        self.paned.add(self.left_frame, minsize=520, width=680)
+
+        self.right_frame = tk.Frame(self.paned, bg=self.c_panel, padx=16, pady=14)
+        self.paned.add(self.right_frame, minsize=420)
+
+        self.build_left_panel()
+        self.build_right_panel()
+
+        # ── 3. Status Bar ───────────────────────────────────────────────────
+        self.status_bar = tk.Frame(self.root, bg=self.c_panel, height=28, padx=16)
+        self.status_bar.grid(row=2, column=0, sticky="ew")
+
+        self.lbl_status = tk.Label(
+            self.status_bar,
+            text="✅ Ready | Select or create a notice to manage",
+            font=("Segoe UI", 9),
+            fg=self.c_muted,
+            bg=self.c_panel
+        )
+        self.lbl_status.pack(side=tk.LEFT, pady=4)
+
+        self.lbl_count = tk.Label(
+            self.status_bar,
+            text="0 Notices",
+            font=("Segoe UI", 9, "bold"),
+            fg="#58A6FF",
+            bg=self.c_panel
+        )
+        self.lbl_count.pack(side=tk.RIGHT, pady=4)
+
+    # ── Left Panel: Notices Search, Filter Pills & List ──────────────────────
+    def build_left_panel(self):
+        # Top bar of Left Panel
+        top_bar = tk.Frame(self.left_frame, bg=self.c_bg)
+        top_bar.pack(fill=tk.X, pady=(0, 10))
+
+        lbl_list_title = tk.Label(
+            top_bar,
+            text="📋 All Published Notices",
+            font=("Segoe UI", 12, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_bg
+        )
+        lbl_list_title.pack(side=tk.LEFT)
+
+        btn_refresh = tk.Button(
+            top_bar,
+            text="🔄 Refresh",
+            bg=self.c_card,
+            fg=self.c_text,
+            activebackground=self.c_panel,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 8, "bold"),
+            relief="flat",
+            padx=10,
+            pady=4,
+            cursor="hand2",
+            highlightthickness=1,
+            highlightbackground=self.c_border,
+            command=self.refresh_notices
+        )
+        btn_refresh.pack(side=tk.RIGHT)
+
+        # Search Bar Frame
+        search_wrap = tk.Frame(
+            self.left_frame,
+            bg=self.c_card,
+            padx=10,
+            pady=6,
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        search_wrap.pack(fill=tk.X, pady=(0, 8))
+
+        tk.Label(
+            search_wrap,
+            text="🔍",
+            font=("Segoe UI", 10),
+            bg=self.c_card,
+            fg=self.c_muted
+        ).pack(side=tk.LEFT, padx=(2, 6))
+
+        self.ent_search = tk.Entry(
+            search_wrap,
+            font=("Segoe UI", 10),
+            bg=self.c_card,
+            fg="#FFFFFF",
+            insertbackground="#58A6FF",
+            relief="flat",
+            highlightthickness=0
+        )
+        self.ent_search.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.ent_search.bind("<KeyRelease>", lambda e: self.filter_and_render_notices())
+        self.setup_entry_context_menu(self.ent_search)
+
+        btn_clear_search = tk.Button(
+            search_wrap,
+            text="✕",
+            bg=self.c_card,
+            fg=self.c_muted,
+            activebackground=self.c_card,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 8, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            command=self.clear_search
+        )
+        btn_clear_search.pack(side=tk.RIGHT)
+
+        # Quick Filter Pills Bar
+        pill_bar = tk.Frame(self.left_frame, bg=self.c_bg)
+        pill_bar.pack(fill=tk.X, pady=(0, 10))
+
+        self.filter_buttons = {}
+        pills = [
+            ("all", "All"),
+            ("urgent", "🔥 Urgent"),
+            ("important", "⭐ Important"),
+            ("holiday", "🎉 Holiday"),
+            ("normal", "📌 Normal"),
+            ("file", "📎 With Attachment")
+        ]
+
+        for p_key, p_label in pills:
+            btn = tk.Button(
+                pill_bar,
+                text=p_label,
+                font=("Segoe UI", 8, "bold"),
+                relief="flat",
+                padx=8,
+                pady=3,
+                cursor="hand2",
+                bg=self.c_primary if p_key == "all" else self.c_panel,
+                fg="#FFFFFF" if p_key == "all" else self.c_muted,
+                activebackground=self.c_primary,
+                activeforeground="#FFFFFF",
+                command=lambda k=p_key: self.set_badge_filter(k)
+            )
+            btn.pack(side=tk.LEFT, padx=(0, 4))
+            self.filter_buttons[p_key] = btn
+
+        # Scrollable Notices List Canvas
+        list_container = tk.Frame(self.left_frame, bg=self.c_bg)
+        list_container.pack(fill=tk.BOTH, expand=True)
+
+        self.notices_canvas = tk.Canvas(list_container, bg=self.c_bg, highlightthickness=0)
+        self.notices_scrollbar = ttk.Scrollbar(
+            list_container,
+            orient="vertical",
+            command=self.notices_canvas.yview
+        )
+        self.notices_scrollable_frame = tk.Frame(self.notices_canvas, bg=self.c_bg)
+
+        self.notices_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.notices_canvas.configure(scrollregion=self.notices_canvas.bbox("all"))
+        )
+
+        self.canvas_window_id = self.notices_canvas.create_window(
+            (0, 0),
+            window=self.notices_scrollable_frame,
+            anchor="nw"
+        )
+
+        def _on_canvas_configure(e):
+            self.notices_canvas.itemconfig(self.canvas_window_id, width=e.width)
+
+        self.notices_canvas.bind("<Configure>", _on_canvas_configure)
+        self.notices_canvas.configure(yscrollcommand=self.notices_scrollbar.set)
+
+        self.notices_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.notices_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Mouse wheel support
+        def _on_wheel(e):
+            if self.notices_canvas.winfo_exists():
+                self.notices_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+
+        self.notices_canvas.bind_all("<MouseWheel>", _on_wheel)
+
+    # ── Right Panel: Notice Edit Form & Live Preview Card ────────────────────
+    def build_right_panel(self):
+        # Scrollable right panel so no field gets cut off on 1366x768
+        canvas_r = tk.Canvas(self.right_frame, bg=self.c_panel, highlightthickness=0)
+        scrollbar_r = ttk.Scrollbar(self.right_frame, orient="vertical", command=canvas_r.yview)
+        scroll_r = tk.Frame(canvas_r, bg=self.c_panel)
+
+        scroll_r.bind(
+            "<Configure>",
+            lambda e: canvas_r.configure(scrollregion=canvas_r.bbox("all"))
+        )
+
+        r_win_id = canvas_r.create_window((0, 0), window=scroll_r, anchor="nw")
+
+        def _on_r_config(e):
+            canvas_r.itemconfig(r_win_id, width=e.width)
+
+        canvas_r.bind("<Configure>", _on_r_config)
+        canvas_r.configure(yscrollcommand=scrollbar_r.set)
+
+        canvas_r.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar_r.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Header of right panel
+        r_header = tk.Frame(scroll_r, bg=self.c_panel)
+        r_header.pack(fill=tk.X, pady=(0, 8))
+
+        self.lbl_form_mode = tk.Label(
+            r_header,
+            text="📝 Create / Edit Notice",
+            font=("Segoe UI", 12, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_panel
+        )
+        self.lbl_form_mode.pack(side=tk.LEFT)
+
+        btn_new = tk.Button(
+            r_header,
+            text="➕ New Notice",
+            bg=self.c_success,
+            fg="#FFFFFF",
+            activebackground="#059669",
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 8, "bold"),
+            relief="flat",
+            padx=10,
+            pady=4,
+            cursor="hand2",
+            command=self.clear_form
+        )
+        btn_new.pack(side=tk.RIGHT)
+
+        # 1. Attachment Visual Preview Card
+        self.preview_card = tk.Frame(
+            scroll_r,
+            bg=self.c_card,
+            padx=12,
+            pady=10,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        self.preview_card.pack(fill=tk.X, pady=(0, 12))
+
+        self.lbl_preview_media = tk.Label(
+            self.preview_card,
+            text="📁 No Attachment Preview\nAttach an image or document to see preview here",
+            font=("Segoe UI", 9),
+            fg=self.c_muted,
+            bg=self.c_card,
+            height=6
+        )
+        self.lbl_preview_media.pack(fill=tk.BOTH, expand=True)
+
+        self.lbl_file_meta = tk.Label(
+            self.preview_card,
+            text="No file attached",
+            font=("Segoe UI", 8),
+            fg=self.c_muted,
+            bg=self.c_card,
+            anchor="w",
+            wraplength=400
+        )
+        self.lbl_file_meta.pack(fill=tk.X, pady=(4, 0))
+
+        # 2. Form Fields Card
+        form_card = tk.Frame(
+            scroll_r,
+            bg=self.c_card,
+            padx=14,
+            pady=12,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        form_card.pack(fill=tk.X, pady=(0, 12))
+
+        def create_field_label(parent, text):
+            l = tk.Label(
+                parent,
+                text=text,
+                font=("Segoe UI", 9, "bold"),
+                fg="#FFFFFF",
+                bg=self.c_card,
+                anchor="w"
+            )
+            l.pack(fill=tk.X, pady=(6, 3))
+            return l
+
+        # Title Field
+        create_field_label(form_card, "Notice Title *")
+        self.ent_title = tk.Entry(
+            form_card,
+            font=("Segoe UI", 10),
+            bg=self.c_panel,
+            fg="#FFFFFF",
+            insertbackground="#58A6FF",
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        self.ent_title.pack(fill=tk.X, ipady=5, pady=(0, 6))
+        self.setup_entry_context_menu(self.ent_title)
+
+        # Content Field
+        create_field_label(form_card, "Notice Content / Details *")
+        content_wrap = tk.Frame(form_card, bg=self.c_border, padx=1, pady=1)
+        content_wrap.pack(fill=tk.X, pady=(0, 6))
+
+        self.txt_content = tk.Text(
+            content_wrap,
+            font=("Segoe UI", 9),
+            bg=self.c_panel,
+            fg="#FFFFFF",
+            insertbackground="#58A6FF",
+            relief="flat",
+            height=5,
+            wrap="word",
+            padx=8,
+            pady=6
+        )
+        self.txt_content.pack(fill=tk.BOTH, expand=True)
+        self.setup_entry_context_menu(self.txt_content)
+
+        # Date & Badge Container (2 columns)
+        date_badge_frame = tk.Frame(form_card, bg=self.c_card)
+        date_badge_frame.pack(fill=tk.X, pady=(0, 8))
+        date_badge_frame.columnconfigure(0, weight=1)
+        date_badge_frame.columnconfigure(1, weight=1)
+
+        # Column 0: Date (BS)
+        col_date = tk.Frame(date_badge_frame, bg=self.c_card)
+        col_date.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+
+        date_lbl_row = tk.Frame(col_date, bg=self.c_card)
+        date_lbl_row.pack(fill=tk.X)
+        tk.Label(
+            date_lbl_row,
+            text="Date (BS) *",
+            font=("Segoe UI", 9, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_card
+        ).pack(side=tk.LEFT)
+
+        btn_today = tk.Button(
+            date_lbl_row,
+            text="📅 Auto Today",
+            font=("Segoe UI", 7, "bold"),
+            bg=self.c_panel,
+            fg="#58A6FF",
+            activebackground=self.c_primary,
+            activeforeground="#FFFFFF",
+            relief="flat",
+            padx=6,
+            pady=1,
+            cursor="hand2",
+            command=self.fill_today_bs
+        )
+        btn_today.pack(side=tk.RIGHT)
+
+        self.ent_date = tk.Entry(
+            col_date,
+            font=("Segoe UI", 10),
+            bg=self.c_panel,
+            fg="#FFFFFF",
+            insertbackground="#58A6FF",
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=self.c_border
+        )
+        self.ent_date.pack(fill=tk.X, ipady=5, pady=(4, 2))
+        self.setup_entry_context_menu(self.ent_date)
+
+        tk.Label(
+            col_date,
+            text="Format: YYYY/MM/DD (e.g. 2083/05/26)",
+            font=("Segoe UI", 7),
+            fg=self.c_muted,
+            bg=self.c_card,
+            anchor="w"
+        ).pack(fill=tk.X)
+
+        # Column 1: Badge Selector
+        col_badge = tk.Frame(date_badge_frame, bg=self.c_card)
+        col_badge.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
+
+        tk.Label(
+            col_badge,
+            text="Badge Category",
+            font=("Segoe UI", 9, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_card,
+            anchor="w"
+        ).pack(fill=tk.X)
+
+        self.cbo_badge = ttk.Combobox(
+            col_badge,
+            values=["Normal", "Urgent", "Important", "Holiday"],
+            font=("Segoe UI", 9),
+            state="readonly"
+        )
+        self.cbo_badge.set("Normal")
+        self.cbo_badge.pack(fill=tk.X, ipady=3, pady=(4, 2))
+
+        tk.Label(
+            col_badge,
+            text="Sets badge color & icon tag",
+            font=("Segoe UI", 7),
+            fg=self.c_muted,
+            bg=self.c_card,
+            anchor="w"
+        ).pack(fill=tk.X)
+
+        # Attachment Controls
+        create_field_label(form_card, "Attachment File (Optional)")
+        attach_box = tk.Frame(form_card, bg=self.c_card)
+        attach_box.pack(fill=tk.X, pady=(2, 6))
+
+        btn_browse = tk.Button(
+            attach_box,
+            text="📁 Browse File",
+            bg=self.c_primary,
+            fg="#FFFFFF",
+            activebackground=self.c_primary_hover,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=12,
+            pady=5,
+            cursor="hand2",
+            command=self.browse_file
+        )
+        btn_browse.pack(side=tk.LEFT, padx=(0, 6))
+
+        btn_mobile_attach = tk.Button(
+            attach_box,
+            text="📱 QR Upload",
+            bg="#3B82F6",
+            fg="#FFFFFF",
+            activebackground="#2563EB",
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=10,
+            pady=5,
+            cursor="hand2",
+            command=self.open_mobile_upload_dialog
+        )
+        btn_mobile_attach.pack(side=tk.LEFT, padx=(0, 6))
+
+        self.btn_open_file = tk.Button(
+            attach_box,
+            text="📂 Open",
+            bg=self.c_panel,
+            fg=self.c_text,
+            activebackground=self.c_card_active,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=10,
+            pady=5,
+            cursor="hand2",
+            state="disabled",
+            command=self.open_current_attached_file
+        )
+        self.btn_open_file.pack(side=tk.LEFT, padx=(0, 6))
+
+        self.btn_remove_file = tk.Button(
+            attach_box,
+            text="✕ Remove",
+            bg=self.c_panel,
+            fg=self.c_danger,
+            activebackground=self.c_card_active,
+            activeforeground=self.c_danger,
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=10,
+            pady=5,
+            cursor="hand2",
+            state="disabled",
+            command=self.remove_attached_file
+        )
+        self.btn_remove_file.pack(side=tk.LEFT)
+
+        # 3. Action Buttons Card
+        action_card = tk.Frame(scroll_r, bg=self.c_panel)
+        action_card.pack(fill=tk.X, pady=(4, 16))
+
+        self.btn_save = tk.Button(
+            action_card,
+            text="💾 Save / Publish Notice",
+            bg=self.c_primary,
+            fg="#FFFFFF",
+            activebackground=self.c_primary_hover,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 10, "bold"),
+            relief="flat",
+            padx=16,
+            pady=10,
+            cursor="hand2",
+            command=self.submit_notice
+        )
+        self.btn_save.pack(fill=tk.X, pady=(0, 8))
+
+        sub_btns = tk.Frame(action_card, bg=self.c_panel)
+        sub_btns.pack(fill=tk.X)
+
+        btn_folder = tk.Button(
+            sub_btns,
+            text="📂 Open 'notices/' Folder",
+            bg=self.c_card,
+            fg=self.c_text,
+            activebackground=self.c_panel,
+            activeforeground="#FFFFFF",
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=12,
+            pady=8,
+            cursor="hand2",
+            highlightthickness=1,
+            highlightbackground=self.c_border,
+            command=self.open_notices_folder
+        )
+        btn_folder.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
+
+        self.btn_delete = tk.Button(
+            sub_btns,
+            text="🗑 Delete Notice",
+            bg=self.c_card,
+            fg=self.c_danger,
+            activebackground=self.c_panel,
+            activeforeground=self.c_danger,
+            font=("Segoe UI", 9, "bold"),
+            relief="flat",
+            padx=12,
+            pady=8,
+            cursor="hand2",
+            state="disabled",
+            highlightthickness=1,
+            highlightbackground=self.c_border,
+            command=self.delete_selected_notice
+        )
+        self.btn_delete.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(6, 0))
+
+    # ── Context Menu (Copy/Paste/Cut) ────────────────────────────────────────
+    def setup_entry_context_menu(self, widget):
+        menu = tk.Menu(widget, tearoff=0, bg=self.c_card, fg="#FFFFFF", activebackground=self.c_primary)
+        menu.add_command(label="Cut", command=lambda: widget.event_generate("<<Cut>>"))
+        menu.add_command(label="Copy", command=lambda: widget.event_generate("<<Copy>>"))
+        menu.add_command(label="Paste", command=lambda: widget.event_generate("<<Paste>>"))
+        menu.add_separator()
+        menu.add_command(
+            label="Select All",
+            command=lambda: widget.select_range(0, tk.END) if isinstance(widget, tk.Entry) else widget.tag_add("sel", "1.0", tk.END)
+        )
+
+        def _show_menu(e):
+            menu.tk_popup(e.x_root, e.y_root)
+
+        widget.bind("<Button-3>", _show_menu)
+
+    # ── Keyboard Shortcuts ───────────────────────────────────────────────────
+    def setup_keyboard_shortcuts(self):
+        self.root.bind("<F5>", lambda e: self.refresh_notices())
+        self.root.bind("<Escape>", lambda e: self.clear_form())
+        self.root.bind("<Control-s>", lambda e: self.submit_notice())
+        self.root.bind("<Control-S>", lambda e: self.submit_notice())
+        self.root.bind("<Control-f>", lambda e: self.ent_search.focus_set())
+        self.root.bind("<Control-F>", lambda e: self.ent_search.focus_set())
+
+    # ── HTML Data Persistence (BeautifulSoup) ────────────────────────────────
+    def load_table(self):
+        try:
+            if not os.path.exists(HTML_FILE):
+                self.create_default_html_file()
+
+            with open(HTML_FILE, "r", encoding="utf-8") as file:
+                soup = BeautifulSoup(file, "html.parser")
+
+            table = soup.find("table", id="noticeTable")
+            if not table:
+                table = soup.new_tag("table", id="noticeTable")
+                thead = soup.new_tag("thead")
+                tr = soup.new_tag("tr")
+                for header in ["Title", "Content", "Date"]:
+                    th = soup.new_tag("th")
+                    th.string = header
+                    tr.append(th)
+                thead.append(tr)
+                table.append(thead)
+                tbody = soup.new_tag("tbody")
+                table.append(tbody)
+                soup.body.append(table)
+
+            tbody = table.find("tbody")
+            if not tbody:
+                tbody = soup.new_tag("tbody")
+                table.append(tbody)
+
+            return soup, tbody
+        except Exception as e:
+            messagebox.showerror("HTML Load Error", f"Failed to parse {HTML_FILE}:\n{str(e)}")
+            return None
+
+    def save_table(self, soup):
+        try:
+            with open(HTML_FILE, "w", encoding="utf-8") as file:
+                file.write(str(soup.prettify() if soup else ""))
+            return True
+        except Exception as e:
+            messagebox.showerror("HTML Save Error", f"Failed to save {HTML_FILE}:\n{str(e)}")
+            return False
+
+    def create_row_tag(self, title, content, date_bs, badge, badge_class, file_link):
+        parts = date_bs.split("/")
+        year = parts[0]
+        month = parts[1].zfill(2) if len(parts) > 1 else "01"
+        day = parts[2].zfill(2) if len(parts) > 2 else "01"
+        sort_date = f"{year}{month}{day}"
+
+        file_name = os.path.basename(file_link) if file_link else ""
+        badge_lower = badge.lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
+
+        cfg = BADGE_CONFIG.get(badge_lower, BADGE_CONFIG["normal"])
+        badge_icon = cfg["icon"]
+        clean_badge_text = cfg["label"] if badge_lower in BADGE_CONFIG else badge
+
+        row_html = f"""
 <tr>
 <td class="font-medium text-gray-900" data-label="Title">{title}</td>
 <td class="text-gray-700" data-label="Content">
     <div class="notice-content">{content}</div>
     {"<a href='" + file_link + "' target='_blank' class='download-link text-blue-600'><i class='fas fa-paperclip'></i> " + file_name + "</a>" if file_link else ""}
-    <span class="badge {badge_class}">{badge_icon} {badge}</span>
+    <span class="badge {badge_class}">{badge_icon} {clean_badge_text}</span>
 </td>
 <td class="text-gray-600" data-label="Date" data-sort="{sort_date}" data-date="{date_bs}">
     <div class="font-medium"><i class="far fa-calendar-alt"></i> {date_bs}</div>
 </td>
 </tr>
 """
-    return BeautifulSoup(row_html, "html.parser").tr
+        return BeautifulSoup(row_html, "html.parser").tr
 
-def insert_notice(title, content, date_bs, badge, badge_class, file_link):
-    result = load_table()
-    if not result:
-        return False
-    soup, tbody = result
-    new_row = create_row(title, content, date_bs, badge, badge_class, file_link)
-    tbody.insert(0, new_row)
-    save_table(soup)
-    return True
+    def parse_all_notices_from_soup(self):
+        res = self.load_table()
+        if not res:
+            return []
+        _, tbody = res
+        rows = tbody.find_all("tr")
+        notices = []
 
-def find_notice(search_term, search_by="title"):
-    result = load_table()
-    if not result:
-        return []
-    _, tbody = result
-    rows = tbody.find_all("tr")
-    matches = []
-    
-    for row in rows:
-        if search_by == "title":
+        for row in rows:
             title_cell = row.find("td", {"data-label": "Title"})
-            if title_cell:
-                title = title_cell.text.strip()
-                if search_term.lower() in title.lower():
-                    matches.append(row)
-        elif search_by == "date":
-            date_cell = row.find("td", {"data-label": "Date"})
-            if date_cell:
-                date = date_cell.get("data-date", "").strip()
-                if search_term in date:
-                    matches.append(row)
-        elif search_by == "badge":
-            badge_span = row.find("span", class_="badge")
-            if badge_span:
-                badge = badge_span.text.strip()
-                if search_term.lower() in badge.lower():
-                    matches.append(row)
-        elif search_by == "content":
             content_div = row.find("div", class_="notice-content")
-            if content_div:
-                content = content_div.text.strip()
-                if search_term.lower() in content.lower():
-                    matches.append(row)
-    
-    return matches
+            date_cell = row.find("td", {"data-label": "Date"})
+            badge_span = row.find("span", class_="badge")
 
-def delete_notice_by_identifier(title, date_bs):
-    result = load_table()
-    if not result:
-        return False
-    soup, tbody = result
-    rows = tbody.find_all("tr")
-    for row in rows:
-        title_cell = row.find("td", {"data-label": "Title"})
-        date_cell = row.find("td", {"data-label": "Date"})
-        
-        if title_cell and date_cell:
-            t = title_cell.text.strip()
-            d = date_cell.get("data-date", "").strip()
-            if t == title and d == date_bs:
+            if title_cell and date_cell:
+                title = title_cell.text.strip()
+                content = content_div.text.strip() if content_div else ""
+                date = date_cell.get("data-date", "").strip() or date_cell.text.strip()
+                badge_raw = badge_span.text.strip() if badge_span else "Normal"
+
+                # Extract file link
                 download_link = row.find("a", class_="download-link")
-                if download_link:
-                    file_path = download_link.get("href", "")
-                    if file_path:
-                        if not os.path.isabs(file_path):
-                            file_path = os.path.abspath(file_path)
-                        if os.path.exists(file_path):
-                            try:
-                                os.remove(file_path)
-                            except Exception as e:
-                                print(f"Error deleting file: {e}")
-                row.decompose()
-                save_table(soup)
-                return True
-    return False
+                file_link = download_link.get("href", "").strip() if download_link else ""
+                has_file = bool(file_link)
+                file_name = os.path.basename(file_link) if has_file else ""
 
-def update_notice_by_identifier(old_title, old_date, new_title, content, date_bs, badge, badge_class, file_link):
-    result = load_table()
-    if not result:
-        return False
-    soup, tbody = result
-    rows = tbody.find_all("tr")
-    for row in rows:
-        title_cell = row.find("td", {"data-label": "Title"})
-        date_cell = row.find("td", {"data-label": "Date"})
-        
-        if title_cell and date_cell:
-            t = title_cell.text.strip()
-            d = date_cell.get("data-date", "").strip()
-            if t == old_title and d == old_date:
-                download_link = row.find("a", class_="download-link")
-                if download_link:
-                    old_file_path = download_link.get("href", "")
-                    if old_file_path and file_link != old_file_path:
-                        if not os.path.isabs(old_file_path):
-                            old_file_path = os.path.abspath(old_file_path)
-                        if os.path.exists(old_file_path):
-                            try:
-                                os.remove(old_file_path)
-                            except Exception as e:
-                                print(f"Error deleting old file: {e}")
-                
-                new_row = create_row(new_title, content, date_bs, badge, badge_class, file_link)
-                row.replace_with(new_row)
-                save_table(soup)
-                return True
-    return False
+                file_exists = False
+                if has_file:
+                    full_p = os.path.join(BASE_DIR, file_link) if not os.path.isabs(file_link) else file_link
+                    file_exists = os.path.exists(full_p)
 
-def get_all_notices():
-    result = load_table()
-    if not result:
-        return []
-    _, tbody = result
-    rows = tbody.find_all("tr")
-    notices = []
-    for row in rows:
-        title_cell = row.find("td", {"data-label": "Title"})
-        content_div = row.find("div", class_="notice-content")
-        date_cell = row.find("td", {"data-label": "Date"})
-        badge_span = row.find("span", class_="badge")
-        
-        if all([title_cell, content_div, date_cell, badge_span]):
-            title = title_cell.text.strip()
-            content = content_div.text.strip()
-            date = date_cell.get("data-date", "").strip()
-            badge = badge_span.text.strip()
-            
-            download_link = row.find("a", class_="download-link")
-            has_file = bool(download_link)
-            file_link = download_link.get("href", "") if download_link else ""
-            file_name = os.path.basename(file_link) if download_link else ""
-            
-            file_exists = False
-            if file_link:
-                if not os.path.isabs(file_link):
-                    file_path = os.path.abspath(file_link)
+                notices.append({
+                    "title": title,
+                    "content": content,
+                    "date": date,
+                    "badge": badge_raw,
+                    "has_file": has_file,
+                    "file_link": file_link,
+                    "file_name": file_name,
+                    "file_exists": file_exists
+                })
+
+        # Sort newest first by BS date
+        return sorted(notices, key=lambda x: x["date"], reverse=True)
+
+    # ── Notice Rendering & Filtering ─────────────────────────────────────────
+    def refresh_notices(self):
+        self.notices = self.parse_all_notices_from_soup()
+        self.filter_and_render_notices()
+        self.lbl_count.config(text=f"{len(self.notices)} Notice{'s' if len(self.notices) != 1 else ''}")
+
+    def set_badge_filter(self, badge_key):
+        self.active_filter_badge = badge_key
+        for k, btn in self.filter_buttons.items():
+            if k == badge_key:
+                btn.config(bg=self.c_primary, fg="#FFFFFF")
+            else:
+                btn.config(bg=self.c_panel, fg=self.c_muted)
+        self.filter_and_render_notices()
+
+    def clear_search(self):
+        self.ent_search.delete(0, tk.END)
+        self.filter_and_render_notices()
+
+    def filter_and_render_notices(self):
+        for w in self.notices_scrollable_frame.winfo_children():
+            w.destroy()
+
+        query = self.ent_search.get().strip().lower()
+        filter_type = self.active_filter_badge
+
+        filtered = []
+        for n in self.notices:
+            # Query match
+            if query:
+                in_title = query in n["title"].lower()
+                in_content = query in n["content"].lower()
+                in_date = query in n["date"].lower()
+                in_badge = query in n["badge"].lower()
+                in_file = query in n["file_name"].lower()
+                if not (in_title or in_content or in_date or in_badge or in_file):
+                    continue
+
+            # Badge filter match
+            if filter_type != "all":
+                if filter_type == "file":
+                    if not n["has_file"]:
+                        continue
                 else:
-                    file_path = file_link
-                file_exists = os.path.exists(file_path)
-            
-            notices.append({
-                "title": title,
-                "content": content,
-                "date": date,
-                "badge": badge,
-                "has_file": has_file,
-                "file_exists": file_exists,
-                "file_name": file_name,
-                "file_link": file_link
-            })
-    return sorted(notices, key=lambda x: x["date"], reverse=True)
+                    b_clean = n["badge"].lower()
+                    if filter_type not in b_clean:
+                        continue
 
-def get_notice_file(title, date_bs):
-    notices = get_all_notices()
-    for notice in notices:
-        if notice["title"] == title and notice["date"] == date_bs:
-            return notice.get("file_link", "")
-    return ""
+            filtered.append(n)
 
-# -------------------- Enhanced UI Functions --------------------
-def create_modern_button(parent, text, command, color=COLORS["primary"], hover_color=None):
-    if hover_color is None:
-        hover_color = COLORS["primary_light"]
-    
-    btn = tk.Button(
-        parent, text=text, command=command,
-        bg=color, fg="white", font=("Segoe UI", resp.font_size(10), "bold"),
-        padx=resp.scale(20, "button"), pady=resp.scale(8, "button"), 
-        relief="flat", cursor="hand2",
-        activebackground=hover_color, bd=0,
-        highlightthickness=0
-    )
-    
-    def on_enter(e):
-        if btn['state'] == 'normal':
-            btn['background'] = hover_color
-    
-    def on_leave(e):
-        if btn['state'] == 'normal':
-            btn['background'] = color
-    
-    btn.bind("<Enter>", on_enter)
-    btn.bind("<Leave>", on_leave)
-    
-    return btn
+        if not filtered:
+            empty_box = tk.Frame(self.notices_scrollable_frame, bg=self.c_bg, pady=40)
+            empty_box.pack(fill=tk.BOTH, expand=True)
 
-def create_card(parent, **kwargs):
-    card = tk.Frame(
-        parent, 
-        bg=COLORS["card_bg"],
-        bd=0,
-        relief="flat",
-        highlightbackground=COLORS["border"],
-        highlightthickness=1,
-        **kwargs
-    )
-    return card
+            tk.Label(
+                empty_box,
+                text="📭 No matching notices found",
+                font=("Segoe UI", 12, "bold"),
+                fg=self.c_muted,
+                bg=self.c_bg
+            ).pack()
 
-def create_section_label(parent, text, icon="🔹"):
-    frame = tk.Frame(parent, bg=COLORS["white"])
-    frame.pack(fill="x", pady=(resp.scale(15, "padding"), resp.scale(8, "padding")), 
-              padx=resp.scale(15, "padding"))
-    
-    tk.Label(
-        frame, 
-        text=f"{icon}  {text}",
-        bg=COLORS["white"],
-        fg=COLORS["dark"],
-        font=("Segoe UI", resp.font_size(11), "bold"),
-        anchor="w"
-    ).pack(fill="x")
-    
-    sep = tk.Frame(frame, height=2, bg=COLORS["primary_light"])
-    sep.pack(fill="x", pady=(5, 0))
-    
-    return frame
-
-def browse_file():
-    global current_file_path
-    file_path = filedialog.askopenfilename(
-        title="Select a file",
-        filetypes=[
-            ("All files", "*.*"),
-            ("PDF files", "*.pdf"),
-            ("Word documents", "*.doc *.docx"),
-            ("Excel files", "*.xls *.xlsx"),
-            ("Image files", "*.jpg *.jpeg *.png *.gif"),
-        ]
-    )
-    
-    if file_path:
-        current_file_path = file_path
-        file_name = os.path.basename(file_path)
-        file_size = os.path.getsize(file_path) / (1024 * 1024)
-        
-        file_info_label.config(
-            text=f"📎 {file_name} ({file_size:.2f} MB)",
-            fg=COLORS["primary"]
-        )
-        remove_file_btn.config(state="normal")
-
-def remove_selected_file():
-    global current_file_path
-    current_file_path = None
-    file_info_label.config(text="📁 No file selected", fg=COLORS["text_light"])
-    remove_file_btn.config(state="disabled")
-
-def submit_notice():
-    global current_file_path
-    
-    title = entry_title.get().strip()
-    content = text_content.get("1.0", tk.END).strip()
-    date_bs = entry_date.get().strip()
-    badge = entry_badge.get().strip() or "Normal"
-    
-    if not title or not content or not date_bs:
-        messagebox.showwarning("Input Error", "📝 Title, Content, and Date are required")
-        return
-    
-    try:
-        parts = date_bs.split("/")
-        if len(parts) != 3:
-            raise ValueError
-        year, month, day = parts
-        if len(year) != 4 or len(month) != 2 or len(day) != 2:
-            raise ValueError
-        int(year), int(month), int(day)
-    except:
-        messagebox.showwarning("Input Error", "📅 Date must be in YYYY/MM/DD format")
-        return
-    
-    file_link = ""
-    if current_file_path:
-        file_link = save_uploaded_file(current_file_path)
-        if not file_link:
+            tk.Label(
+                empty_box,
+                text="Try changing your search query or filter tab, or create a new notice.",
+                font=("Segoe UI", 9),
+                fg=self.c_muted,
+                bg=self.c_bg,
+                pady=6
+            ).pack()
             return
-    
-    badge_lower = badge.lower()
-    if badge_lower == "urgent":
-        badge_class = "bg-red-100 text-red-800"
-    elif badge_lower == "holiday":
-        badge_class = "bg-green-100 text-green-800"
-    elif badge_lower == "important":
-        badge_class = "bg-blue-100 text-blue-800"
-    else:
-        badge_class = "bg-yellow-100 text-yellow-800"
-    
-    if insert_notice(title, content, date_bs, badge, badge_class, file_link):
-        status_label.config(text=f"✅ Notice added successfully! | {len(get_all_notices())} total notices", fg=COLORS["success"])
-        
-        if file_link:
-            messagebox.showinfo("Success", f"✅ Notice added!\n📎 File: {os.path.basename(file_link)}")
-        else:
-            messagebox.showinfo("Success", "✅ Notice added successfully!")
-        
-        clear_form()
-        refresh_notices_list()
-        update_count()
-    else:
-        messagebox.showerror("Error", "❌ Failed to add notice")
 
-def clear_form():
-    global selected_notice, current_file_path
-    selected_notice = None
-    current_file_path = None
-    
-    entry_title.delete(0, tk.END)
-    text_content.delete("1.0", tk.END)
-    entry_date.delete(0, tk.END)
-    entry_badge.delete(0, tk.END)
-    entry_badge.insert(0, "Normal")
-    
-    file_info_label.config(text="📁 No file selected", fg=COLORS["text_light"])
-    remove_file_btn.config(state="disabled")
-    
-    refresh_notices_list()
-    status_label.config(text="📝 Form cleared | Ready to create new notice", fg=COLORS["info"])
+        for idx, notice in enumerate(filtered):
+            self.create_notice_card(self.notices_scrollable_frame, notice, idx)
 
-def show_search_dialog():
-    search_window = tk.Toplevel(root)
-    search_window.title("🔍 Search Notice")
-    search_window.geometry(f"{resp.scale(450)}x{resp.scale(350)}")
-    search_window.configure(bg=COLORS["light"])
-    search_window.transient(root)
-    search_window.grab_set()
-    
-    search_window.update_idletasks()
-    x = (root.winfo_screenwidth() // 2) - (resp.scale(450) // 2)
-    y = (root.winfo_screenheight() // 2) - (resp.scale(350) // 2)
-    search_window.geometry(f'{resp.scale(450)}x{resp.scale(350)}+{x}+{y}')
-    
-    header = tk.Frame(search_window, bg=COLORS["primary"], height=resp.scale(70))
-    header.pack(fill="x")
-    header.pack_propagate(False)
-    
-    tk.Label(header, text="🔍 Search Notices", bg=COLORS["primary"], fg="white",
-             font=("Segoe UI", resp.font_size(14), "bold")).pack(expand=True)
-    
-    content = tk.Frame(search_window, bg=COLORS["light"], padx=resp.scale(25), pady=resp.scale(15))
-    content.pack(fill="both", expand=True)
-    
-    tk.Label(content, text="Search by:", bg=COLORS["light"], fg=COLORS["dark"],
-             font=("Segoe UI", resp.font_size(10), "bold")).pack(anchor="w", pady=(0, resp.scale(8)))
-    
-    mode_frame = tk.Frame(content, bg=COLORS["light"])
-    mode_frame.pack(fill="x", pady=(0, resp.scale(15)))
-    
-    search_var = tk.StringVar(value="title")
-    
-    modes = [
-        ("🔤 Title", "title"),
-        ("📅 Date", "date"),
-        ("🏷️ Badge", "badge"),
-        ("📝 Content", "content")
-    ]
-    
-    for text, mode in modes:
-        btn = tk.Radiobutton(
-            mode_frame, text=text, variable=search_var, value=mode,
-            bg=COLORS["light"], fg=COLORS["dark_light"], font=("Segoe UI", resp.font_size(9)),
-            selectcolor=COLORS["primary_light"], indicatoron=0,
-            width=10, height=1, relief="solid", bd=1,
-            activebackground=COLORS["primary_light"]
+    def create_notice_card(self, parent, notice, idx):
+        is_selected = (
+            self.selected_notice_tuple and
+            self.selected_notice_tuple[0] == notice["title"] and
+            self.selected_notice_tuple[1] == notice["date"]
         )
-        btn.pack(side="left", padx=resp.scale(2))
-    
-    input_frame = tk.Frame(content, bg=COLORS["light"])
-    input_frame.pack(fill="x", pady=resp.scale(15))
-    
-    tk.Label(input_frame, text="Search term:", bg=COLORS["light"], fg=COLORS["dark"],
-             font=("Segoe UI", resp.font_size(10))).pack(side="left", padx=(0, resp.scale(8)))
-    
-    search_entry = tk.Entry(
-        input_frame, font=("Segoe UI", resp.font_size(10)), width=22,
-        bd=1, relief="solid", highlightthickness=1,
-        highlightcolor=COLORS["primary"]
-    )
-    search_entry.pack(side="left")
-    enable_paste(search_entry)
-    search_entry.focus()
-    
-    def perform_search():
-        search_term = search_entry.get().strip()
-        if not search_term:
-            messagebox.showwarning("Search", "🔍 Please enter a search term")
-            return
-        
-        mode = search_var.get()
-        matches = find_notice(search_term, mode)
-        
-        if not matches:
-            messagebox.showinfo("Search Result", "📭 No matching notice found")
-            return
-        
-        results_window = tk.Toplevel(search_window)
-        results_window.title(f"Search Results ({len(matches)} found)")
-        results_window.geometry(f"{resp.scale(600)}x{resp.scale(400)}")
-        results_window.configure(bg="white")
-        
-        results_header = tk.Frame(results_window, bg=COLORS["primary"], height=resp.scale(50))
-        results_header.pack(fill="x")
-        results_header.pack_propagate(False)
-        
-        tk.Label(results_header, text=f"🔍 Found {len(matches)} result(s)", 
-                 bg=COLORS["primary"], fg="white", font=("Segoe UI", resp.font_size(12), "bold")).pack(expand=True)
-        
-        results_container = tk.Frame(results_window, bg="white")
-        results_container.pack(fill="both", expand=True, padx=resp.scale(15), pady=resp.scale(15))
-        
-        results_canvas = tk.Canvas(results_container, bg="white", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(results_container, orient="vertical", command=results_canvas.yview)
-        results_content = tk.Frame(results_canvas, bg="white")
-        
-        results_content.bind(
-            "<Configure>",
-            lambda e: results_canvas.configure(scrollregion=results_canvas.bbox("all"))
-        )
-        
-        results_canvas.create_window((0, 0), window=results_content, anchor="nw")
-        results_canvas.configure(yscrollcommand=scrollbar.set)
-        
-        results_canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-        
-        for i, match in enumerate(matches):
-            title = match.find("td", {"data-label": "Title"}).text.strip()
-            date = match.find("td", {"data-label": "Date"}).get("data-date", "").strip()
-            badge = match.find("span", class_="badge").text.strip()
-            
-            result_card = create_card(results_content, padx=resp.scale(12), pady=resp.scale(10))
-            result_card.pack(fill="x", padx=resp.scale(5), pady=resp.scale(5))
-            
-            header_frame = tk.Frame(result_card, bg=COLORS["card_bg"])
-            header_frame.pack(fill="x", pady=(0, resp.scale(6)))
-            
-            tk.Label(header_frame, text=f"{i+1}. {title}", bg=COLORS["card_bg"],
-                     fg=COLORS["dark"], font=("Segoe UI", resp.font_size(10), "bold")).pack(side="left")
-            
-            badge_lower = badge.lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
-            badge_color, bg_color, text_color = BADGE_COLORS.get(badge_lower, (COLORS["warning"], COLORS["light"], COLORS["dark"]))
-            
-            badge_label = tk.Label(header_frame, text=badge,
-                                   bg=bg_color, fg=text_color,
-                                   font=("Segoe UI", resp.font_size(8), "bold"),
-                                   padx=resp.scale(10), pady=resp.scale(2), bd=0, relief="flat")
-            badge_label.pack(side="right")
-            
-            footer_frame = tk.Frame(result_card, bg=COLORS["card_bg"])
-            footer_frame.pack(fill="x")
-            
-            tk.Label(footer_frame, text=f"📅 {date}", bg=COLORS["card_bg"],
-                     fg=COLORS["text_secondary"], font=("Segoe UI", resp.font_size(8))).pack(side="left")
-            
-            tk.Button(footer_frame, text="📝 Load", 
-                     command=lambda t=title, d=date: load_and_close(t, d, search_window, results_window),
-                     bg=COLORS["primary"], fg="white", font=("Segoe UI", resp.font_size(8), "bold"),
-                     padx=resp.scale(12), pady=resp.scale(3), relief="flat").pack(side="right")
-        
-        def load_and_close(title, date, *windows):
-            load_notice_for_editing(title, date)
-            for window in windows:
-                window.destroy()
-        
-        results_window.mainloop()
-    
-    button_frame = tk.Frame(content, bg=COLORS["light"])
-    button_frame.pack(pady=resp.scale(15))
-    
-    create_modern_button(button_frame, "🔍 Search", perform_search, COLORS["primary"]).pack(side="left", padx=resp.scale(5))
-    
-    tk.Button(button_frame, text="Cancel", command=search_window.destroy,
-              bg=COLORS["text_light"], fg="white", font=("Segoe UI", resp.font_size(10)),
-              padx=resp.scale(15), pady=resp.scale(6), relief="flat").pack(side="left", padx=resp.scale(5))
-    
-    search_entry.bind('<Return>', lambda e: perform_search())
 
-def load_notice_for_editing(title, date_bs):
-    global selected_notice
-    selected_notice = (title, date_bs)
-    
-    result = load_table()
-    if not result:
-        return
-    
-    _, tbody = result
-    rows = tbody.find_all("tr")
-    
-    for row in rows:
-        title_cell = row.find("td", {"data-label": "Title"})
-        date_cell = row.find("td", {"data-label": "Date"})
-        
-        if title_cell and date_cell:
-            t = title_cell.text.strip()
-            d = date_cell.get("data-date", "").strip()
-            
-            if t == title and d == date_bs:
-                entry_title.delete(0, tk.END)
-                entry_title.insert(0, title)
-                
-                content_div = row.find("div", class_="notice-content")
-                text_content.delete("1.0", tk.END)
-                if content_div:
-                    text_content.insert(tk.END, content_div.text.strip())
-                
-                badge_span = row.find("span", class_="badge")
-                entry_badge.delete(0, tk.END)
-                if badge_span:
-                    badge_text = badge_span.text.strip()
-                    for emoji in ["🔥", "⭐", "🎉", "📌"]:
-                        badge_text = badge_text.replace(emoji, "").strip()
-                    entry_badge.insert(0, badge_text)
-                
-                entry_date.delete(0, tk.END)
-                entry_date.insert(0, date_bs)
-                
-                download_link = row.find("a", class_="download-link")
-                if download_link:
-                    file_path = download_link.get("href", "")
-                    if file_path:
-                        if not os.path.isabs(file_path):
-                            file_path = os.path.abspath(file_path)
-                        if os.path.exists(file_path):
-                            file_info_label.config(
-                                text=f"📎 {os.path.basename(file_path)}",
-                                fg=COLORS["success"]
-                            )
-                        else:
-                            file_info_label.config(text="⚠ File not found", fg=COLORS["danger"])
-                else:
-                    file_info_label.config(text="📁 No file attached", fg=COLORS["text_light"])
-                
-                refresh_notices_list()
-                status_label.config(text=f"📝 Editing: {title}", fg=COLORS["info"])
-                return
+        card_bg = self.c_card_active if is_selected else self.c_card
+        border_col = self.c_primary if is_selected else self.c_border
 
-def edit_notice():
-    global selected_notice, current_file_path
-    
-    if not selected_notice:
-        messagebox.showwarning("Warning", "📝 Please select a notice to edit")
-        return
-    
-    old_title, old_date = selected_notice
-    new_title = entry_title.get().strip()
-    content = text_content.get("1.0", tk.END).strip()
-    date_bs = entry_date.get().strip()
-    badge = entry_badge.get().strip() or "Normal"
-    
-    if not new_title or not content or not date_bs:
-        messagebox.showwarning("Input Error", "📝 Title, Content, and Date are required")
-        return
-    
-    try:
-        parts = date_bs.split("/")
-        if len(parts) != 3:
-            raise ValueError
-        year, month, day = parts
-        if len(year) != 4 or len(month) != 2 or len(day) != 2:
-            raise ValueError
-        int(year), int(month), int(day)
-    except:
-        messagebox.showwarning("Input Error", "📅 Date must be in YYYY/MM/DD format")
-        return
-    
-    file_link = ""
-    if current_file_path:
-        file_link = save_uploaded_file(current_file_path)
-        if not file_link:
-            return
-    
-    if not file_link:
-        result = load_table()
-        if result:
-            _, tbody = result
-            rows = tbody.find_all("tr")
-            for row in rows:
-                title_cell = row.find("td", {"data-label": "Title"})
-                date_cell = row.find("td", {"data-label": "Date"})
-                if title_cell and date_cell:
-                    if title_cell.text.strip() == old_title and date_cell.get("data-date", "").strip() == old_date:
-                        download_link = row.find("a", class_="download-link")
-                        if download_link:
-                            file_link = download_link.get("href", "")
-    
-    badge_lower = badge.lower()
-    if badge_lower == "urgent":
-        badge_class = "bg-red-100 text-red-800"
-    elif badge_lower == "holiday":
-        badge_class = "bg-green-100 text-green-800"
-    elif badge_lower == "important":
-        badge_class = "bg-blue-100 text-blue-800"
-    else:
-        badge_class = "bg-yellow-100 text-yellow-800"
-    
-    if update_notice_by_identifier(old_title, old_date, new_title, content, date_bs, badge, badge_class, file_link):
-        messagebox.showinfo("Success", "✅ Notice updated successfully!")
-        status_label.config(text=f"✅ Notice '{new_title}' updated successfully!", fg=COLORS["success"])
-        clear_form()
-        refresh_notices_list()
-        update_count()
-    else:
-        messagebox.showerror("Error", "❌ Failed to update notice")
-
-def remove_notice():
-    global selected_notice
-    
-    if not selected_notice:
-        messagebox.showwarning("Warning", "📝 Please select a notice to delete")
-        return
-    
-    title, date_bs = selected_notice
-    
-    if messagebox.askyesno("Confirm Delete", f"🗑️ Are you sure you want to delete:\n\n'{title}'\n📅 ({date_bs})?"):
-        if delete_notice_by_identifier(title, date_bs):
-            messagebox.showinfo("Success", "✅ Notice deleted successfully!")
-            status_label.config(text="✅ Notice deleted successfully!", fg=COLORS["success"])
-            clear_form()
-            refresh_notices_list()
-            update_count()
-        else:
-            messagebox.showerror("Error", "❌ Failed to delete notice")
-
-def view_notice_file(title, date_bs):
-    file_path = get_notice_file(title, date_bs)
-    if not file_path:
-        messagebox.showinfo("No File", "📭 This notice doesn't have an attached file.")
-        return
-    
-    if not os.path.isabs(file_path):
-        file_path = os.path.abspath(file_path)
-    
-    if not os.path.exists(file_path):
-        messagebox.showwarning("File Not Found", f"❌ The attached file no longer exists.")
-        return
-    
-    if open_file(file_path):
-        file_name = os.path.basename(file_path)
-        status_label.config(text=f"📂 Opened: {file_name}", fg=COLORS["info"])
-    else:
-        messagebox.showerror("Error", "❌ Failed to open the file")
-
-def refresh_notices_list():
-    for widget in notices_canvas_frame.winfo_children():
-        widget.destroy()
-    
-    notices = get_all_notices()
-    
-    if not notices:
-        empty_frame = tk.Frame(notices_canvas_frame, bg=COLORS["white"], height=resp.scale(150, "card"))
-        empty_frame.pack(fill="both", expand=True)
-        
-        tk.Label(empty_frame, text="📭 No notices found", 
-                 bg=COLORS["white"], fg=COLORS["text_light"], font=("Segoe UI", resp.font_size(12), "bold"),
-                 pady=resp.scale(15, "padding")).pack(expand=True)
-        
-        tk.Label(empty_frame, text="Create your first notice using the form", 
-                 bg=COLORS["white"], fg=COLORS["text_secondary"], font=("Segoe UI", resp.font_size(10))).pack()
-        return
-    
-    for i, notice in enumerate(notices):
-        card_bg = COLORS["card_bg"]
-        border_color = COLORS["border"]
-        
-        if selected_notice and notice["title"] == selected_notice[0] and notice["date"] == selected_notice[1]:
-            card_bg = "#F0F9FF"
-            border_color = COLORS["primary"]
-        
-        notice_card = create_card(
-            notices_canvas_frame,
-            padx=resp.scale(15, "card"),
-            pady=resp.scale(12, "card")
-        )
-        notice_card.pack(fill="x", padx=resp.scale(6, "padding"), pady=resp.scale(6, "padding"))
-        
-        header_frame = tk.Frame(notice_card, bg=card_bg)
-        header_frame.pack(fill="x", pady=(0, resp.scale(10, "padding")))
-        
-        title_text = notice["title"]
-        if len(title_text) > 40:
-            title_text = title_text[:37] + "..."
-        
-        title_label = tk.Label(
-            header_frame,
-            text=title_text,
+        card = tk.Frame(
+            parent,
             bg=card_bg,
-            fg=COLORS["dark"],
-            font=("Segoe UI", resp.font_size(11), "bold"),
+            padx=14,
+            pady=12,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=border_col
+        )
+        card.pack(fill=tk.X, pady=(0, 8))
+
+        # Click card to load
+        card.bind("<Button-1>", lambda e, n=notice: self.load_notice_for_editing(n["title"], n["date"]))
+
+        # Top row of card (Badge, Date, Index)
+        top_row = tk.Frame(card, bg=card_bg)
+        top_row.pack(fill=tk.X, pady=(0, 6))
+        top_row.bind("<Button-1>", lambda e, n=notice: self.load_notice_for_editing(n["title"], n["date"]))
+
+        # Badge pill
+        b_clean = notice["badge"].lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
+        b_cfg = BADGE_CONFIG.get(b_clean, BADGE_CONFIG["normal"])
+
+        pill = tk.Label(
+            top_row,
+            text=f"{b_cfg['icon']} {b_cfg['label']}",
+            font=("Segoe UI", 8, "bold"),
+            fg=b_cfg["color"],
+            bg=b_cfg["bg_pill"],
+            padx=8,
+            pady=2,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=b_cfg["border_pill"]
+        )
+        pill.pack(side=tk.LEFT)
+
+        # Date pill
+        date_lbl = tk.Label(
+            top_row,
+            text=f"📅 {notice['date']}",
+            font=("Segoe UI", 8),
+            fg=self.c_muted,
+            bg=card_bg
+        )
+        date_lbl.pack(side=tk.LEFT, padx=10)
+
+        # Title
+        title_lbl = tk.Label(
+            card,
+            text=notice["title"],
+            font=("Segoe UI", 10, "bold"),
+            fg="#FFFFFF",
+            bg=card_bg,
             anchor="w",
+            justify="left",
+            wraplength=480,
             cursor="hand2"
         )
-        title_label.pack(side="left", fill="x", expand=True)
-        title_label.bind("<Button-1>", lambda e, t=notice["title"], d=notice["date"]: load_notice_for_editing(t, d))
-        
-        badge_lower = notice["badge"].lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
-        badge_color, bg_color, text_color = BADGE_COLORS.get(badge_lower, (COLORS["warning"], COLORS["light"], COLORS["dark"]))
-        
-        badge_label = tk.Label(
-            header_frame,
-            text=notice["badge"],
-            bg=bg_color,
-            fg=text_color,
-            font=("Segoe UI", resp.font_size(8), "bold"),
-            padx=resp.scale(12, "button"),
-            pady=resp.scale(3, "button"),
-            bd=0,
-            relief="flat"
-        )
-        badge_label.pack(side="right")
-        
-        content_frame = tk.Frame(notice_card, bg=card_bg)
-        content_frame.pack(fill="x", pady=(0, resp.scale(12, "padding")))
-        
-        content_text = notice["content"]
-        if len(content_text) > 120:
-            content_text = content_text[:117] + "..."
-        
-        content_label = tk.Label(
-            content_frame,
-            text=content_text,
-            bg=card_bg,
-            fg=COLORS["text_secondary"],
-            font=("Segoe UI", resp.font_size(10)),
-            wraplength=resp.scale(400, "card"),
-            anchor="w",
-            justify="left"
-        )
-        content_label.pack(fill="x")
-        
-        footer_frame = tk.Frame(notice_card, bg=card_bg)
-        footer_frame.pack(fill="x")
-        
-        meta_frame = tk.Frame(footer_frame, bg=card_bg)
-        meta_frame.pack(side="left", fill="x", expand=True)
-        
-        date_icon = tk.Label(meta_frame, text="📅", bg=card_bg, font=("Segoe UI", resp.font_size(9)))
-        date_icon.pack(side="left")
-        
-        date_label = tk.Label(
-            meta_frame,
-            text=f" {notice['date']}",
-            bg=card_bg,
-            fg=COLORS["text_secondary"],
-            font=("Segoe UI", resp.font_size(9))
-        )
-        date_label.pack(side="left", padx=(0, resp.scale(15, "padding")))
-        
-        if notice["has_file"]:
-            file_color = COLORS["primary"] if notice.get("file_exists", True) else COLORS["danger"]
-            file_icon = tk.Label(meta_frame, text="📎", bg=card_bg, font=("Segoe UI", resp.font_size(9)), fg=file_color)
-            file_icon.pack(side="left")
-            
-            file_name = notice["file_name"]
-            if len(file_name) > 20:
-                file_name = file_name[:17] + "..."
-            
-            file_label = tk.Label(
-                meta_frame,
-                text=f" {file_name}",
+        title_lbl.pack(fill=tk.X, pady=(0, 4))
+        title_lbl.bind("<Button-1>", lambda e, n=notice: self.load_notice_for_editing(n["title"], n["date"]))
+
+        # Content snippet
+        c_snippet = notice["content"].replace("\n", " ").strip()
+        if len(c_snippet) > 130:
+            c_snippet = c_snippet[:127] + "..."
+
+        if c_snippet:
+            cnt_lbl = tk.Label(
+                card,
+                text=c_snippet,
+                font=("Segoe UI", 8),
+                fg=self.c_muted,
                 bg=card_bg,
-                fg=file_color,
-                font=("Segoe UI", resp.font_size(9))
+                anchor="w",
+                justify="left",
+                wraplength=480
             )
-            file_label.pack(side="left")
-        
-        action_frame = tk.Frame(footer_frame, bg=card_bg)
-        action_frame.pack(side="right")
-        
+            cnt_lbl.pack(fill=tk.X, pady=(0, 6))
+            cnt_lbl.bind("<Button-1>", lambda e, n=notice: self.load_notice_for_editing(n["title"], n["date"]))
+
+        # Bottom row of card (Attachment info + Action Buttons)
+        btm_row = tk.Frame(card, bg=card_bg)
+        btm_row.pack(fill=tk.X, pady=(2, 0))
+        btm_row.bind("<Button-1>", lambda e, n=notice: self.load_notice_for_editing(n["title"], n["date"]))
+
         if notice["has_file"]:
-            file_btn = create_modern_button(
-                action_frame,
-                "📂 Open",
-                lambda t=notice["title"], d=notice["date"]: view_notice_file(t, d),
-                color=COLORS["secondary"]
+            f_color = "#58A6FF" if notice.get("file_exists", True) else self.c_danger
+            fn_trunc = notice["file_name"]
+            if len(fn_trunc) > 28:
+                fn_trunc = fn_trunc[:25] + "..."
+
+            f_lbl = tk.Label(
+                btm_row,
+                text=f"📎 {fn_trunc}",
+                font=("Segoe UI", 8),
+                fg=f_color,
+                bg=card_bg
             )
-            file_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
-                          font=("Segoe UI", resp.font_size(8), "bold"))
-            file_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
-        
-        view_btn = create_modern_button(
-            action_frame,
-            "👁 View",
-            lambda t=notice["title"], d=notice["date"]: load_notice_for_editing(t, d),
-            color=COLORS["primary"]
-        )
-        view_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
-                       font=("Segoe UI", resp.font_size(8), "bold"))
-        view_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
-        
-        delete_btn = create_modern_button(
-            action_frame,
-            "🗑 Delete",
-            lambda t=notice["title"], d=notice["date"]: delete_selected_notice(t, d),
-            color=COLORS["danger"]
-        )
-        delete_btn.config(padx=resp.scale(10, "button"), pady=resp.scale(4, "button"), 
-                         font=("Segoe UI", resp.font_size(8), "bold"))
-        delete_btn.pack(side="left", padx=(resp.scale(3, "padding"), 0))
-    
-    notices_canvas.configure(scrollregion=notices_canvas.bbox("all"))
-
-def delete_selected_notice(title, date):
-    if messagebox.askyesno("Confirm Delete", f"🗑️ Delete notice '{title}'?\n📅 {date}"):
-        if delete_notice_by_identifier(title, date):
-            messagebox.showinfo("Success", "✅ Notice deleted successfully!")
-            status_label.config(text="✅ Notice deleted successfully!", fg=COLORS["success"])
-            clear_form()
-            refresh_notices_list()
-            update_count()
+            f_lbl.pack(side=tk.LEFT)
         else:
-            messagebox.showerror("Error", "❌ Failed to delete notice")
+            no_f = tk.Label(
+                btm_row,
+                text="Text notice",
+                font=("Segoe UI", 8),
+                fg=self.c_muted,
+                bg=card_bg
+            )
+            no_f.pack(side=tk.LEFT)
 
-def update_count():
-    notices = get_all_notices()
-    count = len(notices)
-    count_label.config(text=f"📊 {count} notice{'s' if count != 1 else ''}")
-    root.after(5000, update_count)
+        # Card action buttons
+        actions = tk.Frame(btm_row, bg=card_bg)
+        actions.pack(side=tk.RIGHT)
 
-def toggle_maximize():
-    global is_maximized
-    if is_maximized:
-        root.state('normal')
-        is_maximized = False
-    else:
-        root.state('zoomed')
-        is_maximized = True
+        if notice["has_file"]:
+            btn_view = tk.Button(
+                actions,
+                text="📂 View File",
+                font=("Segoe UI", 8, "bold"),
+                bg=self.c_panel,
+                fg="#58A6FF",
+                activebackground=self.c_primary,
+                activeforeground="#FFFFFF",
+                relief="flat",
+                padx=8,
+                pady=2,
+                cursor="hand2",
+                command=lambda t=notice["title"], d=notice["date"]: self.open_notice_file_by_name(t, d)
+            )
+            btn_view.pack(side=tk.LEFT, padx=(0, 4))
 
-# -------------------- Keyboard Shortcuts --------------------
-def setup_keyboard_shortcuts():
-    """Set up proper keyboard shortcuts without interfering with normal typing"""
-    
-    # F11 for maximize
-    root.bind("<F11>", lambda e: toggle_maximize())
-    
-    # Escape to clear form
-    root.bind("<Escape>", lambda e: clear_form())
-    
-    # F5 to refresh
-    root.bind("<F5>", lambda e: refresh_notices_list())
-    
-    # Ctrl+Alt+S for scaling settings
-    root.bind("<Control-Alt-s>", lambda e: show_scaling_dialog())
-    root.bind("<Control-Alt-S>", lambda e: show_scaling_dialog())
+        btn_edit = tk.Button(
+            actions,
+            text="✏️ Edit",
+            font=("Segoe UI", 8, "bold"),
+            bg=self.c_panel,
+            fg="#FFFFFF",
+            activebackground=self.c_primary,
+            activeforeground="#FFFFFF",
+            relief="flat",
+            padx=8,
+            pady=2,
+            cursor="hand2",
+            command=lambda n=notice: self.load_notice_for_editing(n["title"], n["date"])
+        )
+        btn_edit.pack(side=tk.LEFT, padx=(0, 4))
 
-# -------------------- Responsive UI Setup --------------------
-root = tk.Tk()
-root.title("📢 Notice Management System")
+        btn_del = tk.Button(
+            actions,
+            text="🗑",
+            font=("Segoe UI", 8, "bold"),
+            bg=self.c_panel,
+            fg=self.c_danger,
+            activebackground=self.c_danger,
+            activeforeground="#FFFFFF",
+            relief="flat",
+            padx=6,
+            pady=2,
+            cursor="hand2",
+            command=lambda t=notice["title"], d=notice["date"]: self.delete_notice_prompt(t, d)
+        )
+        btn_del.pack(side=tk.LEFT)
 
-# Initialize responsive configuration for main window
-resp = ResponsiveConfig(root)
+    # ── Form Operations: Load, Save, Delete, Clear ───────────────────────────
+    def load_notice_for_editing(self, title, date_bs):
+        self.selected_notice_tuple = (title, date_bs)
+        self.lbl_form_mode.config(text="✏️ Edit Notice")
+        self.btn_save.config(text="💾 Update Notice", bg=self.c_warning)
+        self.btn_delete.config(state="normal")
 
-# Set window size for 1366x768
-window_width = resp.scale(1100)
-window_height = resp.scale(650)
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-x = (screen_width - window_width) // 2
-y = (screen_height - window_height) // 2
-root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        # Find in notices
+        target = None
+        for n in self.notices:
+            if n["title"] == title and n["date"] == date_bs:
+                target = n
+                break
 
-# Set minimum size for 1366x768
-min_width = resp.scale(600)
-min_height = resp.scale(450)
-root.minsize(min_width, min_height)
+        if not target:
+            return
 
-root.configure(bg=COLORS["light"])
+        # Populate fields
+        self.ent_title.delete(0, tk.END)
+        self.ent_title.insert(0, target["title"])
 
-try:
-    root.iconbitmap("icon.ico")
-except:
-    pass
+        self.txt_content.delete("1.0", tk.END)
+        self.txt_content.insert(tk.END, target["content"])
 
-# Create main UI
-create_main_ui()
+        self.ent_date.delete(0, tk.END)
+        self.ent_date.insert(0, target["date"])
 
-# Set up keyboard shortcuts
-setup_keyboard_shortcuts()
+        # Badge
+        b_clean = target["badge"].lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
+        matched_badge = "Normal"
+        for b_name in ["Urgent", "Important", "Holiday", "Normal"]:
+            if b_name.lower() == b_clean:
+                matched_badge = b_name
+                break
+        self.cbo_badge.set(matched_badge)
 
-# Set focus to title field
-entry_title.focus_set()
+        # File
+        if target["has_file"] and target["file_link"]:
+            full_p = os.path.join(BASE_DIR, target["file_link"]) if not os.path.isabs(target["file_link"]) else target["file_link"]
+            self.current_attached_file_path = full_p
+            self.update_file_preview(full_p)
+        else:
+            self.current_attached_file_path = None
+            self.update_file_preview(None)
 
-# Start the main loop
-root.mainloop()
+        self.filter_and_render_notices()
+        self.lbl_status.config(text=f"📝 Editing notice: '{title}'")
+
+    def clear_form(self):
+        self.selected_notice_tuple = None
+        self.current_attached_file_path = None
+
+        self.lbl_form_mode.config(text="📝 Create New Notice")
+        self.btn_save.config(text="💾 Save / Publish Notice", bg=self.c_primary)
+        self.btn_delete.config(state="disabled")
+
+        self.ent_title.delete(0, tk.END)
+        self.txt_content.delete("1.0", tk.END)
+        self.ent_date.delete(0, tk.END)
+        self.cbo_badge.set("Normal")
+
+        self.update_file_preview(None)
+        self.filter_and_render_notices()
+        self.lbl_status.config(text="✨ Form cleared. Ready for new notice.")
+        self.ent_title.focus_set()
+
+    def fill_today_bs(self):
+        """Auto-computes an approximate current BS year/date template."""
+        now = datetime.now()
+        approx_bs_year = now.year + 57
+        month_str = str(now.month).zfill(2)
+        day_str = str(now.day).zfill(2)
+
+        val = f"{approx_bs_year}/{month_str}/{day_str}"
+        self.ent_date.delete(0, tk.END)
+        self.ent_date.insert(0, val)
+
+    def submit_notice(self):
+        title = self.ent_title.get().strip()
+        content = self.txt_content.get("1.0", tk.END).strip()
+        date_bs = self.ent_date.get().strip()
+        badge = self.cbo_badge.get().strip() or "Normal"
+
+        if not title or not content or not date_bs:
+            messagebox.showwarning("Incomplete Form", "Please fill in Notice Title, Content, and Date (BS).")
+            return
+
+        # Validate date format YYYY/MM/DD
+        parts = date_bs.split("/")
+        if len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit() or not parts[2].isdigit():
+            messagebox.showwarning("Invalid Date", "Date must be in BS format: YYYY/MM/DD\nExample: 2083/05/26")
+            return
+
+        year = parts[0]
+        month = parts[1].zfill(2)
+        day = parts[2].zfill(2)
+        normalized_date = f"{year}/{month}/{day}"
+
+        # Resolve badge class
+        badge_key = badge.lower()
+        cfg = BADGE_CONFIG.get(badge_key, BADGE_CONFIG["normal"])
+        badge_class = cfg["bg_class"]
+
+        # Handle attachment copy if new file selected
+        file_link = ""
+        if self.current_attached_file_path and os.path.exists(self.current_attached_file_path):
+            abs_curr = os.path.abspath(self.current_attached_file_path)
+            abs_upload = os.path.abspath(UPLOAD_FOLDER)
+
+            if abs_curr.startswith(abs_upload):
+                rel = os.path.relpath(abs_curr, BASE_DIR).replace("\\", "/")
+                file_link = rel
+            else:
+                ext = os.path.splitext(abs_curr)[1].lower()
+                base_name = os.path.splitext(os.path.basename(abs_curr))[0]
+                safe_base = "".join(c for c in base_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                unique_fn = f"{safe_base}_{uuid.uuid4().hex[:8]}{ext}"
+                dest_p = os.path.join(UPLOAD_FOLDER, unique_fn)
+                try:
+                    shutil.copy2(abs_curr, dest_p)
+                    file_link = f"notices/{unique_fn}"
+                except Exception as e:
+                    messagebox.showerror("File Error", f"Could not copy attachment file:\n{e}")
+                    return
+
+        res = self.load_table()
+        if not res:
+            return
+        soup, tbody = res
+
+        if self.selected_notice_tuple:
+            # UPDATE EXISTING NOTICE
+            old_title, old_date = self.selected_notice_tuple
+            rows = tbody.find_all("tr")
+            updated = False
+
+            for row in rows:
+                t_cell = row.find("td", {"data-label": "Title"})
+                d_cell = row.find("td", {"data-label": "Date"})
+                if t_cell and d_cell:
+                    if t_cell.text.strip() == old_title and d_cell.get("data-date", "").strip() == old_date:
+                        # Clean up old file if replaced
+                        d_link = row.find("a", class_="download-link")
+                        if d_link:
+                            old_f = d_link.get("href", "").strip()
+                            if old_f and old_f != file_link:
+                                old_full = os.path.join(BASE_DIR, old_f) if not os.path.isabs(old_f) else old_f
+                                if os.path.exists(old_full):
+                                    try:
+                                        os.remove(old_full)
+                                    except Exception:
+                                        pass
+
+                        new_row = self.create_row_tag(title, content, normalized_date, badge, badge_class, file_link)
+                        row.replace_with(new_row)
+                        updated = True
+                        break
+
+            if updated and self.save_table(soup):
+                messagebox.showinfo("Success", f"✅ Notice '{title}' updated successfully!")
+                self.clear_form()
+                self.refresh_notices()
+            else:
+                messagebox.showerror("Error", "Could not locate the existing notice to update.")
+        else:
+            # CREATE NEW NOTICE (insert at top of tbody)
+            new_row = self.create_row_tag(title, content, normalized_date, badge, badge_class, file_link)
+            tbody.insert(0, new_row)
+
+            if self.save_table(soup):
+                messagebox.showinfo("Published", f"🎉 Notice '{title}' published successfully to notice.html!")
+                self.clear_form()
+                self.refresh_notices()
+            else:
+                messagebox.showerror("Error", "Failed to write notice to HTML file.")
+
+    def delete_selected_notice(self):
+        if not self.selected_notice_tuple:
+            return
+        t, d = self.selected_notice_tuple
+        self.delete_notice_prompt(t, d)
+
+    def delete_notice_prompt(self, title, date_bs):
+        confirm = messagebox.askyesno(
+            "Confirm Delete",
+            f"Are you sure you want to permanently delete this notice?\n\n📢 Title: {title}\n📅 Date: {date_bs}\n\nAny attached file in notices/ will also be deleted.",
+            icon="warning"
+        )
+        if not confirm:
+            return
+
+        res = self.load_table()
+        if not res:
+            return
+        soup, tbody = res
+
+        deleted = False
+        for row in tbody.find_all("tr"):
+            t_cell = row.find("td", {"data-label": "Title"})
+            d_cell = row.find("td", {"data-label": "Date"})
+            if t_cell and d_cell:
+                if t_cell.text.strip() == title and d_cell.get("data-date", "").strip() == date_bs:
+                    # Remove attached file if present
+                    d_link = row.find("a", class_="download-link")
+                    if d_link:
+                        f_path = d_link.get("href", "").strip()
+                        if f_path:
+                            full_p = os.path.join(BASE_DIR, f_path) if not os.path.isabs(f_path) else f_path
+                            if os.path.exists(full_p):
+                                try:
+                                    os.remove(full_p)
+                                except Exception as e:
+                                    print(f"Error removing file: {e}")
+                    row.decompose()
+                    deleted = True
+                    break
+
+        if deleted and self.save_table(soup):
+            messagebox.showinfo("Deleted", f"Notice '{title}' deleted successfully.")
+            self.clear_form()
+            self.refresh_notices()
+        else:
+            messagebox.showerror("Error", "Could not delete notice.")
+
+    # ── File Attachment & Visual Preview Card ────────────────────────────────
+    def browse_file(self):
+        filetypes = [
+            ("All Supported Files", "*.pdf;*.jpg;*.jpeg;*.png;*.webp;*.doc;*.docx;*.xls;*.xlsx;*.txt;*.heic"),
+            ("PDF Documents (*.pdf)", "*.pdf"),
+            ("Images (*.jpg, *.png, *.webp, etc.)", "*.jpg;*.jpeg;*.png;*.webp;*.heic"),
+            ("Office Documents (*.doc, *.docx, *.xls)", "*.doc;*.docx;*.xls;*.xlsx"),
+            ("All Files", "*.*")
+        ]
+        chosen = filedialog.askopenfilename(title="Select Attachment File", filetypes=filetypes)
+        if chosen:
+            self.current_attached_file_path = chosen
+            self.update_file_preview(chosen)
+
+    def remove_attached_file(self):
+        self.current_attached_file_path = None
+        self.update_file_preview(None)
+
+    def open_current_attached_file(self):
+        if self.current_attached_file_path and os.path.exists(self.current_attached_file_path):
+            self.open_file_in_system(self.current_attached_file_path)
+        else:
+            messagebox.showwarning("File Missing", "The attached file cannot be found on disk.")
+
+    def open_notice_file_by_name(self, title, date_bs):
+        for n in self.notices:
+            if n["title"] == title and n["date"] == date_bs:
+                if n["has_file"] and n["file_link"]:
+                    full_p = os.path.join(BASE_DIR, n["file_link"]) if not os.path.isabs(n["file_link"]) else n["file_link"]
+                    if os.path.exists(full_p):
+                        self.open_file_in_system(full_p)
+                    else:
+                        messagebox.showwarning("File Missing", f"File '{n['file_name']}' does not exist in notices/ folder.")
+                return
+
+    def open_file_in_system(self, file_path):
+        try:
+            if platform.system() == "Windows":
+                os.startfile(file_path)
+            elif platform.system() == "Darwin":
+                subprocess.call(["open", file_path])
+            else:
+                subprocess.call(["xdg-open", file_path])
+        except Exception as e:
+            try:
+                webbrowser.open(f"file://{file_path}")
+            except Exception:
+                messagebox.showerror("Open Error", f"Could not open file:\n{e}")
+
+    def open_notices_folder(self):
+        try:
+            if platform.system() == "Windows":
+                os.startfile(UPLOAD_FOLDER)
+            elif platform.system() == "Darwin":
+                subprocess.call(["open", UPLOAD_FOLDER])
+            else:
+                subprocess.call(["xdg-open", UPLOAD_FOLDER])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open folder:\n{e}")
+
+    def update_file_preview(self, file_path):
+        if not file_path or not os.path.exists(file_path):
+            self.lbl_preview_media.config(
+                image="",
+                text="📁 No Attachment Preview\nAttach an image or document to see preview here",
+                font=("Segoe UI", 9),
+                fg=self.c_muted,
+                height=6
+            )
+            self.lbl_file_meta.config(text="No file attached", fg=self.c_muted)
+            self.btn_open_file.config(state="disabled")
+            self.btn_remove_file.config(state="disabled")
+            self.preview_thumbnail_photo = None
+            return
+
+        self.btn_open_file.config(state="normal")
+        self.btn_remove_file.config(state="normal")
+
+        file_name = os.path.basename(file_path)
+        ext = os.path.splitext(file_name)[1].lower()
+        sz = os.path.getsize(file_path)
+        sz_str = f"{sz / (1024*1024):.2f} MB" if sz > 1024*1024 else f"{sz / 1024:.1f} KB"
+
+        self.lbl_file_meta.config(
+            text=f"📎 {file_name}  •  {sz_str}  •  {ext.upper()}",
+            fg="#58A6FF"
+        )
+
+        # Image thumbnail preview
+        if ext in IMAGE_EXTENSIONS:
+            try:
+                img = Image.open(file_path)
+                img.thumbnail((320, 180), Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.ANTIALIAS)
+                self.preview_thumbnail_photo = ImageTk.PhotoImage(img)
+                self.lbl_preview_media.config(image=self.preview_thumbnail_photo, text="", height=0)
+                return
+            except Exception as e:
+                print(f"Thumbnail error: {e}")
+
+        # PDF or Document icon preview
+        doc_icon = "📕 PDF Document" if ext == ".pdf" else "📄 Office Document" if ext in {".doc", ".docx", ".xls", ".xlsx"} else "📎 Attached File"
+        self.lbl_preview_media.config(
+            image="",
+            text=f"{doc_icon}\n{file_name}\n({sz_str})",
+            font=("Segoe UI", 10, "bold"),
+            fg="#FFFFFF",
+            height=6
+        )
+
+    # ── Mobile QR Upload Integration ─────────────────────────────────────────
+    def open_mobile_upload_dialog(self):
+        self.start_mobile_server_if_needed()
+
+        local_ip = get_local_ip()
+        upload_url = f"http://{local_ip}:{MOBILE_UPLOAD_PORT}"
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title("📱 Mobile QR Notice Uploader")
+        dlg.geometry("480x580")
+        dlg.minsize(440, 520)
+        dlg.configure(bg=self.c_panel)
+        dlg.transient(self.root)
+        dlg.grab_set()
+
+        header = tk.Frame(dlg, bg=self.c_panel, padx=20, pady=16)
+        header.pack(fill=tk.X)
+
+        tk.Label(
+            header,
+            text="📱 Mobile QR Notice Uploader",
+            font=("Segoe UI", 14, "bold"),
+            fg="#FFFFFF",
+            bg=self.c_panel
+        ).pack(anchor="w")
+
+        tk.Label(
+            header,
+            text="Scan with your smartphone camera on the same Wi-Fi network to upload photos of notices, documents, or PDFs directly to this computer.",
+            font=("Segoe UI", 9),
+            fg=self.c_muted,
+            bg=self.c_panel,
+            wraplength=420,
+            justify="left"
+        ).pack(anchor="w", pady=(4, 0))
+
+        # QR Code Display
+        qr_card = tk.Frame(dlg, bg=self.c_card, padx=20, pady=20, relief="flat", highlightthickness=1, highlightbackground=self.c_border)
+        qr_card.pack(padx=20, pady=10)
+
+        lbl_qr = tk.Label(qr_card, bg="#FFFFFF", padx=10, pady=10)
+        lbl_qr.pack()
+
+        if HAS_QRCODE:
+            qr = qrcode.QRCode(box_size=6, border=2)
+            qr.add_data(upload_url)
+            qr.make(fit=True)
+            qr_img = qr.make_image(fill_color="black", back_color="white")
+            self.qr_photo = ImageTk.PhotoImage(qr_img)
+            lbl_qr.config(image=self.qr_photo)
+        else:
+            lbl_qr.config(
+                text=f"QR Code library not installed.\nOpen this link on your phone:\n{upload_url}",
+                fg="#000000",
+                bg="#FFFFFF",
+                font=("Segoe UI", 10)
+            )
+
+        # URL display & copy button
+        url_box = tk.Frame(dlg, bg=self.c_panel, padx=20, pady=6)
+        url_box.pack(fill=tk.X)
+
+        ent_url = tk.Entry(url_box, font=("Segoe UI", 10, "bold"), bg=self.c_card, fg="#58A6FF", justify="center", relief="flat")
+        ent_url.insert(0, upload_url)
+        ent_url.pack(fill=tk.X, ipady=6, pady=(0, 6))
+
+        btn_row = tk.Frame(dlg, bg=self.c_panel, padx=20, pady=10)
+        btn_row.pack(fill=tk.X)
+
+        def _copy_url():
+            self.root.clipboard_clear()
+            self.root.clipboard_append(upload_url)
+            messagebox.showinfo("Copied", f"Link copied to clipboard:\n{upload_url}", parent=dlg)
+
+        def _open_browser():
+            webbrowser.open(upload_url)
+
+        tk.Button(btn_row, text="📋 Copy Link", bg=self.c_card, fg=self.c_text, font=("Segoe UI", 9, "bold"), relief="flat", padx=12, pady=6, cursor="hand2", command=_copy_url).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0, 4))
+        tk.Button(btn_row, text="🌐 Test in Browser", bg=self.c_primary, fg="#FFFFFF", font=("Segoe UI", 9, "bold"), relief="flat", padx=12, pady=6, cursor="hand2", command=_open_browser).pack(side=tk.RIGHT, expand=True, fill=tk.X, padx=(4, 0))
+
+    def start_mobile_server_if_needed(self):
+        if self.mobile_running:
+            return
+        try:
+            MobileNoticeUploadHandler.app_ref = self
+            server_address = ("0.0.0.0", MOBILE_UPLOAD_PORT)
+
+            class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+                daemon_threads = True
+
+            self.mobile_httpd = ThreadedHTTPServer(server_address, MobileNoticeUploadHandler)
+            self.mobile_thread = threading.Thread(target=self.mobile_httpd.serve_forever, daemon=True)
+            self.mobile_thread.start()
+            self.mobile_running = True
+            print(f"Mobile Notice Upload server started on port {MOBILE_UPLOAD_PORT}")
+        except Exception as e:
+            print(f"Could not start mobile server: {e}")
+
+    def on_mobile_upload_success(self, uploaded_names):
+        if not uploaded_names:
+            return
+        last_file = uploaded_names[-1]
+        full_p = os.path.join(UPLOAD_FOLDER, last_file)
+        self.current_attached_file_path = full_p
+        self.update_file_preview(full_p)
+        self.lbl_status.config(text=f"📱 Received {len(uploaded_names)} file(s) from phone! Auto-attached '{last_file}'.")
+        messagebox.showinfo(
+            "Phone Upload Received",
+            f"📱 Received {len(uploaded_names)} file(s) from mobile!\n\nAuto-attached to current notice:\n📎 {last_file}"
+        )
+
+    # ── Live Website Preview Server ──────────────────────────────────────────
+    def toggle_preview_server(self):
+        if not self.preview_running:
+            self.start_preview_server()
+        target_url = f"http://localhost:{PREVIEW_PORT}/notice.html"
+        webbrowser.open(target_url)
+        self.lbl_status.config(text=f"🌐 Live Website Preview opened at {target_url}")
+
+    def start_preview_server(self):
+        if self.preview_running:
+            return
+        try:
+            class QuietHandler(http.server.SimpleHTTPRequestHandler):
+                def __init__(self, *args, **kwargs):
+                    super().__init__(*args, directory=BASE_DIR, **kwargs)
+
+                def log_message(self, format, *args):
+                    pass
+
+            class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+                daemon_threads = True
+
+            self.preview_httpd = ThreadedHTTPServer(("127.0.0.1", PREVIEW_PORT), QuietHandler)
+            self.preview_thread = threading.Thread(target=self.preview_httpd.serve_forever, daemon=True)
+            self.preview_thread.start()
+            self.preview_running = True
+            self.btn_preview_srv.config(
+                text="🌐 Live Preview: ACTIVE (Click to Open)",
+                bg=self.c_success,
+                activebackground="#059669"
+            )
+            print(f"Notice Portal Preview Server started on http://localhost:{PREVIEW_PORT}/notice.html")
+        except Exception as e:
+            print(f"Preview server notice error: {e}")
+
+    def on_closing(self):
+        """Cleanly shutdown servers and close window."""
+        try:
+            if self.preview_httpd:
+                self.preview_httpd.shutdown()
+                self.preview_httpd.server_close()
+        except Exception:
+            pass
+        try:
+            if self.mobile_httpd:
+                self.mobile_httpd.shutdown()
+                self.mobile_httpd.server_close()
+        except Exception:
+            pass
+        self.root.destroy()
+
+
+# ── Application Entry Point ──────────────────────────────────────────────────
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = NoticeAdminApp(root)
+    root.mainloop()
