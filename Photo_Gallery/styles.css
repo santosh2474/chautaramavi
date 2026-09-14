@@ -178,12 +178,13 @@ body {
   background: var(--glow-3);
 }
 
-/* Fluid Container */
 .site-container {
   width: 100%;
-  max-width: 1320px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 2rem);
+  padding: 0 clamp(0.75rem, 3vw, 2rem);
+  padding-left: max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-right, 0px));
   position: relative;
   z-index: 1;
 }
@@ -708,6 +709,53 @@ body {
   color: #ffffff;
 }
 
+.filter-divider {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 300;
+  margin: 0 0.15rem;
+  user-select: none;
+}
+
+.sort-select-wrap {
+  position: relative;
+  padding-right: 1.5rem;
+}
+
+.sort-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold-light);
+  pointer-events: none;
+  font-size: 0.75rem;
+}
+
+.sort-select {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.sort-select option {
+  background: #0b2b64;
+  color: #f8fafc;
+  padding: 4px;
+}
+
+[data-theme="dark"] .sort-select option {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 /* ==========================================================================
    4. Stats & Status Strip
    ========================================================================== */
@@ -876,7 +924,9 @@ body {
 .image-preview-box {
   position: relative;
   width: 100%;
-  height: 165px;
+  aspect-ratio: 16 / 10;
+  height: auto;
+  min-height: 120px;
   background-color: #0b0f19;
   overflow: hidden;
   cursor: pointer;
@@ -962,7 +1012,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 130px;
+  width: 100%;
 }
 
 .image-date-sub {
@@ -1863,94 +1913,578 @@ body {
 }
 
 /* ==========================================================================
-   9. Full Responsive Breakpoints
+   9. Full Responsive Breakpoints (All Device Screens & Orientations)
    ========================================================================== */
+
+/* --- 9.1 Ultra-Wide / 4K Displays (>= 1440px) --- */
+@media (min-width: 1440px) {
+  .site-container {
+    max-width: 1520px;
+  }
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.35rem;
+  }
+}
+
+/* --- 9.2 Laptops & Medium Screens (<= 1200px) --- */
+@media (max-width: 1200px) {
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+/* --- 9.3 Tablet Landscape & Netbooks (<= 992px) --- */
 @media (max-width: 992px) {
+  .header-container {
+    gap: 1rem;
+  }
+
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
   }
+
   .brand-col {
     grid-column: span 2;
   }
+
+  .date-filter-box {
+    max-width: 100%;
+    padding: 0.85rem 1rem;
+  }
+
+  .date-fields-wrap {
+    gap: 0.65rem;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
 }
 
+/* --- 9.4 Tablets Portrait & Large Mobile Screens (<= 768px) --- */
 @media (max-width: 768px) {
+  /* Prevent iOS automatic zoom on text input focus */
+  input[type="text"],
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Header Layout */
+  .glass-header {
+    padding: 0.65rem 0;
+  }
+
   .header-container {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
+
+  .brand {
+    justify-content: flex-start;
+  }
+
   .header-controls {
     max-width: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
-  .stats-card {
-    flex-direction: column;
-    align-items: flex-start;
+
+  .search-box {
+    flex: 1;
+    min-width: 0;
   }
+
+  .theme-toggle-btn {
+    flex-shrink: 0;
+    min-height: 42px;
+  }
+
+  /* Notice Bar & Badges */
+  .top-nav-content {
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
   .hide-sm {
     display: none !important;
   }
-  .image-preview-box {
-    height: 145px;
-  }
-}
 
-@media (max-width: 600px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  /* Hero Section */
+  .hero-section {
+    padding: 1.25rem 0 0.85rem;
   }
-  .brand-col {
-    grid-column: span 1;
+
+  .hero-card {
+    padding: 1.4rem 1rem;
+    border-radius: var(--radius-md);
   }
-  .hide-md {
-    display: none !important;
+
+  .hero-title {
+    font-size: clamp(1.4rem, 5vw, 1.85rem);
   }
-  .hide-xs {
-    display: none !important;
+
+  /* Category Filter Tabs with Touch Scrolling */
+  .category-tabs-wrapper {
+    margin: 0 -0.5rem;
+    padding: 0.25rem 0.5rem 0.55rem;
+    scroll-padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
   }
-  .theme-toggle-btn {
-    padding: 0.45rem;
+
+  .category-tabs {
+    gap: 0.35rem;
   }
+
+  .tab-btn {
+    min-height: 38px;
+    padding: 0.35rem 0.8rem;
+  }
+
+  /* Responsive Date Filter Grid */
   .date-filter-box {
-    padding: 0.75rem 0.85rem;
+    width: 100%;
+    padding: 0.85rem;
   }
+
   .date-fields-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .date-field {
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .date-field.sort-field {
+    flex: 1 1 200px;
+  }
+
+  .date-arrow,
+  .filter-divider {
+    display: none;
+  }
+
+  .date-input-wrap {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 40px;
+  }
+
+  .date-input-wrap input {
+    width: 100%;
+  }
+
+  .sort-select-wrap {
+    width: 100%;
+  }
+
+  .sort-select {
+    width: 100%;
+    height: 100%;
+  }
+
+  .date-clear-btn {
+    flex: 1 1 100%;
+    min-height: 38px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Stats Card */
+  .stats-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .stat-group {
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .admin-notice-pill {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.73rem;
+    line-height: 1.4;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Image Grid - Clean 2-column Layout on Mobile */
+  .image-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .category-card {
+    padding: 1rem 0.85rem;
+    border-radius: var(--radius-md);
+  }
+
+  .category-header {
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .image-details {
+    padding: 0.55rem 0.65rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .btn-download {
+    width: 100%;
+    min-height: 38px;
+    justify-content: center;
+    font-size: 0.78rem;
+  }
+
+  /* Lightbox Modal on Tablets/Mobile */
+  .modal-overlay {
+    padding: 0.5rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .glass-modal {
+    max-height: 96vh;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-header-bar {
+    padding: 0.5rem 0.85rem;
+  }
+
+  .modal-image-wrapper {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .modal-details {
+    padding: 0.6rem 0.85rem;
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
   }
-  .date-field {
-    justify-content: space-between;
-  }
-  .date-arrow {
-    display: none;
-  }
-  .date-input-wrap {
-    flex: 1;
-  }
-  .date-input-wrap input {
+
+  .modal-info {
     width: 100%;
   }
-  .image-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
+
+  #modal-download-btn {
+    width: 100%;
+    min-height: 42px;
+    justify-content: center;
+    text-align: center;
   }
-  .image-preview-box {
-    height: 125px;
+}
+
+/* --- 9.5 Standard Smartphones (<= 576px) --- */
+@media (max-width: 576px) {
+  .site-container {
+    padding: 0 0.75rem;
   }
-  .image-details {
-    padding: 0.55rem 0.65rem;
-    flex-direction: column;
-    align-items: flex-start;
+
+  .hide-md,
+  .hide-xs {
+    display: none !important;
+  }
+
+  .top-info-left {
     gap: 0.4rem;
   }
-  .image-filename {
-    max-width: 100%;
+
+  .info-pill {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.4rem;
   }
-  .btn-download {
-    width: 100%;
+
+  .top-portal-btn {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .school-emblem {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .brand-nepali {
+    font-size: 0.94rem;
+  }
+
+  .brand-english {
+    font-size: 0.98rem;
+  }
+
+  .theme-toggle-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .theme-toggle-btn .theme-icon {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .brand-col {
+    grid-column: span 1;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
     text-align: center;
+    gap: 0.4rem;
+  }
+}
+
+/* --- 9.6 Compact Mobile Phones & Foldable Screens (<= 380px, e.g. 280px-360px) --- */
+@media (max-width: 380px) {
+  .site-container {
+    padding: 0 0.5rem;
+  }
+
+  .brand {
+    gap: 0.5rem;
+  }
+
+  .school-emblem {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  .brand-nepali {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .brand-english {
+    font-size: 0.86rem;
+    line-height: 1.2;
+  }
+
+  .search-box {
+    padding: 0.35rem 0.65rem;
+  }
+
+  .hero-card {
+    padding: 1.15rem 0.65rem;
+  }
+
+  .hero-badge {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .hero-title {
+    font-size: 1.25rem;
+  }
+
+  .hero-desc {
+    font-size: 0.8rem;
+  }
+
+  .date-field {
+    flex: 1 1 100%;
+  }
+
+  /* Single column on very narrow screens for optimal clarity and readability */
+  .image-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .image-preview-box {
+    aspect-ratio: 16 / 9;
+  }
+
+  .stat-group {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .stat-divider {
+    display: none;
+  }
+
+  .modal-nav-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+}
+
+/* --- 9.7 Mobile Landscape & Short Viewports (height <= 520px) --- */
+@media (orientation: landscape) and (max-height: 520px) {
+  .top-nav-bar {
+    display: none; /* Hide top notice bar in landscape to maximize screen height */
+  }
+
+  .glass-header {
+    padding: 0.35rem 0;
+  }
+
+  .school-emblem {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-nepali {
+    font-size: 0.85rem;
+  }
+
+  .brand-english {
+    font-size: 0.9rem;
+  }
+
+  .hero-section {
+    padding: 0.75rem 0 0.5rem;
+  }
+
+  .hero-card {
+    padding: 0.85rem 1rem;
+  }
+
+  .hero-desc {
+    display: none;
+  }
+
+  .hero-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-overlay {
+    padding: 0 !important;
+  }
+
+  .glass-modal {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .modal-header-bar {
+    padding: 0.25rem 0.85rem !important;
+    min-height: 34px !important;
+  }
+
+  .modal-details {
+    padding: 0.25rem 0.85rem !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 36px !important;
+  }
+
+  .modal-info {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+
+  .modal-filename {
+    font-size: 0.82rem !important;
+  }
+
+  #modal-download-btn {
+    width: auto !important;
+    min-height: 30px !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.76rem !important;
+  }
+}
+
+/* --- 9.8 Touch-Screen Friendly Optimizations (Mobile / Tablet Pointers) --- */
+@media (hover: none) and (pointer: coarse) {
+  /* Suppress desktop hover overlay to avoid sticky touch state */
+  .image-preview-box .preview-overlay {
+    display: none;
+  }
+
+  .image-preview-box:active img {
+    transform: scale(0.97);
+  }
+
+  .btn,
+  .glass-btn,
+  .tab-btn,
+  .date-input-wrap,
+  .search-box {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-btn {
+    touch-action: manipulation;
+  }
+}
+
+/* --- 9.9 Accessibility: Reduced Motion Support --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- 9.10 Print Optimization --- */
+@media print {
+  .top-nav-bar,
+  .header-controls,
+  .hero-badge,
+  .category-tabs-wrapper,
+  .date-filter-box,
+  .stats-strip,
+  .btn-download,
+  .ambient-glow,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .category-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
   }
 }

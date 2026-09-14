@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const dateFromInput = document.getElementById('date-from');
   const dateToInput = document.getElementById('date-to');
   const dateClearBtn = document.getElementById('date-clear-btn');
+  const sortSelect = document.getElementById('sort-select');
   const totalCategoriesEl = document.getElementById('total-categories');
   const totalImagesEl = document.getElementById('total-images');
   const emptyStateEl = document.getElementById('empty-state');
@@ -154,8 +155,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Helper function to sort images (default: newest / recent uploads in front)
+  function sortImages(images, sortOrder = 'newest') {
+    if (!Array.isArray(images)) return [];
+    return [...images].sort((a, b) => {
+      const nameA = typeof a === 'string' ? a : (a.name || '');
+      const nameB = typeof b === 'string' ? b : (b.name || '');
+      const dateA = normalizeDate(typeof a === 'object' ? a.date : '');
+      const dateB = normalizeDate(typeof b === 'object' ? b.date : '');
+      const timeA = typeof a === 'object' && (a.timestamp || a.mtime) ? (a.timestamp || a.mtime) : 0;
+      const timeB = typeof b === 'object' && (b.timestamp || b.mtime) ? (b.timestamp || b.mtime) : 0;
+
+      if (sortOrder === 'oldest') {
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
+        if (timeA !== timeB) return timeA - timeB;
+        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+      } else if (sortOrder === 'name-asc') {
+        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+      } else if (sortOrder === 'name-desc') {
+        return nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
+      } else {
+        // 'newest' (recent uploads in front of each category)
+        if (dateA !== dateB) return dateB.localeCompare(dateA);
+        if (timeA !== timeB) return timeB - timeA;
+        return nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
+      }
+    });
+  }
+
   // Initialize Gallery UI and Dynamic Tabs
   function initializeGallery(categories) {
+    // Ensure all categories have images sorted with recents in front by default
+    categories.forEach(cat => {
+      if (cat.images) {
+        cat.images = sortImages(cat.images, 'newest');
+      }
+    });
     buildCategoryTabs(categories);
     applyFilterAndRender();
   }
@@ -248,6 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dateClearBtn) dateClearBtn.classList.add('hidden');
     }
 
+    const sortOrder = sortSelect ? sortSelect.value : 'newest';
+
     let filtered = allCategories.map(cat => {
       const catNameLower = cat.category.toLowerCase();
 
@@ -293,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       return {
         category: cat.category,
-        images: images
+        images: sortImages(images, sortOrder)
       };
     }).filter(Boolean);
 
@@ -447,6 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dateToInput) dateToInput.value = '';
       applyFilterAndRender();
     });
+  }
+
+  // Sort order change handler
+  if (sortSelect) {
+    sortSelect.addEventListener('change', applyFilterAndRender);
   }
 
   // -------------------------------------------------------------

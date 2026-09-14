@@ -256,12 +256,13 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
                 with open(dest_path, "wb") as f:
                     f.write(content)
 
-                # Save metadata with upload date via the app reference
+                # Save metadata with upload date and timestamp via the app reference
                 app = MobileUploadHandler.app_ref
                 if app is not None:
                     if safe_category not in app.metadata:
                         app.metadata[safe_category] = {}
-                    app.metadata[safe_category][safe_name] = {"date": today_str}
+                    file_mtime = int(os.path.getmtime(dest_path)) if os.path.exists(dest_path) else int(datetime.now().timestamp())
+                    app.metadata[safe_category][safe_name] = {"date": today_str, "timestamp": file_mtime}
                     app.save_metadata()
                     # Schedule a UI refresh on the main thread
                     app.root.after(0, lambda: app.refresh_all())
@@ -796,11 +797,11 @@ class GalleryAdminApp:
 
             for cat in categories:
                 cat_path = os.path.join(CATEGORIES_DIR, cat)
-                images = sorted([
+                images = [
                     f for f in os.listdir(cat_path)
                     if os.path.isfile(os.path.join(cat_path, f))
                     and os.path.splitext(f)[1].lower() in IMAGE_EXTENSIONS
-                ])
+                ]
 
                 if cat not in self.metadata:
                     self.metadata[cat] = {}
@@ -808,17 +809,34 @@ class GalleryAdminApp:
                 cat_images_data = []
                 for img in images:
                     img_path = os.path.join(cat_path, img)
-                    if img in self.metadata[cat] and "date" in self.metadata[cat][img]:
-                        img_date = self.metadata[cat][img]["date"]
-                    else:
-                        try:
-                            mtime = os.path.getmtime(img_path)
-                            img_date = datetime.fromtimestamp(mtime).strftime("%Y/%m/%d")
-                        except Exception:
-                            img_date = today_str
-                        self.metadata[cat][img] = {"date": img_date}
+                    img_meta = self.metadata.get(cat, {}).get(img, {})
+                    img_date = img_meta.get("date", "")
+                    try:
+                        mtime = os.path.getmtime(img_path)
+                    except Exception:
+                        mtime = 0
 
-                    cat_images_data.append({"name": img, "date": img_date})
+                    if not img_date:
+                        if mtime:
+                            img_date = datetime.fromtimestamp(mtime).strftime("%Y/%m/%d")
+                        else:
+                            img_date = today_str
+                        if img not in self.metadata[cat]:
+                            self.metadata[cat][img] = {}
+                        self.metadata[cat][img]["date"] = img_date
+
+                    timestamp = img_meta.get("timestamp") or int(mtime)
+                    cat_images_data.append({
+                        "name": img,
+                        "date": img_date,
+                        "timestamp": timestamp
+                    })
+
+                # Sort images: recently uploaded images in front (newest date, newest timestamp, name)
+                cat_images_data.sort(
+                    key=lambda x: (x.get("date", ""), x.get("timestamp", 0), x.get("name", "")),
+                    reverse=True
+                )
 
                 manifest_data.append({"category": cat, "images": cat_images_data})
 
@@ -1327,11 +1345,26 @@ class GalleryAdminApp:
 
             cat_path = os.path.join(CATEGORIES_DIR, cat_name)
             if os.path.exists(cat_path):
-                images = sorted([
+                images = [
                     f for f in os.listdir(cat_path)
                     if os.path.isfile(os.path.join(cat_path, f))
                     and os.path.splitext(f)[1].lower() in IMAGE_EXTENSIONS
-                ])
+                ]
+
+                def get_img_sort_key(img_name):
+                    img_path = os.path.join(cat_path, img_name)
+                    meta_entry = self.metadata.get(cat_name, {}).get(img_name, {})
+                    d = meta_entry.get("date", "")
+                    try:
+                        mtime = os.path.getmtime(img_path)
+                    except Exception:
+                        mtime = 0
+                    if not d and mtime:
+                        d = datetime.fromtimestamp(mtime).strftime("%Y/%m/%d")
+                    t = meta_entry.get("timestamp") or int(mtime)
+                    return (d, t, img_name)
+
+                images.sort(key=get_img_sort_key, reverse=True)
                 reselect_idx = None
                 for idx, img in enumerate(images):
                     self.img_listbox.insert(tk.END, f"  {img}")
@@ -1598,7 +1631,8 @@ class GalleryAdminApp:
                             f.write(jpeg_data)
                         
                         dest_filename = os.path.basename(target_path)
-                        self.metadata[cat_name][dest_filename] = {"date": today_str}
+                        mtime_val = int(os.path.getmtime(target_path)) if os.path.exists(target_path) else int(datetime.now().timestamp())
+                        self.metadata[cat_name][dest_filename] = {"date": today_str, "timestamp": mtime_val}
                         copied_count += 1
                         last_uploaded = dest_filename
                         continue
@@ -1617,7 +1651,8 @@ class GalleryAdminApp:
             try:
                 shutil.copy2(file_path, target_path)
                 dest_filename = os.path.basename(target_path)
-                self.metadata[cat_name][dest_filename] = {"date": today_str}
+                mtime_val = int(os.path.getmtime(target_path)) if os.path.exists(target_path) else int(datetime.now().timestamp())
+                self.metadata[cat_name][dest_filename] = {"date": today_str, "timestamp": mtime_val}
                 copied_count += 1
                 last_uploaded = dest_filename
             except Exception as e:
