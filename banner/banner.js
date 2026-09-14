@@ -61,14 +61,8 @@
             this.prevBtn = null;
             this.nextBtn = null;
             this.closeBtn = null;
-            this.dontShowCheckbox = null;
             this.loaderEl = null;
             this.footerCaptionEl = null;
-
-            // Tracking for additions and edits after user last dismissed
-            this.serverContentHash = null;
-            this.changeStatus = null;
-            this.newItemsSinceDismissal = [];
 
             this.init();
         }
@@ -83,6 +77,13 @@
                 console.log("[ScsBanner] Banner media viewer is disabled in bannerSettings.");
                 return;
             }
+
+            // Clean up any old "Don't show again today" legacy suppression keys from localStorage
+            try {
+                localStorage.removeItem("scs_banner_closed_timestamp");
+                localStorage.removeItem("scs_banner_dismissed_fingerprint");
+                localStorage.removeItem("scs_banner_dismissed_state");
+            } catch (e) {}
 
             // Check PHP auto-detection only if enabled and running on http/https web server
             // (Browsers block fetch on file:// protocol with CORS error)
@@ -104,9 +105,6 @@
                             }
                             if (data.meta && typeof data.meta === "object") {
                                 this.meta = Object.assign({}, this.meta, data.meta);
-                            }
-                            if (data.contentHash) {
-                                this.serverContentHash = data.contentHash;
                             }
                         }
                     }
@@ -142,281 +140,42 @@
             this.buildDOM();
             this.bindEvents();
 
-            // Detect any new items added or existing items edited since dismissal
-            this.changeStatus = this.detectNewOrEditedItems();
-            this.newItemsSinceDismissal = this.changeStatus.newItems || [];
-
             // Auto-open handling:
-            // If new or edited items exist, isDismissed() returns false,
-            // so the viewer automatically opens and navigates directly to the new/edited item!
-            const dismissed = this.isDismissed();
-            if (this.settings.autoOpen && !dismissed) {
+            // "Don't show again today" has been removed; visitors see the announcement popup on load!
+            const isDismissed = this.isDismissed();
+            if (this.settings.autoOpen && !isDismissed) {
                 setTimeout(() => {
-                    const targetIdx = (this.changeStatus && this.changeStatus.hasChanges)
-                        ? this.changeStatus.firstTargetIndex
-                        : 0;
-                    this.open(targetIdx);
+                    this.open(0);
                 }, 400);
             }
-
-            // Visually signal new/updated items on the floating trigger
-            this.updateFloatingTriggerNewBadge();
         }
 
-        /**
-         * Comprehensive fingerprint string capturing:
-         * - Ordered list of media paths
-         * - Title of every media item
-         * - Total count of items
-         * - Server content hash (if PHP available)
-         *
-         * Any addition, removal, reordering, or caption/title edit will produce a different fingerprint!
-         */
-        getMediaFingerprint() {
-            const items = this.mediaList.map((url, idx) => ({
-                idx,
-                url,
-                title: this.getTitle(url) || ""
-            }));
-            const hash = this.serverContentHash || (this.settings.lastUpdated ? String(this.settings.lastUpdated) : "");
-            return JSON.stringify({
-                count: this.mediaList.length,
-                items,
-                hash
-            });
-        }
-
-        /**
-         * Compares current media items, titles, and server hash against what was stored at dismissal.
-         * Detects:
-         *  - Newly added items (URL not in dismissed list)
-         *  - Edited items (title/caption changed for an existing URL)
-         *  - Removed items (count changed)
-         *  - Server content hash changes
-         */
-        detectNewOrEditedItems() {
-            try {
-                const dismissedTime = localStorage.getItem("scs_banner_closed_timestamp");
-                const storedFingerprint = localStorage.getItem("scs_banner_dismissed_fingerprint");
-
-                // Fresh visitor, never dismissed -> nothing is "new/edited", show normally
-                if (!dismissedTime) {
-                    return {
-                        hasChanges: false,
-                        newItems: [],
-                        editedItems: [],
-                        allChangedIndices: [],
-                        firstTargetIndex: 0
-                    };
-                }
-
-                // Dismissed before, but without fingerprint (legacy session before this fix):
-                // We cannot verify what they saw, so break suppression and show everything!
-                if (!storedFingerprint) {
-                    return {
-                        hasChanges: true,
-                        newItems: this.mediaList.map((url, idx) => ({ url, idx, title: this.getTitle(url) })),
-                        editedItems: [],
-                        allChangedIndices: this.mediaList.map((_, idx) => idx),
-                        firstTargetIndex: 0
-                    };
-                }
-
-                let parsed = null;
-                try {
-                    parsed = JSON.parse(storedFingerprint);
-                } catch (e) {
-                    parsed = null;
-                }
-
-                if (!parsed) {
-                    return {
-                        hasChanges: true,
-                        newItems: this.mediaList.map((url, idx) => ({ url, idx, title: this.getTitle(url) })),
-                        editedItems: [],
-                        allChangedIndices: this.mediaList.map((_, idx) => idx),
-                        firstTargetIndex: 0
-                    };
-                }
-
-                // Map of stored URLs to their stored title and idx
-                const storedMap = new Map();
-                let storedHash = "";
-                let storedCount = -1;
-
-                if (Array.isArray(parsed)) {
-                    // Old format: array of URLs ["banner/img1.jpg", ...]
-                    storedCount = parsed.length;
-                    parsed.forEach((url, idx) => {
-                        if (typeof url === "string") {
-                            storedMap.set(url, { title: null, idx });
-                        }
-                    });
-                } else if (parsed && typeof parsed === "object") {
-                    storedCount = typeof parsed.count === "number" ? parsed.count : -1;
-                    storedHash = parsed.hash || "";
-                    if (Array.isArray(parsed.items)) {
-                        parsed.items.forEach((it, idx) => {
-                            if (typeof it === "string") {
-                                storedMap.set(it, { title: null, idx });
-                            } else if (it && typeof it === "object") {
-                                storedMap.set(it.url, {
-                                    title: typeof it.title === "string" ? it.title : null,
-                                    idx: typeof it.idx === "number" ? it.idx : idx
-                                });
-                            }
-                        });
-                    }
-                }
-
-                const newItems = [];
-                const editedItems = [];
-                const allChangedIndices = [];
-
-                this.mediaList.forEach((url, idx) => {
-                    const currentTitle = this.getTitle(url) || "";
-                    if (!storedMap.has(url)) {
-                        // NEW item added!
-                        newItems.push({ url, idx, title: currentTitle });
-                        allChangedIndices.push(idx);
-                    } else {
-                        // Existing item: check if title/caption was EDITED!
-                        const stored = storedMap.get(url);
-                        if (stored.title !== null && stored.title !== currentTitle) {
-                            editedItems.push({
-                                url,
-                                idx,
-                                oldTitle: stored.title,
-                                newTitle: currentTitle
-                            });
-                            allChangedIndices.push(idx);
-                        }
-                    }
-                });
-
-                const countChanged = (storedCount !== -1 && storedCount !== this.mediaList.length);
-                const hashChanged = (this.serverContentHash && storedHash && this.serverContentHash !== storedHash);
-
-                // If stored fingerprint was the old legacy format (no titles saved in it):
-                const currentFp = this.getMediaFingerprint();
-                const fpMismatch = (storedFingerprint !== currentFp);
-
-                const hasChanges = (newItems.length > 0) ||
-                                   (editedItems.length > 0) ||
-                                   countChanged ||
-                                   hashChanged ||
-                                   (fpMismatch && (newItems.length > 0 || editedItems.length > 0 || countChanged));
-
-                let firstTargetIndex = 0;
-                if (newItems.length > 0) {
-                    firstTargetIndex = newItems[0].idx;
-                } else if (editedItems.length > 0) {
-                    firstTargetIndex = editedItems[0].idx;
-                } else if (allChangedIndices.length > 0) {
-                    firstTargetIndex = allChangedIndices[0];
-                }
-
-                return {
-                    hasChanges,
-                    newItems,
-                    editedItems,
-                    allChangedIndices,
-                    firstTargetIndex
-                };
-            } catch (e) {
-                return {
-                    hasChanges: true,
-                    newItems: this.mediaList.map((url, idx) => ({ url, idx })),
-                    editedItems: [],
-                    allChangedIndices: this.mediaList.map((_, idx) => idx),
-                    firstTargetIndex: 0
-                };
-            }
-        }
-
-        /**
-         * Returns true (suppress popup) ONLY when ALL of these are true:
-         *   1. User clicked "Don't show again today" within the past 24 hours
-         *   2. NO new items have been added to the media list
-         *   3. NO existing items have been edited (titles, files, captions)
-         * If ANY item was added or edited, returns false → viewer opens!
-         */
         isDismissed() {
-            try {
-                const dismissedTime = localStorage.getItem("scs_banner_closed_timestamp");
-                if (!dismissedTime) return false; // Never dismissed
-
-                const oneDayMs = 24 * 60 * 60 * 1000;
-                if ((Date.now() - parseInt(dismissedTime, 10)) >= oneDayMs) {
-                    this.clearDismiss();
-                    return false; // Expired after 24h
-                }
-
-                // Check if any items were added or edited
-                const changeStatus = this.detectNewOrEditedItems();
-                if (changeStatus.hasChanges) {
-                    // NEW OR EDITED ITEMS EXIST → DO NOT SUPPRESS!
+            if (this.settings.rememberClosed) {
+                try {
+                    return sessionStorage.getItem("scs_banner_closed_session") === "1";
+                } catch (e) {
                     return false;
                 }
-
-                return true; // Truly unchanged within 24h → suppress
-            } catch (e) {
-                return false;
             }
-        }
-
-        /** Legacy alias */
-        isDismissedWithoutNewItems() {
-            return this.isDismissed();
+            return false;
         }
 
         dismiss() {
-            try {
-                localStorage.setItem("scs_banner_closed_timestamp", Date.now().toString());
-                localStorage.setItem("scs_banner_dismissed_fingerprint", this.getMediaFingerprint());
-                this.changeStatus = null;
-                this.newItemsSinceDismissal = [];
-                this.updateFloatingTriggerNewBadge();
-            } catch (e) {}
+            if (this.settings.rememberClosed) {
+                try {
+                    sessionStorage.setItem("scs_banner_closed_session", "1");
+                } catch (e) {}
+            }
         }
 
         clearDismiss() {
             try {
+                sessionStorage.removeItem("scs_banner_closed_session");
                 localStorage.removeItem("scs_banner_closed_timestamp");
                 localStorage.removeItem("scs_banner_dismissed_fingerprint");
-                this.changeStatus = null;
-                this.newItemsSinceDismissal = [];
-                this.updateFloatingTriggerNewBadge();
+                localStorage.removeItem("scs_banner_dismissed_state");
             } catch (e) {}
-        }
-
-        /**
-         * Add/remove a "NEW" or "UPDATED" tag on the floating trigger button
-         * to visually tell visitors there are announcements even while dismissed.
-         */
-        updateFloatingTriggerNewBadge() {
-            if (!this.floatingTrigger) return;
-            const changeStatus = this.detectNewOrEditedItems();
-            const totalChanged = changeStatus.newItems.length + changeStatus.editedItems.length;
-
-            const existing = this.floatingTrigger.querySelector(".scs-floating-new-tag");
-            if (existing) existing.remove();
-
-            if (changeStatus.hasChanges && totalChanged > 0) {
-                this.floatingTrigger.classList.add("scs-has-new");
-                const label = this.floatingTrigger.querySelector(".scs-floating-label");
-                if (label) {
-                    const tag = document.createElement("span");
-                    tag.className = "scs-floating-new-tag";
-                    const tagText = changeStatus.newItems.length > 0
-                        ? `${changeStatus.newItems.length} NEW`
-                        : "UPDATED";
-                    tag.textContent = tagText;
-                    label.appendChild(tag);
-                }
-            } else {
-                this.floatingTrigger.classList.remove("scs-has-new");
-            }
         }
 
         getMediaType(url) {
@@ -540,13 +299,6 @@
 
                             <!-- Footer Navigation & Controls Row -->
                             <div class="scs-banner-footer-controls">
-                                <div class="scs-banner-footer-left">
-                                    <label class="scs-banner-checkbox-label">
-                                        <input type="checkbox" id="scsDontShowAgain">
-                                        <span>Don't show again today</span>
-                                    </label>
-                                </div>
-
                                 <!-- Indicator Dots -->
                                 <div class="scs-banner-dots" id="scsBannerDots"></div>
 
@@ -575,7 +327,6 @@
             this.prevBtn = document.getElementById("scsBannerPrev");
             this.nextBtn = document.getElementById("scsBannerNext");
             this.closeBtn = document.getElementById("scsBannerClose");
-            this.dontShowCheckbox = document.getElementById("scsDontShowAgain");
             this.loaderEl = document.getElementById("scsBannerLoader");
             this.footerHintEl = document.getElementById("scsFooterHint");
             this.footerCaptionEl = document.getElementById("scsBannerFooterCaption");
@@ -592,16 +343,11 @@
             }
             this.dotsContainer.style.display = "flex";
 
-            const changeStatus = this.detectNewOrEditedItems();
-            const changedIndices = new Set(changeStatus.allChangedIndices || []);
-
             this.mediaList.forEach((_, idx) => {
                 const dot = document.createElement("button");
                 dot.type = "button";
-                let cls = `scs-banner-dot ${idx === this.currentIndex ? "scs-active" : ""}`;
-                if (changedIndices.has(idx)) cls += " scs-dot-new";
-                dot.className = cls;
-                dot.setAttribute("aria-label", `Go to slide ${idx + 1}${changedIndices.has(idx) ? " (Updated/New)" : ""}`);
+                dot.className = `scs-banner-dot ${idx === this.currentIndex ? "scs-active" : ""}`;
+                dot.setAttribute("aria-label", `Go to slide ${idx + 1}`);
                 dot.addEventListener("click", (e) => {
                     e.stopPropagation();
                     this.goToIndex(idx);
@@ -631,43 +377,22 @@
                 this.next();
             });
 
-            // "Don't show again today" checkbox
-            // Dismiss is stored when the viewer closes via close().
-            // If the user un-checks, we clear the stored dismissal immediately.
-            if (this.dontShowCheckbox) {
-                this.dontShowCheckbox.addEventListener("change", (e) => {
-                    if (!e.target.checked) {
-                        this.clearDismiss();
-                    }
-                    // When checked, dismissal is saved by close() when the user closes the viewer,
-                    // ensuring the media fingerprint is always up-to-date at dismiss time.
+            // Floating trigger click – open banner viewer
+            if (this.floatingTrigger) {
+                this.floatingTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.open(0);
                 });
             }
 
-        // Floating trigger click – open banner viewer
-        if (this.floatingTrigger) {
-            this.floatingTrigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const changeStatus = this.detectNewOrEditedItems();
-                const targetIdx = (changeStatus && changeStatus.hasChanges)
-                    ? changeStatus.firstTargetIndex
-                    : 0;
-                this.open(targetIdx);
-            });
-        }
-
-        // Rotate button – rotate image 90° clockwise per click
-        if (this.rotateBtn) {
-            this.rotateBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.rotation = (this.rotation + 90) % 360;
-                this.applyTransform();
-            });
-        }
-
-
-
-        // Keyboard navigation
+            // Rotate button – rotate image 90° clockwise per click
+            if (this.rotateBtn) {
+                this.rotateBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.rotation = (this.rotation + 90) % 360;
+                    this.applyTransform();
+                });
+            }
 
             // Keyboard navigation
             document.addEventListener("keydown", (e) => {
@@ -750,22 +475,13 @@
             }, { passive: true });
         }
 
-        open(index = null) {
+        open(index = 0) {
             this.isOpen = true;
             document.body.classList.add("scs-banner-active");
             this.overlay.classList.add("scs-show");
 
-            // CRITICAL: Always reset the "Don't show again today" checkbox
-            // so the user is never automatically re-dismissed without their conscious choice!
-            if (this.dontShowCheckbox) {
-                this.dontShowCheckbox.checked = false;
-            }
-
-            if (index === null || typeof index !== "number") {
-                const changeStatus = this.detectNewOrEditedItems();
-                index = (changeStatus && changeStatus.hasChanges)
-                    ? changeStatus.firstTargetIndex
-                    : 0;
+            if (typeof index !== "number" || index < 0 || index >= this.mediaList.length) {
+                index = 0;
             }
 
             this.goToIndex(index);
@@ -785,10 +501,7 @@
             this.stopSlideshow();
             this.stopActiveVideo();
 
-            // Check if user selected "Don't show again" OR rememberClosed setting is on
-            // Note: dismiss() now also stores a media fingerprint so new items can still
-            // break through the suppression on the next visit.
-            if ((this.dontShowCheckbox && this.dontShowCheckbox.checked) || this.settings.rememberClosed) {
+            if (this.settings.rememberClosed) {
                 this.dismiss();
             }
 
@@ -837,43 +550,23 @@
             const currentMedia = this.mediaList[this.currentIndex];
             const type = this.getMediaType(currentMedia);
 
-            // Determine if this slide is newly added or edited
-            const changeStatus = this.detectNewOrEditedItems();
-            const isNewItem = changeStatus.newItems.some(it => it.idx === this.currentIndex);
-            const isEditedItem = changeStatus.editedItems.some(it => it.idx === this.currentIndex);
-
             // Counter
             this.counterEl.textContent = `${this.currentIndex + 1} / ${this.mediaList.length}`;
 
-            // Header badge: switch to glowing red "NEW" or green/blue "UPDATED" style
+            // Header badge
             const badgeEl = this.overlay ? this.overlay.querySelector(".scs-banner-badge") : null;
             if (badgeEl) {
-                if (isNewItem) {
-                    badgeEl.innerHTML = `<i class="fas fa-bell"></i> NEW NOTICE`;
-                    badgeEl.className = "scs-banner-badge scs-badge-new";
-                } else if (isEditedItem) {
-                    badgeEl.innerHTML = `<i class="fas fa-sync-alt"></i> UPDATED NOTICE`;
-                    badgeEl.className = "scs-banner-badge scs-badge-updated";
-                } else {
-                    badgeEl.innerHTML = `<i class="fas fa-bullhorn"></i>Events/Notices`;
-                    badgeEl.className = "scs-banner-badge";
-                }
+                badgeEl.innerHTML = `<i class="fas fa-bullhorn"></i>Events/Notices`;
+                badgeEl.className = "scs-banner-badge";
             }
 
-            // Title (header) + footer caption with optional "NEW" or "UPDATED" pill
+            // Title (header) + footer caption
             const resolvedTitle = this.getTitle(currentMedia);
             this.titleEl.textContent = resolvedTitle;
             this.titleEl.title = resolvedTitle;
             if (this.footerCaptionEl) {
-                let captionPrefix = "";
-                if (isNewItem) {
-                    captionPrefix = `<span class="scs-caption-pill scs-pill-new">&#x2605; New</span>`;
-                } else if (isEditedItem) {
-                    captionPrefix = `<span class="scs-caption-pill scs-pill-updated">&#x27F3; Updated</span>`;
-                }
-
-                if (resolvedTitle || captionPrefix) {
-                    this.footerCaptionEl.innerHTML = `${captionPrefix}${resolvedTitle || ""}`;
+                if (resolvedTitle) {
+                    this.footerCaptionEl.textContent = resolvedTitle;
                     this.footerCaptionEl.style.display = "block";
                 } else {
                     this.footerCaptionEl.textContent = "";

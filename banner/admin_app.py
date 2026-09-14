@@ -1105,7 +1105,7 @@ class BannerAdminApp:
         self.chk_remember = create_option_row(
             cfg_card,
             "4. Remember Dismissal (rememberClosed)",
-            "Hides the popup for 24 hours after a visitor clicks Close.",
+            "Hides the popup for the current browser session after a visitor clicks Close.",
             self.var_remember_closed
         )
 
