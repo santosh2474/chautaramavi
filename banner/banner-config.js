@@ -39,7 +39,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1773468900000
+    lastUpdated: 1789388558345
 };
 
 // Media Items to Display
@@ -54,6 +54,5 @@ const bannerMeta = {
 const bannerMedia = [
     "banner/banner_img/1000109365.jpg",
     "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg",
-    "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg",
-    "banner/banner_img/20260909_155614.jpg"
+    "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg"
 ];
