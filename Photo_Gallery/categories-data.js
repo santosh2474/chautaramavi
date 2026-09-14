@@ -161,6 +161,26 @@ window.GALLERY_DATA = [
     ]
   },
   {
+    "category": "Academics",
+    "images": [
+      {
+        "name": "IMG20260910105514.jpg",
+        "date": "2026/09/14",
+        "timestamp": 1789362716
+      },
+      {
+        "name": "IMG20260910105215.jpg",
+        "date": "2026/09/14",
+        "timestamp": 1789362716
+      },
+      {
+        "name": "IMG20260910105208.jpg",
+        "date": "2026/09/14",
+        "timestamp": 1789362716
+      }
+    ]
+  },
+  {
     "category": "Cultural Activities",
     "images": []
   },
