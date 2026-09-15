@@ -88,7 +88,7 @@
                 var dayString = now.toLocaleDateString('en-US', { weekday: 'long' });
                 var dateString = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
                 var bsString = (typeof toBikEuro === 'function') ? toBikEuro(now) : '';
-                dateTimeElement.innerHTML = '<strong>' + dateTimeString + ' | ' + dateString + ' A.D.' + (bsString ? ', ' + bsString + ' B.S.' : '') + ' Day: ' + dayString + '</strong>';
+                dateTimeElement.innerHTML = '<strong>' + dateTimeString + (bsString ? ' | ' + bsString + ' B.S.' : '') + ' | ' + dateString + ' A.D. | Day: ' + dayString + '</strong>';
             }
         }
 

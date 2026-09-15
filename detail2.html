@@ -45,12 +45,12 @@
             <div class="d-flex justify-content-start">
                 <small class="text-white mr-3"><i class="fa fa-phone-alt mr-2"></i><strong>+977-9862606960</strong></small>
                 <small class="text-white mr-3"><i class="fa fa-envelope mr-2"></i><strong>info@chautaramavi.edu.np</strong></small>
+                <small class="text-white mr-3" title="Total Visitors">🌐 <strong>Total Visitors: <span id="totalVisitors">…</span></strong></small>
             </div>
         </div>
         <div class="col-lg-6 col-md-6 col-12 text-center">
             <div class="d-flex justify-content-end">
                 <div class="text-white mr-3" id="liveDateTime"><strong></strong></div> <!-- Element to display live date and time -->
-                <small class="text-white mr-3" title="Total Visitors">🌐 <strong>Total Visitors: <span id="totalVisitors">…</span></strong></small>
                 <a class="text-white px-2" href="">
                     <i class="fab fa-facebook-f"></i>
                 </a>
@@ -90,7 +90,7 @@
             var dayString = now.toLocaleDateString('en-US', { weekday: 'long' });
             var dateString = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
             var bsString = (typeof toBikEuro === 'function') ? toBikEuro(now) : '';
-            dateTimeElement.innerHTML = '<strong>' + dateTimeString + ' | ' + dateString + ' A.D.' + (bsString ? ', ' + bsString + ' B.S.' : '') + ' Day: ' + dayString + '</strong>';
+            dateTimeElement.innerHTML = '<strong>' + dateTimeString + (bsString ? ' | ' + bsString + ' B.S.' : '') + ' | ' + dateString + ' A.D. | Day: ' + dayString + '</strong>';
         }
     }
 
