@@ -973,6 +973,14 @@ body.scs-banner-active {
   border-color: rgba(255, 51, 102, 0.55);
 }
 
+/* Keep the button vertically centered while pressed. The generic
+   ".scs-banner-btn:active { transform: scale(0.96) }" rule would otherwise
+   override translateY(-50%) and make the button jump out from under the
+   cursor, so clicks/mouseup often land outside it and get swallowed. */
+.scs-banner-dismiss-btn:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
 @media (max-width: 600px) {
   .scs-banner-footer-hint {
     display: none;
@@ -980,7 +988,9 @@ body.scs-banner-active {
 
   .scs-banner-dismiss-btn {
     left: 8px;
-    padding: 4px 6px;
+    padding: 6px 8px;
+    min-width: 36px;
+    min-height: 32px;
   }
 
   .scs-banner-dismiss-btn span {

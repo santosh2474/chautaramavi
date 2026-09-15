@@ -147,7 +147,11 @@
             const isDismissed = this.isDismissed();
             if (this.settings.autoOpen && !isDismissed) {
                 setTimeout(() => {
-                    this.open(0);
+                    // Re-check before opening so a slow PHP/meta fetch cannot force the
+                    // popup open after the visitor already dismissed it in the meantime.
+                    if (!this.isDismissed() && !this.isOpen) {
+                        this.open(0);
+                    }
                 }, 400);
             }
         }
@@ -383,6 +387,9 @@
                 this.dismissTodayBtn.style.display = "inline-flex";
                 this.dismissTodayBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
+                    if (this.dismissClicked) return;
+                    this.dismissClicked = true;
+                    this.dismissTodayBtn.disabled = true;
                     this.dismiss();
                     this.close();
                 });
