@@ -50,6 +50,7 @@
         <div class="col-lg-6 col-md-6 col-12 text-center">
             <div class="d-flex justify-content-end">
                 <div class="text-white mr-3" id="liveDateTime"><strong></strong></div> <!-- Element to display live date and time -->
+                <small class="text-white mr-3" title="Total Visitors">🌐 <strong>Total Visitors: <span id="totalVisitors">…</span></strong></small>
                 <a class="text-white px-2" href="">
                     <i class="fab fa-facebook-f"></i>
                 </a>
@@ -85,14 +86,23 @@
         var dateTimeElement = document.getElementById('liveDateTime');
         if (dateTimeElement) {
             var now = new Date();
-            var dateTimeString = now.toLocaleString();
-            dateTimeElement.innerHTML = '<strong>' + dateTimeString + '</strong>';
+            var dateTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            var dayString = now.toLocaleDateString('en-US', { weekday: 'long' });
+            var dateString = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+            var bsString = (typeof toBikEuro === 'function') ? toBikEuro(now) : '';
+            dateTimeElement.innerHTML = '<strong>' + dateTimeString + ' | ' + dateString + ' A.D.' + (bsString ? ', ' + bsString + ' B.S.' : '') + ' Day: ' + dayString + '</strong>';
         }
     }
 
     // Update the date and time every second
     setInterval(updateDateTime, 1000);
 </script>
+
+<!-- Bikram Sambat Date Converter -->
+<script src="js/bikram-sambat.js"></script>
+
+<!-- Total Visitors Counter -->
+<script src="js/visitor-counter.js"></script>
 <!-- Topbar End -->
 
   <!-- Navbar Start -->
