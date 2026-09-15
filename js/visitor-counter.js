@@ -3,8 +3,7 @@
 
     var DISPLAY_ID = "totalVisitors";
     var CACHE_STORAGE_KEY = "cms_total_visitors";
-    var COUNTED_STORAGE_KEY = "cms_visitor_counted_date";
-    var COUNTER_KEY = "chautaramavi-school/visitors";
+    var COUNTER_KEY = "chautaramavi_total_visitors";
     var API_BASE = "https://countapi.mileshilliard.com/api/v1";
 
     function render(value) {
@@ -35,27 +34,8 @@
         } catch (e) {}
     }
 
-    function isCountedToday() {
-        try {
-            return localStorage.getItem(COUNTED_STORAGE_KEY) === new Date().toDateString();
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function markCountedToday() {
-        try {
-            localStorage.setItem(COUNTED_STORAGE_KEY, new Date().toDateString());
-        } catch (e) {}
-    }
-
     function fallbackToLocal() {
-        var base = readCached() || 0;
-        var value = base;
-        if (!isCountedToday()) {
-            value = base + 1;
-            markCountedToday();
-        }
+        var value = (readCached() || 0) + 1;
         saveCached(value);
         render(value);
     }
@@ -86,7 +66,6 @@
 
     function hitCount() {
         fetchCount("/hit/" + COUNTER_KEY, function (value) {
-            markCountedToday();
             saveCached(value);
             render(value);
         });
@@ -99,15 +78,21 @@
         });
     }
 
+    function isHomePage() {
+        var parts = window.location.pathname.split("/");
+        var last = parts[parts.length - 1];
+        return last === "" || last.toLowerCase() === "index.html";
+    }
+
     function start() {
         if (!document.getElementById(DISPLAY_ID)) {
             return;
         }
         render(readCached() || "\u2026");
-        if (isCountedToday()) {
-            getCount();
-        } else {
+        if (isHomePage()) {
             hitCount();
+        } else {
+            getCount();
         }
     }
 
