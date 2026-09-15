@@ -10001,4 +10001,82 @@ h6,
   background: #2878EB;
 }
 
+/* ================================================================
+   Responsive Topbar
+   Phone No | Mail ID | Total Visitors | Date & Time | Social Icons
+   Text sizes scale fluidly with the viewport.
+   ================================================================ */
+.topbar {
+  font-size: clamp(12px, 1.1vw, 14px);
+  line-height: 1.5;
+  padding: 0.375rem 0;
+  overflow: hidden;
+}
+
+.topbar .row {
+  align-items: center;
+}
+
+.topbar .d-flex {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem 0;
+  min-width: 0;
+}
+
+.topbar .d-flex > small {
+  white-space: nowrap;
+}
+
+.topbar #liveDateTime {
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Social icons scale together with the topbar text */
+.topbar .text-white a,
+.topbar .fab {
+  font-size: 1.1em;
+}
+
+/* Tablet and below: let the long date/time text wrap and centre content */
+@media (max-width: 991.98px) {
+  .topbar {
+    font-size: clamp(11px, 1.45vw, 14px);
+  }
+  .topbar .d-flex.justify-content-end {
+    justify-content: center !important;
+  }
+  .topbar #liveDateTime {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* Small phones: stack nicely, scale text, avoid overflow */
+@media (max-width: 767.98px) {
+  .topbar {
+    font-size: clamp(10px, 2.4vw, 13px);
+    padding: 0.25rem 0;
+  }
+  .topbar .d-flex.justify-content-start {
+    justify-content: center !important;
+  }
+  .topbar .d-flex {
+    row-gap: 0.2rem;
+  }
+}
+
+/* Very small screens: allow wrapping of email / visitor counters */
+@media (max-width: 575.98px) {
+  .topbar .row {
+    row-gap: 0.25rem;
+  }
+  .topbar .d-flex > small,
+  .topbar #liveDateTime {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
 
