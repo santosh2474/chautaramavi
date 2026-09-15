@@ -949,8 +949,41 @@ body.scs-banner-active {
   color: var(--scs-text-muted);
 }
 
+/* "Don't show again today" Dismiss Button */
+.scs-banner-dismiss-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  min-height: 26px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--scs-border);
+  color: var(--scs-text-muted);
+  z-index: 2;
+  line-height: 1;
+  gap: 4px;
+}
+
+.scs-banner-dismiss-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 51, 102, 0.22);
+  border-color: rgba(255, 51, 102, 0.55);
+}
+
 @media (max-width: 600px) {
   .scs-banner-footer-hint {
+    display: none;
+  }
+
+  .scs-banner-dismiss-btn {
+    left: 8px;
+    padding: 4px 6px;
+  }
+
+  .scs-banner-dismiss-btn span {
     display: none;
   }
 }

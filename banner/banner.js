@@ -141,7 +141,9 @@
             this.bindEvents();
 
             // Auto-open handling:
-            // "Don't show again today" has been removed; visitors see the announcement popup on load!
+            // Respect "Don't show again today": if the visitor dismissed the popup earlier
+            // today (localStorage date marker), do NOT auto-open it again — even if new
+            // or edited media items were added to the folder after the dismissal.
             const isDismissed = this.isDismissed();
             if (this.settings.autoOpen && !isDismissed) {
                 setTimeout(() => {
@@ -150,23 +152,32 @@
             }
         }
 
+        // Returns today's date as a stable marker string, e.g. "2026-09-15".
+        getTodayMarker() {
+            const d = new Date();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return d.getFullYear() + "-" + month + "-" + day;
+        }
+
+        // "Don't show again today" is stored in localStorage *by calendar date*.
+        // Unlike sessionStorage (which is per-tab and cleared on browser close),
+        // this survives tab switches and browser restarts for the rest of the day,
+        // so a newly added/changed item is NOT able to trigger the popup again today.
         isDismissed() {
-            if (this.settings.rememberClosed) {
-                try {
-                    return sessionStorage.getItem("scs_banner_closed_session") === "1";
-                } catch (e) {
-                    return false;
-                }
+            if (!this.settings.rememberClosed) return false;
+            try {
+                return localStorage.getItem("scs_banner_dismissed_date") === this.getTodayMarker();
+            } catch (e) {
+                return false;
             }
-            return false;
         }
 
         dismiss() {
-            if (this.settings.rememberClosed) {
-                try {
-                    sessionStorage.setItem("scs_banner_closed_session", "1");
-                } catch (e) {}
-            }
+            if (!this.settings.rememberClosed) return;
+            try {
+                localStorage.setItem("scs_banner_dismissed_date", this.getTodayMarker());
+            } catch (e) {}
         }
 
         clearDismiss() {
@@ -175,6 +186,7 @@
                 localStorage.removeItem("scs_banner_closed_timestamp");
                 localStorage.removeItem("scs_banner_dismissed_fingerprint");
                 localStorage.removeItem("scs_banner_dismissed_state");
+                localStorage.removeItem("scs_banner_dismissed_date");
             } catch (e) {}
         }
 
@@ -299,6 +311,11 @@
 
                             <!-- Footer Navigation & Controls Row -->
                             <div class="scs-banner-footer-controls">
+                                <!-- Don't show again today -->
+                                <button type="button" class="scs-banner-btn scs-banner-dismiss-btn" id="scsDontShowToday" title="Hide this popup for the rest of the day">
+                                    <i class="far fa-clock"></i><span>Don't show again today</span>
+                                </button>
+
                                 <!-- Indicator Dots -->
                                 <div class="scs-banner-dots" id="scsBannerDots"></div>
 
@@ -330,6 +347,7 @@
             this.loaderEl = document.getElementById("scsBannerLoader");
             this.footerHintEl = document.getElementById("scsFooterHint");
             this.footerCaptionEl = document.getElementById("scsBannerFooterCaption");
+            this.dismissTodayBtn = document.getElementById("scsDontShowToday");
 
             this.buildDots();
         }
@@ -359,6 +377,18 @@
         bindEvents() {
             // Close actions
             this.closeBtn.addEventListener("click", () => this.close());
+
+            // "Don't show again today" – explicit user action; hides auto-open for the rest of the day
+            if (this.settings.rememberClosed && this.dismissTodayBtn) {
+                this.dismissTodayBtn.style.display = "inline-flex";
+                this.dismissTodayBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    this.dismiss();
+                    this.close();
+                });
+            } else if (this.dismissTodayBtn) {
+                this.dismissTodayBtn.style.display = "none";
+            }
             this.overlay.addEventListener("click", (e) => {
                 // Close if backdrop clicked directly (not the modal or its children)
                 if (e.target === this.overlay) {
@@ -501,10 +531,8 @@
             this.stopSlideshow();
             this.stopActiveVideo();
 
-            if (this.settings.rememberClosed) {
-                this.dismiss();
-            }
-
+            // NOTE: A plain close (X button / Esc / backdrop click) does NOT dismiss
+            // for today. Only the explicit "Don't show again today" button calls dismiss().
             this.overlay.classList.remove("scs-show");
             document.body.classList.remove("scs-banner-active");
 
