@@ -10024,6 +10024,11 @@ h6,
   min-width: 0;
 }
 
+.topbar small,
+.topbar #liveDateTime {
+  font-size: inherit;
+}
+
 .topbar .d-flex > small {
   white-space: nowrap;
 }
@@ -10053,10 +10058,11 @@ h6,
   }
 }
 
-/* Small phones: stack nicely, scale text, avoid overflow */
+/* Phones: smaller text, tighter padding, centre the left block */
 @media (max-width: 767.98px) {
   .topbar {
     font-size: clamp(10px, 2.4vw, 13px);
+    line-height: 1.4;
     padding: 0.25rem 0;
   }
   .topbar .d-flex.justify-content-start {
@@ -10065,10 +10071,16 @@ h6,
   .topbar .d-flex {
     row-gap: 0.2rem;
   }
+  .topbar .mr-3 {
+    margin-right: 0.75rem !important;
+  }
 }
 
-/* Very small screens: allow wrapping of email / visitor counters */
+/* Small phones: smallest text, allow wrapping of email / visitor counters */
 @media (max-width: 575.98px) {
+  .topbar {
+    font-size: clamp(9.5px, 2.5vw, 12px);
+  }
   .topbar .row {
     row-gap: 0.25rem;
   }
@@ -10076,6 +10088,9 @@ h6,
   .topbar #liveDateTime {
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+  .topbar .mr-3 {
+    margin-right: 0.5rem !important;
   }
 }
 

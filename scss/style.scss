@@ -290,6 +290,11 @@ h6,
     min-width: 0;
   }
 
+  small,
+  #liveDateTime {
+    font-size: inherit;
+  }
+
   .d-flex > small {
     white-space: nowrap;
   }
@@ -305,6 +310,7 @@ h6,
   }
 }
 
+/* Tablet and below: let the long date/time text wrap and centre content */
 @media (max-width: 991.98px) {
   .topbar {
     font-size: clamp(11px, 1.45vw, 14px);
@@ -320,9 +326,11 @@ h6,
   }
 }
 
+/* Phones: smaller text, tighter padding, centre the left block */
 @media (max-width: 767.98px) {
   .topbar {
     font-size: clamp(10px, 2.4vw, 13px);
+    line-height: 1.4;
     padding: 0.25rem 0;
 
     .d-flex.justify-content-start {
@@ -332,11 +340,18 @@ h6,
     .d-flex {
       row-gap: 0.2rem;
     }
+
+    .mr-3 {
+      margin-right: 0.75rem !important;
+    }
   }
 }
 
+/* Small phones: smallest text, allow wrapping of email / visitor counters */
 @media (max-width: 575.98px) {
   .topbar {
+    font-size: clamp(9.5px, 2.5vw, 12px);
+
     .row {
       row-gap: 0.25rem;
     }
@@ -345,6 +360,10 @@ h6,
     #liveDateTime {
       white-space: normal;
       overflow-wrap: anywhere;
+    }
+
+    .mr-3 {
+      margin-right: 0.5rem !important;
     }
   }
 }
