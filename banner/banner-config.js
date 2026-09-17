@@ -34,14 +34,14 @@ const bannerSettings = {
     // Shows a "Don't show again today" button in the banner. When clicked, the auto-open
     // popup is suppressed until the next calendar day using localStorage (survives tab
     // switches and browser restarts, so newly added media can NOT re-trigger it today).
-    rememberClosed: false,
+    rememberClosed: true,
 
     // Auto-detect files using server-side PHP (if your hosting supports PHP)
     // If enabled and get_banners.php is found, it will automatically scan banner/banner_img/
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1789616404769
+    lastUpdated: 1789633547937
 };
 
 // Media Items to Display
@@ -50,9 +50,13 @@ const bannerMeta = {
     "banner/banner_img/1000109365.jpg": {"title": "CTEVT-परीक्षा - 2083 (R & B) सञ्चालन सम्बन्धी अत्यन्त जरुरी सूचना"},
     "banner/banner_img/2083_05_26_ECA_Program_IMG_2.jpeg": {"title": "ECA_Program_Pic_2"},
     "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg": {"title": "ECA_Program_Pic_2 held on 2083/05/26"},
-    "banner/banner_img/20260909_155614.jpg": {"title": "Samir_Tamang_Sir_Photo"}
+    "banner/banner_img/20260909_155614.jpg": {"title": "Samir_Tamang_Sir_Photo"},
+    "banner/banner_img/page-header.jpg": {"title": "Drone View"},
+    "banner/banner_img/courses-1.jpg": {"title": "Computer Lab"}
 };
 
 const bannerMedia = [
+    "banner/banner_img/page-header.jpg",
+    "banner/banner_img/courses-1.jpg",
     "banner/banner_img/1000109365.jpg"
 ];
