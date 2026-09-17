@@ -33,6 +33,7 @@ PROJECT_ROOT = os.path.dirname(BANNER_DIR)
 MEDIA_DIR = os.path.join(BANNER_DIR, 'banner_img')
 CONFIG_JS = os.path.join(BANNER_DIR, 'banner-config.js')
 BANNER_META_JSON = os.path.join(BANNER_DIR, 'banner_meta.json')
+BANNER_DATA_JSON = os.path.join(BANNER_DIR, 'banner_data.json')
 INDEX_HTML = os.path.join(PROJECT_ROOT, 'index.html')
 
 PREVIEW_PORT = 8080
@@ -1331,6 +1332,9 @@ class BannerAdminApp:
             with open(BANNER_META_JSON, "w", encoding="utf-8") as f:
                 json.dump(meta_json, f, ensure_ascii=False, indent=2)
 
+            self.write_data_json()
+            self.cache_bust_index_html()
+
             self.update_banner_toggle_ui()
             self.lbl_status.config(text="✅ Settings & media sequence saved to banner-config.js")
             if not silent:
@@ -1507,8 +1511,75 @@ class BannerAdminApp:
             meta_json = {k: {"title": v} for k, v in self.media_titles.items() if v.strip()}
             with open(BANNER_META_JSON, "w", encoding="utf-8") as f:
                 json.dump(meta_json, f, ensure_ascii=False, indent=2)
+
+            self.write_data_json()
         except Exception as e:
             print(f"Error writing to config: {e}")
+
+    def write_data_json(self):
+        """Write banner/banner_data.json — the cache-busted JSON source the website
+        fetches on every page load so live (GitHub Pages / CDN) updates appear
+        immediately instead of relying on the long-cached banner-config.js script."""
+        try:
+            media_paths = [item["rel_path"] for item in self.media_items]
+            meta_json = {k: {"title": v} for k, v in self.media_titles.items() if v.strip()}
+            now_ms = int(datetime.now().timestamp() * 1000)
+
+            data = {
+                "media": media_paths,
+                "meta": meta_json,
+                "items": [
+                    {
+                        "url": p,
+                        "name": os.path.basename(p),
+                        "mtime": now_ms,
+                        "title": self.media_titles.get(p, "")
+                    }
+                    for p in media_paths
+                ],
+                "lastModified": int(now_ms / 1000)
+            }
+
+            with open(BANNER_DATA_JSON, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"Error writing banner_data.json: {e}")
+
+    def cache_bust_index_html(self):
+        """Bump the ?v= query string on the banner script/link tags in index.html.
+
+        banner-settings.json/banner-data.json are fetched with anti-cache queries by
+        banner.js, but banner-config.js and banner.js are classic <script> tags that
+        CDNs (Cloudflare/GitHub Pages) cache for hours (we observed max-age=14400).
+        Bumping ?v= forces the CDN and browsers to fetch the new files immediately."""
+        try:
+            with open(INDEX_HTML, "r", encoding="utf-8") as f:
+                html = f.read()
+
+            original = html
+            ts = str(int(datetime.now().timestamp() * 1000))
+
+            html = re.sub(
+                r'<link href="banner/banner\.css(?:\?v=[^"]*)?" rel="stylesheet">',
+                f'<link href="banner/banner.css?v={ts}" rel="stylesheet">',
+                html
+            )
+            html = re.sub(
+                r'<script src="banner/banner-config\.js(?:\?v=[^"]*)?"[^>]*></script>',
+                f'<script src="banner/banner-config.js?v={ts}"></script>',
+                html
+            )
+            html = re.sub(
+                r'<script src="banner/banner\.js(?:\?v=[^"]*)?"[^>]*></script>',
+                f'<script src="banner/banner.js?v={ts}"></script>',
+                html
+            )
+
+            if html != original:
+                with open(INDEX_HTML, "w", encoding="utf-8") as f:
+                    f.write(html)
+        except Exception as e:
+            print(f"Error updating index.html cache busting: {e}")
 
     def on_item_select(self, event):
         selected = self.tree.selection()
@@ -1718,8 +1789,12 @@ class BannerAdminApp:
 
         try:
             os.rename(old_p, new_p)
+            old_rel = self.media_items[idx]["rel_path"]
             self.media_items[idx]["filename"] = new_fn
-            self.media_items[idx]["rel_path"] = f"banner/banner_img/{new_fn}"
+            new_rel = f"banner/banner_img/{new_fn}"
+            self.media_items[idx]["rel_path"] = new_rel
+            if old_rel in self.media_titles:
+                self.media_titles[new_rel] = self.media_titles.pop(old_rel)
             self.render_table()
             self.write_media_to_config_js()
             self.show_preview(self.media_items[idx])

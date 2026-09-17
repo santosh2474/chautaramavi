@@ -88,7 +88,44 @@
             // Check PHP auto-detection only if enabled and running on http/https web server
             // (Browsers block fetch on file:// protocol with CORS error)
             const isWebProtocol = window.location.protocol === "http:" || window.location.protocol === "https:";
-            if (this.settings.autoDetectPhp && isWebProtocol) {
+
+            // 1. Load the cache-busted banner_data.json (the authoritative live source).
+            //    banner.js is a classic <script> tag, and CDNs (Cloudflare/GitHub Pages)
+            //    cache JS files for hours (max-age=14400), so bannerMedia inside
+            //    banner-config.js can be stale on the live site. This file is written by
+            //    admin_app.py on every save and fetched fresh (with ?t= cache busting +
+            //    Cache-Control: no-store) so that edits/deletes/reorders appear instantly
+            //    after a GitHub deploy. Media images themselves are referenced by URL, so
+            //    they do not need unique cache-busting (changed content = new filename).
+            let freshListLoaded = false;
+            if (isWebProtocol) {
+                try {
+                    const dataRes = await fetch("banner/banner_data.json?t=" + Date.now(), {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
+                    });
+                    if (dataRes.ok) {
+                        const data = await dataRes.json();
+                        if (data && typeof data === "object") {
+                            if (Array.isArray(data.media)) {
+                                this.mediaList = data.media;
+                                freshListLoaded = true;
+                            }
+                            if (data.meta && typeof data.meta === "object") {
+                                this.meta = Object.assign({}, this.meta, data.meta);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Fallback to bannerMedia (classic script) or PHP auto-detection below
+                }
+            }
+
+            // 2. PHP auto-detection fallback — only works on hosts that actually execute
+            //    PHP. On static hosts (GitHub Pages) this returns raw source and fails,
+            //    and we already have data from banner_data.json above.
+            if (this.settings.autoDetectPhp && !freshListLoaded && isWebProtocol) {
                 try {
                     const response = await fetch("banner/get_banners.php?t=" + Date.now(), {
                         method: "GET",
