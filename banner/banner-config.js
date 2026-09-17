@@ -34,14 +34,14 @@ const bannerSettings = {
     // Shows a "Don't show again today" button in the banner. When clicked, the auto-open
     // popup is suppressed until the next calendar day using localStorage (survives tab
     // switches and browser restarts, so newly added media can NOT re-trigger it today).
-    rememberClosed: true,
+    rememberClosed: false,
 
     // Auto-detect files using server-side PHP (if your hosting supports PHP)
     // If enabled and get_banners.php is found, it will automatically scan banner/banner_img/
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1789446651006
+    lastUpdated: 1789616404769
 };
 
 // Media Items to Display
@@ -54,7 +54,5 @@ const bannerMeta = {
 };
 
 const bannerMedia = [
-    "banner/banner_img/1000109365.jpg",
-    "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg",
-    "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg"
+    "banner/banner_img/1000109365.jpg"
 ];
