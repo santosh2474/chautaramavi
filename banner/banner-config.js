@@ -41,7 +41,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1789633547937
+    lastUpdated: 1789633770376
 };
 
 // Media Items to Display
@@ -51,8 +51,8 @@ const bannerMeta = {
     "banner/banner_img/2083_05_26_ECA_Program_IMG_2.jpeg": {"title": "ECA_Program_Pic_2"},
     "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg": {"title": "ECA_Program_Pic_2 held on 2083/05/26"},
     "banner/banner_img/20260909_155614.jpg": {"title": "Samir_Tamang_Sir_Photo"},
-    "banner/banner_img/page-header.jpg": {"title": "Drone View"},
-    "banner/banner_img/courses-1.jpg": {"title": "Computer Lab"}
+    "banner/banner_img/page-header.jpg": {"title": "Drone View of Dandakharka"},
+    "banner/banner_img/courses-1.jpg": {"title": "CTEVT-DCOM-Computer Lab (Students Performing Practical)"}
 };
 
 const bannerMedia = [
