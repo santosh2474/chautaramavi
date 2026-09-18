@@ -14,7 +14,7 @@ import urllib.parse
 import webbrowser
 import subprocess
 import platform
-from datetime import datetime
+from datetime import date, datetime
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from PIL import Image, ImageTk
@@ -78,6 +78,55 @@ BADGE_CONFIG = {
         "border_pill": "#F59E0B"
     }
 }
+
+# ── Bikram Sambat (BS) date conversion ──────────────────────────────────────
+# Same month-length table & epoch as js/bikram-sambat.js so AD→BS matches the
+# frontend calendar exactly.
+BS_YEAR_ZERO = 1970
+BS_EPOCH_DATE = date(1913, 4, 13)  # 1913-04-13 AD == 1970-01-01 BS
+BS_MONTH_LENGTHS = [
+    5315258, 5314490, 9459438, 8673005, 5315258, 5315066, 9459438, 8673005,
+    5315258, 5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594,
+    5315258, 5314286, 9459438, 5315306, 5315258, 5314286, 8673006, 5315306,
+    5315258, 5265134, 8673006, 5315258, 5315258, 9459438, 8673005, 5315258,
+    5314298, 9459438, 8673005, 5315258, 5314298, 9459438, 8473322, 5315258,
+    5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594, 5315258,
+    5314286, 8673006, 5315306, 5315258, 5265134, 8673006, 5315306, 5315258,
+    9459438, 8673005, 5315258, 5314490, 9459438, 8673005, 5315258, 5314298,
+    9459438, 8473325, 5315258, 5314298, 9459438, 5327594, 5315258, 5314298,
+    9459438, 5327594, 5315258, 5314286, 9459438, 5315306, 5315258, 5265134,
+    8673006, 5315306, 5315258, 5265134, 8673006, 5315258, 5314490, 9459438,
+    8673005, 5315258, 5314298, 9459438, 8669933, 5315258, 5314298, 9459438,
+    8473322, 5315258, 5314298, 9459438, 5327594, 5315258, 5314286, 9459438,
+    5315306, 5315258, 5265134, 8673006, 5315306, 5315258, 5265134, 8673006,
+    5315258, 5315258, 5527226, 5528046, 5527277, 5528250, 5528057, 5527277,
+    5527277
+]
+
+
+def bs_days_in_month(year, month):
+    delta = BS_MONTH_LENGTHS[year - BS_YEAR_ZERO]
+    return 29 + ((delta >> ((month - 1) << 1)) & 3)
+
+
+def ad_to_bs(d):
+    """Convert a Gregorian date to (bs_year, bs_month, bs_day)."""
+    days = (d - BS_EPOCH_DATE).days + 1
+    year = BS_YEAR_ZERO
+    while days > 0:
+        for month in range(1, 13):
+            dmax = bs_days_in_month(year, month)
+            if days <= dmax:
+                return (year, month, days)
+            days -= dmax
+        year += 1
+    return (year, 1, 1)
+
+
+def ad_to_bs_str(d):
+    """Convert a Gregorian date to 'YYYY/MM/DD' in BS."""
+    y, m, day = ad_to_bs(d)
+    return f"{y}/{str(m).zfill(2)}/{str(day).zfill(2)}"
 
 
 def get_local_ip():
@@ -1696,13 +1745,8 @@ class NoticeAdminApp:
         self.ent_title.focus_set()
 
     def fill_today_bs(self):
-        """Auto-computes an approximate current BS year/date template."""
-        now = datetime.now()
-        approx_bs_year = now.year + 57
-        month_str = str(now.month).zfill(2)
-        day_str = str(now.day).zfill(2)
-
-        val = f"{approx_bs_year}/{month_str}/{day_str}"
+        """Fills the current date in BS (YYYY/MM/DD), matching js/bikram-sambat.js."""
+        val = ad_to_bs_str(datetime.now().date())
         self.ent_date.delete(0, tk.END)
         self.ent_date.insert(0, val)
 

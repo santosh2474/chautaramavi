@@ -403,12 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="preview-overlay">
               <span class="preview-icon">👁️ Full View</span>
             </div>
-            ${imgDate ? `<span class="image-date-chip glass-pill">📅 ${escapeHTML(imgDate)}</span>` : ''}
+            ${imgDate ? `<span class="image-date-chip glass-pill">📅 ${escapeHTML(imgDate)} BS</span>` : ''}
           </div>
           <div class="image-details glass-surface">
             <div class="image-meta-wrap">
               <span class="image-filename" title="${escapeHTML(filename)}">${escapeHTML(filename)}</span>
-              ${imgDate ? `<span class="image-date-sub"><span class="cal-mini-icon">📅</span> ${escapeHTML(imgDate)}</span>` : ''}
+              ${imgDate ? `<span class="image-date-sub"><span class="cal-mini-icon">📅</span> ${escapeHTML(imgDate)} BS</span>` : ''}
             </div>
             <a href="${filePath}" download="${escapeHTML(filename)}" class="btn btn-download glass-btn" title="Download Image">
               📥 Save
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modalDate) {
       if (imgObj.imgDate) {
-        modalDate.textContent = `📅 Uploaded: ${imgObj.imgDate}`;
+        modalDate.textContent = `📅 Uploaded: ${imgObj.imgDate} BS`;
         modalDate.classList.remove('hidden');
       } else {
         modalDate.classList.add('hidden');

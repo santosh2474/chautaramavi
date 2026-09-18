@@ -54,7 +54,7 @@
       <div class="header-controls">
         <div class="search-box glass-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" id="search-input" placeholder="Search by name or date (YYYY/MM/DD)..." autocomplete="off">
+          <input type="text" id="search-input" placeholder="Search by name or date (BS: YYYY/MM/DD)..." autocomplete="off">
           <button id="search-clear" class="search-clear-btn hidden" title="Clear Search">&times;</button>
         </div>
 
@@ -91,14 +91,14 @@
         <div class="date-filter-box glass-card">
           <div class="date-filter-title">
             <span class="date-icon">📅</span>
-            <span>Filter by Upload Date (मिति अनुसार खोज्नुहोस्):</span>
+            <span>Filter by Upload Date (BS) (मिति अनुसार खोज्नुहोस्):</span>
           </div>
           <div class="date-fields-wrap">
             <div class="date-field">
               <label for="date-from" class="date-label">From (देखि):</label>
               <div class="date-input-wrap">
                 <span class="cal-mini">🗓️</span>
-                <input type="text" id="date-from" placeholder="YYYY/MM/DD (e.g. 2026/08/01)" pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" maxlength="10" autocomplete="off" title="Date format: YYYY/MM/DD">
+                <input type="text" id="date-from" placeholder="BS: YYYY/MM/DD (e.g. 2083/05/26)" pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" maxlength="10" autocomplete="off" title="Date format (BS): YYYY/MM/DD">
               </div>
             </div>
             <span class="date-arrow">→</span>
@@ -106,7 +106,7 @@
               <label for="date-to" class="date-label">To (सम्म):</label>
               <div class="date-input-wrap">
                 <span class="cal-mini">🗓️</span>
-                <input type="text" id="date-to" placeholder="YYYY/MM/DD (e.g. 2026/09/01)" pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" maxlength="10" autocomplete="off" title="Date format: YYYY/MM/DD">
+                <input type="text" id="date-to" placeholder="BS: YYYY/MM/DD (e.g. 2083/06/02)" pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" maxlength="10" autocomplete="off" title="Date format (BS): YYYY/MM/DD">
               </div>
             </div>
             <button id="date-clear-btn" class="date-clear-btn glass-btn hidden" title="Clear Date Filter">

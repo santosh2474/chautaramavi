@@ -9,7 +9,7 @@ import socketserver
 import http.server
 import urllib.parse
 import webbrowser
-from datetime import datetime
+from datetime import date, datetime
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from PIL import Image, ImageTk
@@ -105,6 +105,77 @@ def convert_heic_to_jpeg(heic_data):
     except Exception as e:
         print(f"HEIC conversion error: {e}")
         return None
+
+
+# ── Bikram Sambat (BS) date conversion ──────────────────────────────────────
+# Same month-length table & epoch as js/bikram-sambat.js so AD→BS matches the
+# frontend calendar exactly.
+BS_YEAR_ZERO = 1970
+BS_EPOCH_DATE = date(1913, 4, 13)  # 1913-04-13 AD == 1970-01-01 BS
+BS_MONTH_LENGTHS = [
+    5315258, 5314490, 9459438, 8673005, 5315258, 5315066, 9459438, 8673005,
+    5315258, 5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594,
+    5315258, 5314286, 9459438, 5315306, 5315258, 5314286, 8673006, 5315306,
+    5315258, 5265134, 8673006, 5315258, 5315258, 9459438, 8673005, 5315258,
+    5314298, 9459438, 8673005, 5315258, 5314298, 9459438, 8473322, 5315258,
+    5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594, 5315258,
+    5314286, 8673006, 5315306, 5315258, 5265134, 8673006, 5315306, 5315258,
+    9459438, 8673005, 5315258, 5314490, 9459438, 8673005, 5315258, 5314298,
+    9459438, 8473325, 5315258, 5314298, 9459438, 5327594, 5315258, 5314298,
+    9459438, 5327594, 5315258, 5314286, 9459438, 5315306, 5315258, 5265134,
+    8673006, 5315306, 5315258, 5265134, 8673006, 5315258, 5314490, 9459438,
+    8673005, 5315258, 5314298, 9459438, 8669933, 5315258, 5314298, 9459438,
+    8473322, 5315258, 5314298, 9459438, 5327594, 5315258, 5314286, 9459438,
+    5315306, 5315258, 5265134, 8673006, 5315306, 5315258, 5265134, 8673006,
+    5315258, 5315258, 5527226, 5528046, 5527277, 5528250, 5528057, 5527277,
+    5527277
+]
+
+
+def bs_days_in_month(year, month):
+    delta = BS_MONTH_LENGTHS[year - BS_YEAR_ZERO]
+    return 29 + ((delta >> ((month - 1) << 1)) & 3)
+
+
+def ad_to_bs(d):
+    """Convert a Gregorian date to (bs_year, bs_month, bs_day)."""
+    days = (d - BS_EPOCH_DATE).days + 1
+    year = BS_YEAR_ZERO
+    while days > 0:
+        for month in range(1, 13):
+            dmax = bs_days_in_month(year, month)
+            if days <= dmax:
+                return (year, month, days)
+            days -= dmax
+        year += 1
+    return (year, 1, 1)
+
+
+def ad_to_bs_str(d):
+    """Convert a Gregorian date to 'YYYY/MM/DD' in BS."""
+    y, m, day = ad_to_bs(d)
+    return f"{y}/{str(m).zfill(2)}/{str(day).zfill(2)}"
+
+
+def bs_mtime_str(mtime_ts):
+    """Convert an mtime timestamp to BS 'YYYY/MM/DD' string."""
+    return ad_to_bs_str(datetime.fromtimestamp(mtime_ts).date())
+
+
+def normalize_bs_date(date_str):
+    """Return date as BS 'YYYY/MM/DD'. Migrates stored AD dates (year < 2070)
+    to BS and passes already-BS dates (year >= 2070) through unchanged."""
+    if not date_str:
+        return ""
+    parts = str(date_str).split("/")
+    if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and parts[2].isdigit():
+        y, m, d = map(int, parts)
+        if y < 2070:
+            try:
+                return ad_to_bs_str(date(y, m, d))
+            except ValueError:
+                pass
+    return date_str
 
 
 class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
@@ -209,7 +280,7 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
             self.send_json({"error": f"Category '{safe_category}' not found"}, 404)
             return
 
-        today_str = datetime.now().strftime("%Y/%m/%d")
+        today_str = ad_to_bs_str(date.today())
         saved_names = []
 
         for filename, content in uploaded_files:
@@ -703,7 +774,7 @@ class MobileUploadHandler(http.server.BaseHTTPRequestHandler):
 
       if (data.success) {{
         const count = data.uploaded.length;
-        let msg = `✅ <strong>${{count}} photo${{count !== 1 ? 's' : ''}}</strong> uploaded to <strong>${{data.category}}</strong> (📅 ${{data.date}})`;
+        let msg = `✅ <strong>${{count}} photo${{count !== 1 ? 's' : ''}}</strong> uploaded to <strong>${{data.category}}</strong> (📅 BS ${{data.date}})`;
         if (data.message) {{
           msg += '<br>💡 ' + data.message;
         }}
@@ -787,7 +858,7 @@ class GalleryAdminApp:
 
     def sync_manifest(self):
         manifest_data = []
-        today_str = datetime.now().strftime("%Y/%m/%d")
+        today_str = ad_to_bs_str(date.today())
 
         if os.path.exists(CATEGORIES_DIR):
             categories = sorted([
@@ -818,11 +889,15 @@ class GalleryAdminApp:
 
                     if not img_date:
                         if mtime:
-                            img_date = datetime.fromtimestamp(mtime).strftime("%Y/%m/%d")
+                            img_date = bs_mtime_str(mtime)
                         else:
                             img_date = today_str
                         if img not in self.metadata[cat]:
                             self.metadata[cat][img] = {}
+                        self.metadata[cat][img]["date"] = img_date
+                    elif img_date != normalize_bs_date(img_date):
+                        # Migrate legacy AD dates stored in metadata to BS
+                        img_date = normalize_bs_date(img_date)
                         self.metadata[cat][img]["date"] = img_date
 
                     timestamp = img_meta.get("timestamp") or int(mtime)
@@ -1064,7 +1139,7 @@ class GalleryAdminApp:
         self.lbl_preview_dims.pack(anchor="w")
         self.lbl_preview_size = ttk.Label(meta_frame, text="Size: —", style="CardMuted.TLabel")
         self.lbl_preview_size.pack(anchor="w")
-        self.lbl_preview_date = ttk.Label(meta_frame, text="📅 Upload Date: —", style="CardMuted.TLabel")
+        self.lbl_preview_date = ttk.Label(meta_frame, text="📅 Upload Date (BS): —", style="CardMuted.TLabel")
         self.lbl_preview_date.pack(anchor="w")
 
         # Image Action Buttons
@@ -1360,7 +1435,7 @@ class GalleryAdminApp:
                     except Exception:
                         mtime = 0
                     if not d and mtime:
-                        d = datetime.fromtimestamp(mtime).strftime("%Y/%m/%d")
+                        d = bs_mtime_str(mtime)
                     t = meta_entry.get("timestamp") or int(mtime)
                     return (d, t, img_name)
 
@@ -1400,7 +1475,7 @@ class GalleryAdminApp:
         self.lbl_preview_name.config(text="Name: —")
         self.lbl_preview_dims.config(text="Resolution: —")
         self.lbl_preview_size.config(text="Size: —")
-        self.lbl_preview_date.config(text="📅 Upload Date: —")
+        self.lbl_preview_date.config(text="📅 Upload Date (BS): —")
         self.current_preview_photo = None
 
     def update_image_preview(self, img_path):
@@ -1452,14 +1527,14 @@ class GalleryAdminApp:
                 self.lbl_preview_name.config(text=f"Name: {file_name}")
                 self.lbl_preview_dims.config(text=f"Resolution: {orig_w} × {orig_h} px")
                 self.lbl_preview_size.config(text=f"Size: {size_str} ({img_format})")
-                self.lbl_preview_date.config(text=f"📅 Upload Date: {img_date}")
+                self.lbl_preview_date.config(text=f"📅 Upload Date (BS): {img_date}")
 
         except Exception as e:
             self.preview_lbl.config(image="", text=f"Preview Unavailable\n({str(e)})", fg="#ef4444")
             self.lbl_preview_name.config(text=f"Name: {os.path.basename(img_path)}")
             self.lbl_preview_dims.config(text="Resolution: —")
             self.lbl_preview_size.config(text="Size: —")
-            self.lbl_preview_date.config(text="📅 Upload Date: —")
+            self.lbl_preview_date.config(text="📅 Upload Date (BS): —")
             self.current_preview_photo = None
 
     def rename_image(self):
@@ -1602,7 +1677,7 @@ class GalleryAdminApp:
         target_dir = os.path.join(CATEGORIES_DIR, cat_name)
         copied_count = 0
         last_uploaded = None
-        today_str = datetime.now().strftime("%Y/%m/%d")
+        today_str = ad_to_bs_str(date.today())
 
         if cat_name not in self.metadata:
             self.metadata[cat_name] = {}
@@ -1660,7 +1735,7 @@ class GalleryAdminApp:
 
         self.save_metadata()
         self.refresh_all(keep_img_selection=last_uploaded)
-        messagebox.showinfo("Success", f"Uploaded {copied_count} image(s) to '{cat_name}' with date ({today_str}).", parent=self.root)
+        messagebox.showinfo("Success", f"Uploaded {copied_count} image(s) to '{cat_name}' with BS date ({today_str}).", parent=self.root)
 
     def delete_images(self):
         cat_name = self.get_selected_category_name()

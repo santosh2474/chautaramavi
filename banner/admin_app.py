@@ -11,7 +11,7 @@ import http.server
 import urllib.parse
 import webbrowser
 import subprocess
-from datetime import datetime
+from datetime import date, datetime
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from PIL import Image, ImageTk
@@ -66,6 +66,57 @@ def get_file_type(filename):
     if ext in DOC_EXTENSIONS:
         return "pdf"
     return "other"
+
+
+# ── Bikram Sambat (BS) date conversion ──────────────────────────────────────
+# Same month-length table & epoch as js/bikram-sambat.js so AD→BS matches the
+# frontend calendar exactly.
+BS_YEAR_ZERO = 1970
+BS_EPOCH_DATE = date(1913, 4, 13)  # 1913-04-13 AD == 1970-01-01 BS
+BS_MONTH_LENGTHS = [
+    5315258, 5314490, 9459438, 8673005, 5315258, 5315066, 9459438, 8673005,
+    5315258, 5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594,
+    5315258, 5314286, 9459438, 5315306, 5315258, 5314286, 8673006, 5315306,
+    5315258, 5265134, 8673006, 5315258, 5315258, 9459438, 8673005, 5315258,
+    5314298, 9459438, 8673005, 5315258, 5314298, 9459438, 8473322, 5315258,
+    5314298, 9459438, 5327594, 5315258, 5314298, 9459438, 5327594, 5315258,
+    5314286, 8673006, 5315306, 5315258, 5265134, 8673006, 5315306, 5315258,
+    9459438, 8673005, 5315258, 5314490, 9459438, 8673005, 5315258, 5314298,
+    9459438, 8473325, 5315258, 5314298, 9459438, 5327594, 5315258, 5314298,
+    9459438, 5327594, 5315258, 5314286, 9459438, 5315306, 5315258, 5265134,
+    8673006, 5315306, 5315258, 5265134, 8673006, 5315258, 5314490, 9459438,
+    8673005, 5315258, 5314298, 9459438, 8669933, 5315258, 5314298, 9459438,
+    8473322, 5315258, 5314298, 9459438, 5327594, 5315258, 5314286, 9459438,
+    5315306, 5315258, 5265134, 8673006, 5315306, 5315258, 5265134, 8673006,
+    5315258, 5315258, 5527226, 5528046, 5527277, 5528250, 5528057, 5527277,
+    5527277
+]
+
+
+def bs_days_in_month(year, month):
+    delta = BS_MONTH_LENGTHS[year - BS_YEAR_ZERO]
+    return 29 + ((delta >> ((month - 1) << 1)) & 3)
+
+
+def ad_to_bs(d):
+    """Convert a Gregorian date to (bs_year, bs_month, bs_day)."""
+    days = (d - BS_EPOCH_DATE).days + 1
+    year = BS_YEAR_ZERO
+    while days > 0:
+        for month in range(1, 13):
+            dmax = bs_days_in_month(year, month)
+            if days <= dmax:
+                return (year, month, days)
+            days -= dmax
+        year += 1
+    return (year, 1, 1)
+
+
+def bs_mtime_display(mtime_ts):
+    """Format a file mtime as a BS 'YYYY/MM/DD HH:MM' display string."""
+    dt = datetime.fromtimestamp(mtime_ts)
+    y, m, d = ad_to_bs(dt.date())
+    return f"{y}/{str(m).zfill(2)}/{str(d).zfill(2)} {dt.strftime('%H:%M')}"
 
 
 def convert_heic_to_jpeg(heic_data):
@@ -690,7 +741,7 @@ class BannerAdminApp:
         self.tree.heading("name", text="File Name")
         self.tree.heading("type", text="Type")
         self.tree.heading("size", text="File Size")
-        self.tree.heading("modified", text="Date Modified")
+        self.tree.heading("modified", text="Date Modified (BS)")
 
         self.tree.column("pos", width=45, anchor="center")
         self.tree.column("name", width=260, anchor="w")
@@ -1357,7 +1408,7 @@ class BannerAdminApp:
                 ext = os.path.splitext(fn)[1].lower()
                 if ext in ALL_ALLOWED_EXTENSIONS:
                     size = os.path.getsize(full_p)
-                    mtime = datetime.fromtimestamp(os.path.getmtime(full_p)).strftime("%Y-%m-%d %H:%M")
+                    mtime = bs_mtime_display(os.path.getmtime(full_p))
                     new_items.append({
                         "filename": fn,
                         "rel_path": f"banner/banner_img/{fn}",
@@ -1373,7 +1424,7 @@ class BannerAdminApp:
                 if ext in ALL_ALLOWED_EXTENSIONS:
                     full_p = os.path.join(MEDIA_DIR, fn)
                     size = os.path.getsize(full_p)
-                    mtime = datetime.fromtimestamp(os.path.getmtime(full_p)).strftime("%Y-%m-%d %H:%M")
+                    mtime = bs_mtime_display(os.path.getmtime(full_p))
                     new_items.append({
                         "filename": fn,
                         "rel_path": f"banner/banner_img/{fn}",
@@ -1416,7 +1467,7 @@ class BannerAdminApp:
             if fn in disk_files and fn not in added:
                 full_p = os.path.join(MEDIA_DIR, fn)
                 size = os.path.getsize(full_p)
-                mtime = datetime.fromtimestamp(os.path.getmtime(full_p)).strftime("%Y-%m-%d %H:%M")
+                mtime = bs_mtime_display(os.path.getmtime(full_p))
                 self.media_items.append({
                     "filename": fn,
                     "rel_path": f"banner/banner_img/{fn}",
@@ -1430,7 +1481,7 @@ class BannerAdminApp:
             if fn not in added:
                 full_p = os.path.join(MEDIA_DIR, fn)
                 size = os.path.getsize(full_p)
-                mtime = datetime.fromtimestamp(os.path.getmtime(full_p)).strftime("%Y-%m-%d %H:%M")
+                mtime = bs_mtime_display(os.path.getmtime(full_p))
                 self.media_items.append({
                     "filename": fn,
                     "rel_path": f"banner/banner_img/{fn}",
@@ -1609,7 +1660,7 @@ class BannerAdminApp:
         full_p = os.path.join(MEDIA_DIR, fn)
 
         self.lbl_preview_info.config(
-            text=f"📄 {fn}\nType: {mtype}   •   Size: {item['size']}   •   Modified: {item['modified']}"
+            text=f"📄 {fn}\nType: {mtype}   •   Size: {item['size']}   •   Modified (BS): {item['modified']}"
         )
 
         if not os.path.exists(full_p):
