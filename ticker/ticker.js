@@ -30,6 +30,14 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
+            "id": "notice-e6a105bd02",
+            "title": "CTEVT_2nd_4th_Sem_Exam_Notice",
+            "content": "डिप्लोमा तथा प्रमाणपत्र तहको बार्षिक/सेमेष्टर परीक्षा प्रणालीका कार्यकमहरुको\nपरीक्षा सञ्चालन सम्वन्धी अत्यन्त जरुरी सूचना",
+            "date": "2083/06/02",
+            "badge": "🔥 Urgent",
+            "file": "notices/CTEVT_2nd_4th_SEM_Exam_Notice_42088ae3.png"
+        },
+        {
             "id": "notice-ff8bf26ab3",
             "title": "CTEVT Examination - 2083 (R & B)",
             "content": "डिप्लोमा/प्रमाणपत्र तहको नियमित तथा आंशिक परीक्षा २०८३ को संशोधित परीक्षा तालिका सम्बन्धी अत्यन्त जरुरी सूचना",
@@ -44,14 +52,6 @@
             "date": "2083/05/22",
             "badge": "⭐ Important",
             "file": "notices/Notice Regarding Postponement of Final Semester Examination_d677c1b2.png"
-        },
-        {
-            "id": "notice-ab86282535",
-            "title": "डप्लोमा प्रमाणपत्र तहको नियमित-आंशिक परीक्षा २०८३ को परीक्षा केन्द्र",
-            "content": "डप्लोमा प्रमाणपत्र तहको नियमित आंशिक परीक्षा २०८३ को परीक्षा केन्द्र कायम गरिएको सम्वन्धी अत्यन्त जररी सूचना",
-            "date": "2083/05/16",
-            "badge": "📌 exam",
-            "file": "notices/ctevt_exam_center_2083_94eb2b9f.png"
         }
     ];
 
