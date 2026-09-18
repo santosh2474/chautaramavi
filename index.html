@@ -216,128 +216,345 @@
     <!-- News Ticker End -->
 
     <!-- Header Start -->
-    <div class="jumbotron position-relative overlay-bottom" style="min-height: 85vh; margin-bottom: 40px;">
-        <div class="video-container">
-            <video autoplay loop muted style="object-fit: cover; width: 100%; height: 100%;">
-                <source src="./contents/video.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <style>
-            .header-wrap {
-                position: relative;
-                z-index: 2;
-                min-height: 85vh;
-                display: flex;
-                flex-direction: column;
-                
-                align-items: center;
-                gap: clamp(0.75rem, 2.5vw, 1.6rem);
-                text-align: center;
-                padding: clamp(1rem, 4vw, 2.2rem) 0 clamp(1.5rem, 5vw, 2.5rem);
-            }
+<div class="jumbotron position-relative overlay-bottom"
+     style="min-height: 85vh; margin-bottom: 40px;">
 
-            .header-motto {
-                font-family: "Tiro Devanagari Hindi", "Mukta", sans-serif;
-                font-style: italic;
-                font-weight: 600;
-                font-size: clamp(1rem, 2.6vw, 1.7rem);
-                line-height: 1.55;
-                letter-spacing: 0.3px;
-                color: #FFF8DC;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.5);
-                max-width: 92%;
-                margin: 0;
+    <!-- Background Video -->
+    <div class="video-container">
+        <video autoplay loop muted playsinline
+               style="object-fit: cover; width: 100%; height: 100%;">
+            <source src="./contents/video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <style>
+        /* =========================================================
+           SCHOOL HEADER
+           ========================================================= */
+
+        .header-wrap {
+            position: relative;
+            z-index: 2;
+
+            min-height: 85vh;
+
+            display: flex;
+            flex-direction: column;
+
+            /* Start content from top instead of vertically centering */
+            justify-content: flex-start;
+            align-items: center;
+
+            /* Reduced gap between sections */
+            gap: clamp(0.35rem, 1.2vw, 0.75rem);
+
+            text-align: center;
+
+            /* Minimal space above motto */
+            padding-top: clamp(0.3rem, 1vw, 0.7rem);
+
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+
+            padding-bottom: 1.5rem;
+        }
+
+
+        /* =========================================================
+           SCHOOL MOTTO
+           ========================================================= */
+
+        .header-motto {
+            font-family:
+                "Tiro Devanagari Hindi",
+                "Mukta",
+                sans-serif;
+
+            font-style: italic;
+            font-weight: 600;
+
+            font-size: clamp(0.85rem, 2.1vw, 1.35rem);
+
+            /* Reduced line spacing */
+            line-height: 1.15;
+
+            letter-spacing: 0.2px;
+
+            color: #FFF8DC;
+
+            text-shadow:
+                2px 2px 5px rgba(0, 0, 0, 0.95),
+                0 0 8px rgba(0, 0, 0, 0.5);
+
+            max-width: 92%;
+
+            margin: 0;
+        }
+
+
+        /* =========================================================
+           SCHOOL NAME
+           ========================================================= */
+
+        .header-school-name {
+            font-family:
+                "Mukta",
+                "Tiro Devanagari Hindi",
+                serif;
+
+            font-weight: 900;
+
+            font-size: clamp(1.25rem, 4.2vw, 3.2rem);
+
+            line-height: 1.2;
+
+            letter-spacing: 0.3px;
+
+            color: #1c73e4;
+
+            text-shadow:
+                2px 2px 4px #000000,
+                -1px -1px 2px rgba(0, 0, 0, 0.8),
+                0 0 10px rgba(0, 0, 0, 0.6);
+
+            margin: 0;
+        }
+
+
+        /* =========================================================
+           SCHOOL ADDRESS
+           ========================================================= */
+
+        .header-address {
+            display: block;
+
+            margin-top: 0.1rem;
+
+            font-family:
+                "Mukta",
+                "Open Sans",
+                sans-serif;
+
+            font-weight: 600;
+
+            font-size: clamp(0.7rem, 1.5vw, 1.1rem);
+
+            line-height: 1.2;
+
+            letter-spacing: 0.2px;
+
+            color: #FFFFFF;
+
+            text-shadow:
+                2px 2px 4px rgba(0, 0, 0, 0.95);
+        }
+
+
+        /* =========================================================
+           SCHOOL COURSES
+           ========================================================= */
+
+        .header-courses {
+            margin-top: 0;
+
+            font-family:
+                "Mukta",
+                "Open Sans",
+                sans-serif;
+
+            font-size: clamp(0.75rem, 1.8vw, 1.25rem);
+
+            line-height: 1.25;
+        }
+
+
+        /* =========================================================
+           SCHOOL LEVEL
+           ========================================================= */
+
+        .header-level {
+            font-weight: 700;
+
+            color: #E8F5E9;
+
+            text-shadow:
+                2px 2px 4px rgba(0, 0, 0, 0.95);
+        }
+
+
+        /* =========================================================
+           DIPLOMA IN COMPUTER ENGINEERING
+           ========================================================= */
+
+        .header-diploma {
+            font-family:
+                "Open Sans",
+                "Mukta",
+                sans-serif;
+
+            font-weight: 800;
+
+            letter-spacing: 0.3px;
+
+            color: #00E5FF;
+
+            text-shadow:
+                2px 2px 4px #000000,
+                0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+
+        /* =========================================================
+           CTEVT AFFILIATION
+           ========================================================= */
+
+        .header-ctevt {
+            margin-top: -0.3rem;
+
+            font-family:
+                "Open Sans",
+                "Mukta",
+                sans-serif;
+
+            font-weight: 600;
+
+            font-size: clamp(0.65rem, 1.35vw, 0.95rem);
+
+            line-height: 1.2;
+
+            letter-spacing: 0.15px;
+
+            color: #FFFFFF;
+
+            text-shadow:
+                2px 2px 5px rgba(0, 0, 0, 0.95);
+        }
+
+
+        /* =========================================================
+           MOBILE
+           ========================================================= */
+
+        @media (max-width: 480px) {
+
+    .header-wrap {
+        gap: 1.5rem;
+
+        padding-top: 0.5rem;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+
+    /* School Motto */
+    .header-motto {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    /* School Name */
+    .header-school-name {
+        font-size: 1.75rem;
+        line-height: 1.2;
+    }
+
+    /* School Address */
+    .header-address {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    /* School Level + Diploma */
+    .header-courses {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+
+    /* CTEVT Affiliation */
+    .header-ctevt {
+        font-size: 0.76rem;
+        line-height: 1.25;
+        margin-top: -1.50rem;
+    }
+}
+
+
+        /* =========================================================
+           TABLETS
+           ========================================================= */
+
+        @media (min-width: 481px) and (max-width: 768px) {
+
+            .header-wrap {
+                padding-top: 0.5rem;
             }
 
             .header-school-name {
-                font-family: "Mukta", "Tiro Devanagari Hindi", serif;
-                font-weight: 900;
-                font-size: clamp(1.5rem, 5.4vw, 4.2rem);
-                line-height: 1.25;
-                letter-spacing: 0.5px;
-                color: #1c73e4;
-                text-shadow: 2px 2px 4px #000000, -1px -1px 2px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.6);
-                margin: 0;
+                font-size: 2rem;
             }
 
             .header-address {
-                display: block;
-                margin-top: 0.3rem;
-                font-family: "Mukta", "Open Sans", sans-serif;
-                font-weight: 600;
-                font-size: clamp(0.78rem, 1.9vw, 1.35rem);
-                line-height: 1.3;
-                letter-spacing: 0.3px;
-                color: #FFFFFF;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.95);
+                font-size: 0.9rem;
             }
 
             .header-courses {
-                margin-top: 0;
-                font-family: "Mukta", "Open Sans", sans-serif;
-                font-size: clamp(0.85rem, 2.3vw, 1.55rem);
-                line-height: 1.45;
+                font-size: 0.95rem;
             }
 
-            .header-level {
-                font-weight: 700;
-                color: #E8F5E9;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.95);
+            .header-ctevt {
+                font-size: 0.78rem;
             }
-
-            .header-diploma {
-                font-family: "Open Sans", "Mukta", sans-serif;
-                font-weight: 800;
-                letter-spacing: 0.5px;
-                color: #00E5FF;
-                text-shadow: 2px 2px 4px #000000, 0 0 8px rgba(0, 0, 0, 0.5);
-            }
-
-                .header-ctevt {
-            margin-top: clamp(-1.5rem, -1.5vw, -0.4rem);
-            font-family: "Open Sans", "Mukta", sans-serif;
-            font-weight: 600;
-            font-size: clamp(0.75rem, 1.7vw, 1.1rem);
-            line-height: 1.3;
-            letter-spacing: 0.2px;
-            color: #FFFFFF;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95);
         }
 
-            @media (max-width: 480px) {
-                .header-motto {
-                    line-height: 1.45;
-                }
-            }
-        </style>
-        <div class="container position-relative header-wrap">
+    </style>
 
-            <!-- School Motto -->
-            <div class="header-motto">
-                "दक्ष जनशक्ति र प्रविधिको उपयोगको लागि ऐक्यबद्धता"<br>
-                "गुणस्तरीय र सर्वसुलभ शिक्षा हाम्रो प्रतिबद्धता"
-            </div>
 
-            <!-- School Name & Address -->
-            <h1 class="header-school-name">
-                श्री चौतारा माध्यमिक विद्यालय,<br>
-                <span class="header-address">सुनकोशी गाउँपालिका–५, डाँडाखर्क, ओखलढुंगा</span>
-            </h1>
+    <!-- Header Content -->
+    <div class="container position-relative header-wrap">
 
-            <!-- School Level & Diploma -->
-            <div class="header-courses">
-                <span class="header-level">कक्षा १ देखि १२ सम्मको औपचारिक विद्यालय शिक्षा</span><br>
-                <span class="header-diploma">Diploma in Computer Engineering</span>
-            </div>
-
-            <!-- CTEVT Affiliation -->
-            <div class="header-ctevt">
-                Council for Technical Education and Vocational Training (CTEVT) सँग आबद्ध
-            </div>
+        <!-- School Motto -->
+        <div class="header-motto">
+            "दक्ष जनशक्ति र प्रविधिको उपयोगको लागि ऐक्यबद्धता"<br>
+            "गुणस्तरीय र सर्वसुलभ शिक्षा हाम्रो प्रतिबद्धता"
         </div>
+
+
+        <!-- School Name & Address -->
+        <h1 class="header-school-name">
+            श्री चौतारा माध्यमिक विद्यालय,<br>
+
+            <span class="header-address">
+                सुनकोशी गाउँपालिका–५, डाँडाखर्क, ओखलढुंगा
+            </span>
+        </h1>
+
+
+        <!-- School Level & Diploma -->
+        <div class="header-courses">
+
+            <span class="header-level">
+                कक्षा १ देखि १२ सम्मको औपचारिक विद्यालय शिक्षा
+            </span>
+
+            <br>
+
+            <span class="header-diploma">
+                Diploma in Computer Engineering
+            </span>
+
+        </div>
+
+
+        <!-- CTEVT Affiliation -->
+        <div class="header-ctevt">
+            Council for Technical Education and Vocational Training (CTEVT)
+            सँग आबद्ध
+        </div>
+
     </div>
-    <!-- Header End -->
+
+</div>
+<!-- Header End -->
 
     <!-- About Start -->
     <div class="container-fluid py-1">
