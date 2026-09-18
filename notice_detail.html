@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notice | Chautara Mavi</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .badge-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-important {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-holiday {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-normal {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .notice-body {
+            white-space: pre-wrap;
+            line-height: 1.7;
+        }
+
+        .attachment-frame {
+            width: 100%;
+            height: 78vh;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <header class="bg-blue-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-3 sm:py-4">
+                <h1 class="text-lg sm:text-2xl font-bold truncate">Chautara Mavi - Notice Portal</h1>
+                <nav class="ml-4 flex items-center gap-2">
+                    <a class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base"
+                        href="notice.html">
+                        <i class="fas fa-list mr-1"></i> All Notices
+                    </a>
+                    <a class="px-3 sm:px-4 py-2 hover:bg-blue-600 rounded transition-colors text-sm sm:text-base hidden sm:inline-block"
+                        href="https://www.chautaramavi.edu.np/">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+        <a href="notice.html" class="inline-flex items-center text-blue-700 hover:text-blue-900 text-sm mb-4">
+            <i class="fas fa-arrow-left mr-2"></i> Back to all notices
+        </a>
+
+        <div id="noticeDetail" class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Loading notice…
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>© 2026 Chautara Mavi. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var noticeId = params.get("id") || (window.location.hash ? window.location.hash.slice(1) : "");
+            var fallbackTitle = params.get("title") || "";
+            var fallbackDate = params.get("date") || "";
+            var qBadge = params.get("badge") || "";
+            var qContent = params.get("content");
+            var qFile = params.get("file") || "";
+            var container = document.getElementById("noticeDetail");
+
+            function escapeHtml(s) {
+                return String(s || "").replace(/[&<>"']/g, function (c) {
+                    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+                });
+            }
+
+            function badgeClass(text) {
+                var t = (text || "").toLowerCase();
+                if (t.indexOf("urgent") !== -1) return "badge-urgent";
+                if (t.indexOf("important") !== -1) return "badge-important";
+                if (t.indexOf("holiday") !== -1) return "badge-holiday";
+                return "badge-normal";
+            }
+
+            function isImage(url) {
+                return /\.(jpe?g|png|webp|gif|bmp|heic|heif)(\?|#|$)/i.test(url);
+            }
+
+            function renderNoticesNotFound() {
+                container.innerHTML =
+                    '<div class="p-8 text-center text-gray-600">' +
+                    '<i class="fas fa-info-circle text-3xl text-blue-500 mb-3"></i>' +
+                    '<p class="mb-2">This notice could not be found or is no longer available.</p>' +
+                    '<a href="notice.html" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View all notices</a>' +
+                    "</div>";
+            }
+
+            function render(notice) {
+                var html = "";
+                html += '<div class="border-b px-6 sm:px-8 py-5 bg-gray-50">';
+                html += '<div class="flex flex-wrap items-center gap-3 mb-2">';
+                if (notice.badge) {
+                    html += '<span class="text-xs font-semibold px-3 py-1 rounded-full ' +
+                        badgeClass(notice.badge) + '">' + escapeHtml(notice.badge) + "</span>";
+                }
+                if (notice.date) {
+                    html += '<span class="text-sm text-gray-500"><i class="far fa-calendar-alt mr-1"></i>' +
+                        escapeHtml(notice.date) + " BS</span>";
+                }
+                html += "</div>";
+                html += '<h1 class="text-xl sm:text-2xl font-bold text-gray-900">' + escapeHtml(notice.title) + "</h1>";
+                html += "</div>";
+
+                html += '<div class="px-6 sm:px-8 py-6">';
+                if (notice.content) {
+                    html += '<div class="notice-body text-gray-800 mb-4">' + escapeHtml(notice.content) + "</div>";
+                } else {
+                    html += '<p class="text-gray-500 mb-4">No additional text for this notice.</p>';
+                }
+
+                if (notice.file) {
+                    html += '<div class="mt-4 pt-4 border-t">';
+                    html += '<div class="flex flex-wrap items-center gap-3 mb-4">';
+                    html += '<a href="' + notice.file + '" target="_blank" rel="noopener" ' +
+                        'class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium">' +
+                        '<i class="fas fa-paperclip mr-2"></i> Open / Download Attachment</a>';
+                    html += '<a href="' + notice.file + '" download ' +
+                        'class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm font-medium">' +
+                        '<i class="fas fa-download mr-2"></i> Save file</a>';
+                    html += "</div>";
+
+                    if (isImage(notice.file)) {
+                        html += '<img src="' + notice.file + '" alt="' + escapeHtml(notice.title) +
+                            '" class="w-full h-auto rounded-lg border">';
+                    } else if (/\.pdf(\?|#|$)/i.test(notice.file)) {
+                        html += '<iframe class="attachment-frame" src="' + notice.file + '#view=FitH"></iframe>';
+                    }
+                    html += "</div>";
+                }
+                html += "</div>";
+
+                container.innerHTML = html;
+                document.title = notice.title + " | Chautara Mavi";
+            }
+
+            function fromParams() {
+                return {
+                    title: fallbackTitle,
+                    date: fallbackDate,
+                    badge: qBadge,
+                    content: qContent || "",
+                    file: qFile
+                };
+            }
+
+            function fallback() {
+                if (noticeId && fallbackTitle) {
+                    render(fromParams());
+                } else {
+                    renderNoticesNotFound();
+                }
+            }
+
+            // When the link already carries the full notice (content param present),
+            // render it directly - works even on file:// where fetch() is blocked.
+            if (qContent !== null) {
+                render(fromParams());
+                return;
+            }
+
+            fetch("notice.html?t=" + Date.now(), { cache: "no-store" })
+                .then(function (res) {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.text();
+                })
+                .then(function (html) {
+                    var doc = new DOMParser().parseFromString(html, "text/html");
+                    var rows = doc.querySelectorAll("#noticeTable tbody tr");
+                    var found = null;
+                    var byTitle = null;
+                    rows.forEach(function (row) {
+                        var titleEl = row.querySelector('td[data-label="Title"]');
+                        var title = titleEl ? titleEl.textContent.replace(/\s+/g, " ").trim() : "";
+                        if (noticeId && row.getAttribute("id") === noticeId) found = row;
+                        if (!noticeId && fallbackTitle && title === fallbackTitle) byTitle = row;
+                    });
+                    var row = found || byTitle;
+                    if (!row) return fallback();
+
+                    var titleEl = row.querySelector('td[data-label="Title"]');
+                    var contentEl = row.querySelector("div.notice-content");
+                    var dateEl = row.querySelector('td[data-label="Date"]');
+                    var badgeEl = row.querySelector("span.badge");
+                    var linkEl = row.querySelector("a.download-link");
+
+                    render({
+                        title: titleEl ? titleEl.textContent.replace(/\s+/g, " ").trim() : fallbackTitle,
+                        content: contentEl ? contentEl.textContent.trim() : "",
+                        date: dateEl ? (dateEl.getAttribute("data-date") || dateEl.textContent.replace(/\s+/g, " ").trim()) : fallbackDate,
+                        badge: badgeEl ? badgeEl.textContent.replace(/\s+/g, " ").trim() : "",
+                        file: linkEl ? linkEl.getAttribute("href") || "" : ""
+                    });
+                })
+                .catch(function (err) {
+                    console.warn("[NoticeDetail] Using fallback:", err.message);
+                    fallback();
+                });
+        })();
+    </script>
+</body>
+
+</html>

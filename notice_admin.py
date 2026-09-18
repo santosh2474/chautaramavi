@@ -6,6 +6,7 @@ import json
 import shutil
 import uuid
 import socket
+import hashlib
 import threading
 import socketserver
 import http.server
@@ -89,6 +90,11 @@ def get_local_ip():
         return ip
     except Exception:
         return "127.0.0.1"
+
+
+def notice_row_id(title):
+    """Stable HTML anchor id for a notice row (ASCII-safe for URL hashes)."""
+    return "notice-" + hashlib.md5(title.encode("utf-8")).hexdigest()[:10]
 
 
 def convert_heic_to_jpeg(heic_data):
@@ -1229,10 +1235,75 @@ class NoticeAdminApp:
         try:
             with open(HTML_FILE, "w", encoding="utf-8") as file:
                 file.write(str(soup.prettify() if soup else ""))
+            self.sync_ticker_snapshot(soup)
             return True
         except Exception as e:
             messagebox.showerror("HTML Save Error", f"Failed to save {HTML_FILE}:\n{str(e)}")
             return False
+
+    def collect_notices(self, soup):
+        """Read every notice row from the table, newest first."""
+        table = soup.find("table", id="noticeTable") if soup else None
+        tbody = table.find("tbody") if table else None
+        if not tbody:
+            return []
+        rows = []
+        for tr in tbody.find_all("tr", recursive=False):
+            title_td = tr.find("td", attrs={"data-label": "Title"})
+            if not title_td:
+                continue
+            title = title_td.get_text(" ", strip=True)
+            if not title:
+                continue
+            date_td = tr.find("td", attrs={"data-label": "Date"})
+            content_el = tr.find("div", class_="notice-content")
+            badge_el = tr.find("span", class_="badge")
+            file_el = tr.find("a", class_="download-link")
+            rows.append({
+                "id": tr.get("id", "") or notice_row_id(title),
+                "title": title,
+                "content": content_el.get_text(" ", strip=True) if content_el else "",
+                "date": (date_td.get("data-date", "") if date_td else ""),
+                "badge": badge_el.get_text(" ", strip=True) if badge_el else "",
+                "file": (file_el.get("href", "") if file_el else ""),
+                "sort": (date_td.get("data-sort", "") if date_td else ""),
+            })
+        rows.sort(key=lambda r: r["sort"], reverse=True)
+        return rows
+
+    def sync_ticker_snapshot(self, soup):
+        """Rewrite the embedded snapshot inside ticker/ticker.js so the marquee
+        reflects the latest notices even when index.html is opened via file://
+        (where the live fetch of notice.html is blocked by the browser)."""
+        try:
+            top = [
+                {k: r[k] for k in ("id", "title", "content", "date", "badge", "file")}
+                for r in self.collect_notices(soup)[:3]
+            ]
+            self.write_ticker_snapshot(top)
+        except Exception as e:
+            print(f"Ticker snapshot sync skipped: {e}")
+
+    def write_ticker_snapshot(self, items):
+        path = os.path.join(BASE_DIR, "ticker", "ticker.js")
+        if not os.path.exists(path):
+            return
+        with open(path, "r", encoding="utf-8") as f:
+            src = f.read()
+        marker = "var FALLBACK_NOTICES = ["
+        start = src.find(marker)
+        if start == -1:
+            return
+        open_end = start + len(marker)
+        close = src.find("];", open_end)
+        if close == -1:
+            return
+        blocks = [json.dumps(it, ensure_ascii=False, indent=4) for it in items]
+        body = ",\n".join(blocks)
+        indented = "\n".join("        " + line for line in body.splitlines())
+        new_src = src[:open_end] + "\n" + indented + "\n    " + src[close:]
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new_src)
 
     def create_row_tag(self, title, content, date_bs, badge, badge_class, file_link):
         parts = date_bs.split("/")
@@ -1240,6 +1311,8 @@ class NoticeAdminApp:
         month = parts[1].zfill(2) if len(parts) > 1 else "01"
         day = parts[2].zfill(2) if len(parts) > 2 else "01"
         sort_date = f"{year}{month}{day}"
+
+        notice_id = notice_row_id(title)
 
         file_name = os.path.basename(file_link) if file_link else ""
         badge_lower = badge.lower().replace("🔥", "").replace("⭐", "").replace("🎉", "").replace("📌", "").strip()
@@ -1249,7 +1322,7 @@ class NoticeAdminApp:
         clean_badge_text = cfg["label"] if badge_lower in BADGE_CONFIG else badge
 
         row_html = f"""
-<tr>
+<tr id="{notice_id}">
 <td class="font-medium text-gray-900" data-label="Title">{title}</td>
 <td class="text-gray-700" data-label="Content">
     <div class="notice-content">{content}</div>

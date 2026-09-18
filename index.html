@@ -29,6 +29,9 @@
          so the CDN (Cloudflare / GitHub Pages, max-age up to 4h) misses its cache and
          the newest banner.css/banner.js/banner-config.js are fetched immediately. -->
     <link href="banner/banner.css?v=1789633770384" rel="stylesheet">
+
+    <!-- Latest News Ticker Stylesheet -->
+    <link href="ticker/ticker.css" rel="stylesheet">
 </head>
 
 <body>
@@ -186,7 +189,31 @@
 
     <!-- Navbar End -->
 
-
+    <!-- News Ticker Start -->
+    <div class="ticker-bar" id="newsTicker">
+        <div class="ticker-inner">
+            <div class="ticker-label"><i class="fa fa-bullhorn"></i> Latest News</div>
+            <div class="ticker-controls">
+                <button type="button" class="ticker-btn" id="tickerPrev" title="Previous notice"
+                    aria-label="Previous notice"><i class="fa fa-chevron-left"></i></button>
+                <button type="button" class="ticker-btn" id="tickerPlayPause" title="Pause"
+                    aria-label="Play or pause">
+                    <i class="fa fa-pause"></i>
+                    <i class="fa fa-play" style="display:none"></i>
+                </button>
+                <button type="button" class="ticker-btn" id="tickerNext" title="Next notice"
+                    aria-label="Next notice"><i class="fa fa-chevron-right"></i></button>
+            </div>
+            <div class="ticker-viewport" id="tickerViewport" aria-live="polite">
+                <div class="ticker-track" id="tickerTrack">
+                    <div class="ticker-item">
+                        <a href="notice.html" target="_blank">Loading latest notices...</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- News Ticker End -->
 
     <!-- Header Start -->
     <div class="jumbotron position-relative overlay-bottom" style="height: 85vh; margin-bottom: 40px;">
@@ -1124,6 +1151,9 @@
     <!-- School Banner / Popup Media Viewer -->
     <script src="banner/banner-config.js?v=1789633770384"></script>
     <script src="banner/banner.js?v=1789633770384"></script>
+
+    <!-- Latest News Ticker -->
+    <script src="ticker/ticker.js"></script>
 </body>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
