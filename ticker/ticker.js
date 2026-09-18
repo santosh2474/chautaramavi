@@ -30,6 +30,14 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
+            "id": "notice-ff8bf26ab3",
+            "title": "CTEVT Examination - 2083 (R & B)",
+            "content": "डिप्लोमा/प्रमाणपत्र तहको नियमित तथा आंशिक परीक्षा २०८३ को संशोधित परीक्षा तालिका सम्बन्धी अत्यन्त जरुरी सूचना",
+            "date": "2083/06/02",
+            "badge": "⭐ Important",
+            "file": "notices/6th-sem_dacb7ee5.png"
+        },
+        {
             "id": "notice-14cb82955f",
             "title": "Notice Regarding Postponement of Final Semester Examination",
             "content": "Notice Regarding Postponement of Final Semester Examination",
@@ -44,14 +52,6 @@
             "date": "2083/05/16",
             "badge": "📌 exam",
             "file": "notices/ctevt_exam_center_2083_94eb2b9f.png"
-        },
-        {
-            "id": "notice-a4ebe199ed",
-            "title": "End Semester Assessment Examination 2083",
-            "content": "End Semester Assessment Examination 2083 (Routine, pending fee, admit card)",
-            "date": "2083/05/01",
-            "badge": "📌 Exam",
-            "file": "notices/End-Semester Assessment ESA - 2083_c6246e1c.jpeg"
         }
     ];
 
