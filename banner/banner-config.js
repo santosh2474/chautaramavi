@@ -41,7 +41,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1789633770376
+    lastUpdated: 1789789528866
 };
 
 // Media Items to Display
@@ -52,11 +52,18 @@ const bannerMeta = {
     "banner/banner_img/2083_05_26_ECA_Program_IMG_4.jpeg": {"title": "ECA_Program_Pic_2 held on 2083/05/26"},
     "banner/banner_img/20260909_155614.jpg": {"title": "Samir_Tamang_Sir_Photo"},
     "banner/banner_img/page-header.jpg": {"title": "Drone View of Dandakharka"},
-    "banner/banner_img/courses-1.jpg": {"title": "CTEVT-DCOM-Computer Lab (Students Performing Practical)"}
+    "banner/banner_img/courses-1.jpg": {"title": "CTEVT-DCOM-Computer Lab (Students Performing Practical)"},
+    "banner/banner_img/6th-sem.png": {"title": "CTEVT_DCOM_6th_SEM_Final_Exam_Updated_Routine_&_Center"},
+    "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png": {"title": "CTEVT_DCOM_2nd_4th_Sem_Final_Exam_Notice"},
+    "banner/banner_img/1000109735.jpg": {"title": "ECA_Program_2082-06-02_Pic_1"},
+    "banner/banner_img/1000109736.jpg": {"title": "ECA_Program_2082-06-02_Pic_2"},
+    "banner/banner_img/1000109732.jpg": {"title": "ECA_Program_2082-06-02_Pic_3"}
 };
 
 const bannerMedia = [
-    "banner/banner_img/page-header.jpg",
-    "banner/banner_img/courses-1.jpg",
-    "banner/banner_img/1000109365.jpg"
+    "banner/banner_img/6th-sem.png",
+    "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png",
+    "banner/banner_img/1000109735.jpg",
+    "banner/banner_img/1000109736.jpg",
+    "banner/banner_img/1000109732.jpg"
 ];

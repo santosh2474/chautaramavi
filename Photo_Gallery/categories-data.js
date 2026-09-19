@@ -4,17 +4,22 @@ window.GALLERY_DATA = [
     "category": "(ECA) Extra Curricular Activities",
     "images": [
       {
-        "name": "20260909_155614.jpg",
-        "date": "2083/05/26",
-        "timestamp": 1789186789
+        "name": "1000109732.jpg",
+        "date": "2083/06/03",
+        "timestamp": 1789789880
+      },
+      {
+        "name": "1000109736.jpg",
+        "date": "2083/06/03",
+        "timestamp": 1789789879
+      },
+      {
+        "name": "1000109735.jpg",
+        "date": "2083/06/03",
+        "timestamp": 1789789879
       },
       {
         "name": "IMG_7069.jpeg",
-        "date": "2083/05/26",
-        "timestamp": 1789119938
-      },
-      {
-        "name": "IMG_7068.jpeg",
         "date": "2083/05/26",
         "timestamp": 1789119938
       },
@@ -24,22 +29,7 @@ window.GALLERY_DATA = [
         "timestamp": 1789119937
       },
       {
-        "name": "IMG_7073.jpeg",
-        "date": "2083/05/26",
-        "timestamp": 1789119937
-      },
-      {
-        "name": "1000108058.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328568
-      },
-      {
         "name": "1000108057.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328568
-      },
-      {
-        "name": "1000108056.jpg",
         "date": "2083/05/17",
         "timestamp": 1788328568
       },
@@ -64,32 +54,7 @@ window.GALLERY_DATA = [
         "timestamp": 1788328567
       },
       {
-        "name": "1000108060.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328567
-      },
-      {
-        "name": "1000108059.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328567
-      },
-      {
-        "name": "1000108075.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
         "name": "1000108074.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
-        "name": "1000108073.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
-        "name": "1000108072.jpg",
         "date": "2083/05/17",
         "timestamp": 1788328566
       },
@@ -104,27 +69,7 @@ window.GALLERY_DATA = [
         "timestamp": 1788328566
       },
       {
-        "name": "1000108069.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
-        "name": "1000108068.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
         "name": "1000108067.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
-        "name": "1000108066.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328566
-      },
-      {
-        "name": "1000108065.jpg",
         "date": "2083/05/17",
         "timestamp": 1788328566
       },
@@ -134,27 +79,7 @@ window.GALLERY_DATA = [
         "timestamp": 1788328565
       },
       {
-        "name": "1000108081.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328565
-      },
-      {
-        "name": "1000108080.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328565
-      },
-      {
         "name": "1000108079.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328565
-      },
-      {
-        "name": "1000108077.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1788328565
-      },
-      {
-        "name": "1000108076.jpg",
         "date": "2083/05/17",
         "timestamp": 1788328565
       }
@@ -186,28 +111,7 @@ window.GALLERY_DATA = [
   },
   {
     "category": "Meetings",
-    "images": [
-      {
-        "name": "1000109365.jpg",
-        "date": "2083/05/29",
-        "timestamp": 1789362775
-      },
-      {
-        "name": "1000109158.jpg",
-        "date": "2083/05/25",
-        "timestamp": 1789020598
-      },
-      {
-        "name": "1000108658.jpg",
-        "date": "2083/05/18",
-        "timestamp": 1788433956
-      },
-      {
-        "name": "9ebbe6db-c0ff-43ab-835a-ad080746352d-1_all_26450.jpg",
-        "date": "2083/05/18",
-        "timestamp": 1788414967
-      }
-    ]
+    "images": []
   },
   {
     "category": "Miscellaneous",
@@ -306,11 +210,6 @@ window.GALLERY_DATA = [
         "name": "1000108255.jpg",
         "date": "2083/05/17",
         "timestamp": 1788328970
-      },
-      {
-        "name": "Institute Image.jpg",
-        "date": "2083/05/17",
-        "timestamp": 1785402742
       }
     ]
   }

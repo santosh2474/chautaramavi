@@ -1,8 +1,10 @@
 {
   "media": [
-    "banner/banner_img/page-header.jpg",
-    "banner/banner_img/courses-1.jpg",
-    "banner/banner_img/1000109365.jpg"
+    "banner/banner_img/6th-sem.png",
+    "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png",
+    "banner/banner_img/1000109735.jpg",
+    "banner/banner_img/1000109736.jpg",
+    "banner/banner_img/1000109732.jpg"
   ],
   "meta": {
     "banner/banner_img/2083_05_26_ECA_Program_IMG_1.jpeg": {
@@ -25,27 +27,54 @@
     },
     "banner/banner_img/courses-1.jpg": {
       "title": "CTEVT-DCOM-Computer Lab (Students Performing Practical)"
+    },
+    "banner/banner_img/6th-sem.png": {
+      "title": "CTEVT_DCOM_6th_SEM_Final_Exam_Updated_Routine_&_Center"
+    },
+    "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png": {
+      "title": "CTEVT_DCOM_2nd_4th_Sem_Final_Exam_Notice"
+    },
+    "banner/banner_img/1000109735.jpg": {
+      "title": "ECA_Program_2082-06-02_Pic_1"
+    },
+    "banner/banner_img/1000109736.jpg": {
+      "title": "ECA_Program_2082-06-02_Pic_2"
+    },
+    "banner/banner_img/1000109732.jpg": {
+      "title": "ECA_Program_2082-06-02_Pic_3"
     }
   },
   "items": [
     {
-      "url": "banner/banner_img/page-header.jpg",
-      "name": "page-header.jpg",
-      "mtime": 1789633770379,
-      "title": "Drone View of Dandakharka"
+      "url": "banner/banner_img/6th-sem.png",
+      "name": "6th-sem.png",
+      "mtime": 1789789528869,
+      "title": "CTEVT_DCOM_6th_SEM_Final_Exam_Updated_Routine_&_Center"
     },
     {
-      "url": "banner/banner_img/courses-1.jpg",
-      "name": "courses-1.jpg",
-      "mtime": 1789633770379,
-      "title": "CTEVT-DCOM-Computer Lab (Students Performing Practical)"
+      "url": "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png",
+      "name": "CTEVT_2nd_4th_SEM_Exam_Notice.png",
+      "mtime": 1789789528869,
+      "title": "CTEVT_DCOM_2nd_4th_Sem_Final_Exam_Notice"
     },
     {
-      "url": "banner/banner_img/1000109365.jpg",
-      "name": "1000109365.jpg",
-      "mtime": 1789633770379,
-      "title": "CTEVT-परीक्षा - 2083 (R & B) सञ्चालन सम्बन्धी अत्यन्त जरुरी सूचना"
+      "url": "banner/banner_img/1000109735.jpg",
+      "name": "1000109735.jpg",
+      "mtime": 1789789528869,
+      "title": "ECA_Program_2082-06-02_Pic_1"
+    },
+    {
+      "url": "banner/banner_img/1000109736.jpg",
+      "name": "1000109736.jpg",
+      "mtime": 1789789528869,
+      "title": "ECA_Program_2082-06-02_Pic_2"
+    },
+    {
+      "url": "banner/banner_img/1000109732.jpg",
+      "name": "1000109732.jpg",
+      "mtime": 1789789528869,
+      "title": "ECA_Program_2082-06-02_Pic_3"
     }
   ],
-  "lastModified": 1789633770
+  "lastModified": 1789789528
 }
