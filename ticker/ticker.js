@@ -30,6 +30,14 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
+            "id": "notice-230ea25894",
+            "title": "CTEVT External Practical Examination",
+            "content": "CTEVT External Practical Examination for 4th sem - 2083",
+            "date": "2083/06/06",
+            "badge": "⭐ Important",
+            "file": "notices/New_Doc_09-21-2026_1131_302157b7.jpg"
+        },
+        {
             "id": "notice-e6a105bd02",
             "title": "CTEVT_2nd_4th_Sem_Exam_Notice",
             "content": "डिप्लोमा तथा प्रमाणपत्र तहको बार्षिक/सेमेष्टर परीक्षा प्रणालीका कार्यकमहरुको\nपरीक्षा सञ्चालन सम्वन्धी अत्यन्त जरुरी सूचना",
@@ -44,14 +52,6 @@
             "date": "2083/06/02",
             "badge": "⭐ Important",
             "file": "notices/6th-sem_dacb7ee5.png"
-        },
-        {
-            "id": "notice-14cb82955f",
-            "title": "Notice Regarding Postponement of Final Semester Examination",
-            "content": "Notice Regarding Postponement of Final Semester Examination",
-            "date": "2083/05/22",
-            "badge": "⭐ Important",
-            "file": "notices/Notice Regarding Postponement of Final Semester Examination_d677c1b2.png"
         }
     ];
 
