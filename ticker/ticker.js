@@ -30,6 +30,14 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
+            "id": "notice-e864fb8731",
+            "title": "कक्षा ११ को विषय",
+            "content": "कक्षा ११ को विषय दर्ता फाराम भर्ने भराउने सम्बन्धमा ।",
+            "date": "2083/06/06",
+            "badge": "⭐ Important",
+            "file": "notices/jpg_63aa50c6.jpg"
+        },
+        {
             "id": "notice-230ea25894",
             "title": "CTEVT External Practical Examination",
             "content": "CTEVT External Practical Examination for 4th sem - 2083",
@@ -44,14 +52,6 @@
             "date": "2083/06/02",
             "badge": "🔥 Urgent",
             "file": "notices/CTEVT_2nd_4th_SEM_Exam_Notice_42088ae3.png"
-        },
-        {
-            "id": "notice-ff8bf26ab3",
-            "title": "CTEVT Examination - 2083 (R & B)",
-            "content": "डिप्लोमा/प्रमाणपत्र तहको नियमित तथा आंशिक परीक्षा २०८३ को संशोधित परीक्षा तालिका सम्बन्धी अत्यन्त जरुरी सूचना",
-            "date": "2083/06/02",
-            "badge": "⭐ Important",
-            "file": "notices/6th-sem_dacb7ee5.png"
         }
     ];
 
