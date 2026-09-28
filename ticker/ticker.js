@@ -30,8 +30,16 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
-            "id": "notice-2ec6b54110",
-            "title": "Practical Routine - CTEVT",
+            "id": "notice-4bd91bcb49",
+            "title": "Final Practical Examination 6th Semester",
+            "content": "Final Practical Examination 6th Semester Routine - 2083",
+            "date": "2083/06/12",
+            "badge": "⭐ Important",
+            "file": "notices/New Doc 09-28-2026 1134_2_3b77bc6f.jpg"
+        },
+        {
+            "id": "notice-923ce8ee70",
+            "title": "Practical Routine - CTEVT - 4th Sem",
             "content": "CTEVT Final Practical Examination (II/II) - 4th Sem - 2083 starts from 2083/06/11 Till 2083/06/15",
             "date": "2083/06/09",
             "badge": "⭐ Important",
@@ -44,14 +52,6 @@
             "date": "2083/06/06",
             "badge": "⭐ Important",
             "file": "notices/CTEVT 2nd and 4th Sem R  B Routine - 2083_b70f239e.jpg"
-        },
-        {
-            "id": "notice-e864fb8731",
-            "title": "कक्षा ११ को विषय",
-            "content": "कक्षा ११ को विषय दर्ता फाराम भर्ने भराउने सम्बन्धमा ।",
-            "date": "2083/06/06",
-            "badge": "⭐ Important",
-            "file": "notices/jpg_63aa50c6.jpg"
         }
     ];
 
