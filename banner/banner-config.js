@@ -41,7 +41,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1790088528764
+    lastUpdated: 1790562641944
 };
 
 // Media Items to Display
