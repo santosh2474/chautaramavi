@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d1a24">
+    <title>School Assembly · Music & Soundboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            background: radial-gradient(1200px 620px at 72% -12%, #1d3142 0%, #101b26 46%, #0a1219 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            padding: 14px 14px 24px;
+        }
+
+        .board {
+            width: 100%;
+            max-width: 1120px;
+            height: 100%;
+            background: rgba(16, 26, 36, 0.72);
+            border: 1px solid #2c4559;
+            border-radius: 22px;
+            padding: 16px 16px 18px;
+            box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.06);
+        }
+
+        /* ---- TOP ---- */
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand .logo {
+            width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+            background: linear-gradient(160deg, #ffc857, #f39c12);
+            display: flex; align-items: center; justify-content: center;
+            color: #2a1c00;
+            box-shadow: 0 6px 14px rgba(255, 200, 87, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.5);
+        }
+
+        .brand .logo svg { width: 26px; height: 26px; fill: currentColor; }
+
+        .brand h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.3px; color: #f4ead8; line-height: 1.05; }
+
+        .brand span {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 2px;
+            color: #9db9d4; text-transform: uppercase;
+        }
+
+        .mode-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #14293a; border: 1px solid #2d4a61; border-radius: 999px;
+            padding: 6px 14px; color: #9fd3ff; font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .mode-pill .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4ade80; box-shadow: 0 0 8px #4ade80;
+            animation: blink 1.6s ease-in-out infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        /* ---- CONTROL BAR ---- */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #0d1a24;
+            border: 1px solid #2d4a61;
+            border-radius: 20px;
+            padding: 10px 12px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), 0 8px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        .ctrl-btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: 999px;
+            border: 1px solid #3a5a74; border-bottom-width: 3px;
+            background: #1d3347; color: #e6f2ff;
+            font-size: 0.82rem; font-weight: 700; letter-spacing: 0.4px;
+            cursor: pointer; user-select: none; touch-action: manipulation;
+            box-shadow: 0 4px 0 #0c1620, 0 6px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+        }
+
+        .ctrl-btn svg { width: 15px; height: 15px; fill: currentColor; flex-shrink: 0; }
+
+        .ctrl-btn:hover:not(:disabled) { filter: brightness(1.15); }
+
+        .ctrl-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #0c1620, 0 4px 8px rgba(0, 0, 0, 0.35); }
+
+        .ctrl-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+        .ctrl-btn.play   { background: #14432f; border-color: #2f7d56; color: #b8ffd9; }
+        .ctrl-btn.stop   { background: #4a2626; border-color: #9c4a4a; color: #ffc2c2; }
+        .ctrl-btn.random { background: #332a4d; border-color: #6a55a8; color: #e0ccff; }
+
+        .ctrl-status {
+            display: flex; align-items: center; gap: 8px;
+            background: #14293a; border: 1px solid #2d4a61; border-radius: 999px;
+            padding: 7px 14px; min-width: 0; flex-shrink: 1;
+        }
+
+        .ctrl-status svg { width: 16px; height: 16px; fill: #ffc857; flex-shrink: 0; }
+
+        .ctrl-status span {
+            font-size: 0.76rem; font-weight: 600; color: #ffedb0;
+            max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .vol-wrap {
+            display: flex; align-items: center; gap: 10px;
+            background: #14293a; border: 1px solid #2d4a61; border-radius: 999px;
+            padding: 5px 12px; margin-left: auto;
+        }
+
+        .mute-btn {
+            width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+            border: 1px solid #3a5a74; background: #1d3347; color: #ffc857;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: filter 0.15s;
+        }
+
+        .mute-btn:hover { filter: brightness(1.2); }
+
+        .mute-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+        .mute-btn.muted { background: #4a2626; border-color: #9c4a4a; color: #ffb0b0; }
+
+        .vol-slider {
+            width: 110px; height: 6px;
+            -webkit-appearance: none; appearance: none;
+            background: #0d1a24; border-radius: 6px; outline: none; cursor: pointer;
+        }
+
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #ffc857; border: 2px solid #1b2b3e;
+            box-shadow: 0 0 8px rgba(255, 200, 87, 0.5); cursor: grab;
+        }
+
+        .vol-slider::-moz-range-thumb {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #ffc857; border: 2px solid #1b2b3e;
+            box-shadow: 0 0 8px rgba(255, 200, 87, 0.5); cursor: grab;
+        }
+
+        /* ---- SOUND PADS ---- */
+        .pad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+            grid-auto-rows: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .sound-card {
+            --cat: #5a7c9c;
+            position: relative;
+            width: 100%;
+            background: linear-gradient(180deg, #23384c, #1a2a3a);
+            border: 1px solid #35536b;
+            border-top: 3px solid var(--cat);
+            border-radius: 18px;
+            padding: 14px 10px 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer; user-select: none; touch-action: manipulation;
+            box-shadow: 0 8px 0 #0b131c, 0 10px 18px rgba(0, 0, 0, 0.45);
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.15s;
+            min-height: 118px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .sound-card:hover { filter: brightness(1.12); }
+
+        .sound-card:active {
+            transform: translateY(4px) scale(0.98);
+            box-shadow: 0 3px 0 #0b131c, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sound-card i {
+            font-size: 2.1rem; line-height: 1; font-style: normal;
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .sound-card .name { font-size: 0.88rem; font-weight: 700; color: #eef6ff; letter-spacing: 0.2px; text-align: center; line-height: 1.25; min-width: 0; overflow-wrap: break-word; }
+
+        .sound-card small {
+            font-size: 0.62rem; color: #9db9d4; letter-spacing: 0.5px;
+            font-weight: 600; text-transform: uppercase; text-align: center;
+            min-width: 0; max-width: 100%;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .sound-card .hotkey {
+            position: absolute; top: 8px; left: 10px;
+            width: 22px; height: 22px; border-radius: 7px;
+            background: #0d1a24; border: 1px solid #3a5a74; color: #ffc857;
+            font-size: 0.7rem; font-weight: 700; font-style: normal;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Category accents */
+        .sound-card.drum       { --cat: #ffae6d; }
+        .sound-card.bell       { --cat: #ffd95c; }
+        .sound-card.song       { --cat: #8dd0ff; }
+        .sound-card.anthem     { --cat: #ff8f8f; }
+        .sound-card.transition { --cat: #a9e7b0; }
+        .sound-card.applause   { --cat: #ff9fd3; }
+        .sound-card.custom     { --cat: #c9a7ff; }
+
+        .sound-card.selected-pad { outline: 3px solid #4a9eff; outline-offset: 2px; }
+
+        .sound-card.active-pad { animation: padPulse 1s ease-in-out infinite; }
+
+        @keyframes padPulse {
+            0%, 100% { box-shadow: 0 8px 0 #0b131c, 0 0 0 2px rgba(255, 200, 87, 0.4), 0 10px 20px rgba(0, 0, 0, 0.5); }
+            50%      { box-shadow: 0 8px 0 #0b131c, 0 0 0 5px rgba(255, 200, 87, 0.15), 0 10px 26px rgba(255, 200, 87, 0.18); }
+        }
+
+        /* ---- PLAYER / SEEK ---- */
+        .player {
+            background: #0d1a24; border: 1px solid #2d4a61; border-radius: 18px;
+            padding: 12px 14px 10px; margin-top: 14px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .player-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+        .player-top .p-title {
+            flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
+            color: #cfe2f3; font-weight: 600; font-size: 0.88rem;
+        }
+
+        .player-top .p-title svg { width: 16px; height: 16px; fill: #ffc857; flex-shrink: 0; }
+
+        .player-top .p-title span {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+        }
+
+        .badge {
+            font-size: 0.66rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 999px; flex-shrink: 0; white-space: nowrap;
+        }
+
+        .badge.idle    { background: #1a2c3c; color: #8fb0cc; border-left: 3px solid #4a6a85; }
+        .badge.playing { background: #14432f; color: #8dffbe; border-left: 3px solid #3d9e6e; }
+        .badge.sel     { background: #3a2e1d; color: #ffd98a; border-left: 3px solid #f1c40f; }
+
+        .p-time {
+            font-size: 0.76rem; font-weight: 700; color: #ffedb0;
+            font-variant-numeric: tabular-nums; flex-shrink: 0;
+        }
+
+        .seek-slider-wrapper { position: relative; width: 100%; height: 36px; display: flex; align-items: center; touch-action: none; }
+
+        .seek-track {
+            position: absolute; width: 100%; height: 8px; border-radius: 4px;
+            background: #1f3443; overflow: hidden; pointer-events: none;
+        }
+
+        .seek-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #ffc857, #ffedb0);
+            border-radius: 4px; transition: width 0.05s linear;
+        }
+
+        .seek-slider {
+            -webkit-appearance: none; appearance: none;
+            position: relative; width: 100%; height: 36px;
+            background: transparent; cursor: pointer; z-index: 2; margin: 0;
+            touch-action: none; min-height: 44px;
+        }
+
+        .seek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #ffd966; border: 3px solid #1b2b3e;
+            cursor: grab; box-shadow: 0 0 10px #ffc85780, 0 3px 6px black;
+            transition: transform 0.1s; touch-action: none;
+        }
+
+        .seek-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.2); background: #ffe28a; }
+
+        .seek-slider::-moz-range-thumb {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #ffd966; border: 3px solid #1b2b3e;
+            cursor: grab; box-shadow: 0 0 10px #ffc85780, 0 3px 6px black; touch-action: none;
+        }
+
+        .seek-slider:disabled::-webkit-slider-thumb { background: #6e8ba3; box-shadow: none; cursor: not-allowed; }
+        .seek-slider:disabled::-moz-range-thumb    { background: #6e8ba3; box-shadow: none; cursor: not-allowed; }
+
+        /* ---- FOOTER ---- */
+        footer {
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 8px;
+            margin-top: 14px; color: #7e9bb5; font-size: 0.68rem; letter-spacing: 0.3px;
+            border-top: 1px solid #2f4457; padding-top: 12px; text-align: center;
+        }
+
+        footer .hint {
+            display: inline-flex; align-items: center; gap: 5px;
+            white-space: nowrap;
+            background: rgba(13, 26, 36, 0.75); border: 1px solid #24394d;
+            border-radius: 999px; padding: 3px 11px; color: #8fa9c2;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        footer kbd {
+            background: #14293a; border: 1px solid #2d4a61; border-bottom-width: 2px;
+            border-radius: 5px; padding: 1px 6px; color: #ffd98a;
+            font-family: inherit; font-size: 0.66rem; font-weight: 700; line-height: 1.4;
+        }
+
+        :focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
+
+        /* ---- MOBILE ---- */
+        @media (max-width: 949px) {
+            .pad-grid { gap: 10px; }
+            .sound-card { min-height: 104px; padding: 12px 9px 10px; border-radius: 16px; }
+            .sound-card i { font-size: 1.8rem; }
+            .sound-card .name { font-size: 0.8rem; }
+        }
+
+        @media (max-width: 720px) {
+            body { padding: 8px; }
+
+            .board { padding: 12px 10px 14px; border-radius: 18px; }
+
+            .brand h1 { font-size: 1.1rem; }
+            .brand span { letter-spacing: 1.5px; }
+            .brand .logo { width: 40px; height: 40px; border-radius: 12px; }
+            .mode-pill { font-size: 0.64rem; padding: 5px 10px; }
+
+            .controls { gap: 6px; padding: 8px; border-radius: 16px; }
+
+            .ctrl-btn { flex: 1; justify-content: center; padding: 10px 6px; font-size: 0.74rem; }
+            .ctrl-btn svg { width: 14px; height: 14px; }
+
+            .ctrl-status { flex-basis: 100%; order: 4; justify-content: center; padding: 6px 12px; }
+            .ctrl-status span { max-width: 220px; }
+
+            .vol-wrap { flex: 1.4; justify-content: center; margin-left: 0; }
+            .vol-slider { flex: 1; width: auto; min-width: 60px; }
+
+            .player { padding: 10px; border-radius: 14px; }
+            .p-time { font-size: 0.7rem; }
+
+            footer { gap: 6px; font-size: 0.6rem; letter-spacing: 0.2px; }
+            footer .hint { padding: 3px 9px; gap: 4px; }
+            footer kbd { font-size: 0.6rem; padding: 1px 5px; }
+        }
+
+        @media (max-width: 659px) {
+            .pad-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 8px; }
+            .sound-card { min-height: 96px; padding: 10px 6px 9px; border-radius: 14px; gap: 4px; box-shadow: 0 6px 0 #0b131c, 0 8px 14px rgba(0, 0, 0, 0.45); }
+            .sound-card i { font-size: 1.55rem; }
+            .sound-card .name { font-size: 0.72rem; }
+            .sound-card small { display: none; }
+            .sound-card .hotkey { top: 6px; left: 6px; width: 18px; height: 18px; font-size: 0.6rem; border-radius: 5px; }
+        }
+
+        @media (max-width: 429px) {
+            .pad-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 105px), 1fr)); gap: 8px; }
+            .sound-card { min-height: 88px; padding: 8px 5px 8px; border-radius: 12px; }
+            .sound-card i { font-size: 1.4rem; }
+            .sound-card .name { font-size: 0.7rem; }
+        }
+
+        @media (max-width: 400px) {
+            footer { font-size: 0.58rem; letter-spacing: 0.1px; }
+            footer .hint { padding: 2px 8px; }
+            footer kbd { font-size: 0.58rem; padding: 1px 4px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="board">
+        <!-- TOP -->
+        <header class="top">
+            <div class="brand">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+                </div>
+                <div>
+                    <h1>Chautara Mavi</h1>
+                    <span>Assembly Soundboard</span>
+                </div>
+            </div>
+            <div class="mode-pill"><span class="dot"></span>Live Mode</div>
+        </header>
+
+        <!-- CONTROL BAR -->
+        <section class="controls">
+            <button class="ctrl-btn play" id="playBtn" title="Play selected sound (Enter)">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play
+            </button>
+            <button class="ctrl-btn stop" id="stopBtn" title="Stop current sound (Space)" disabled>
+                <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/></svg> Stop
+            </button>
+            <button class="ctrl-btn random" id="randomBtn" title="Play a random sound (R)">
+                <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                Random
+            </button>
+
+            <div class="ctrl-status" title="Status">
+                <svg viewBox="0 0 24 24" id="ctrlIcon"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                <span id="ctrlStatusText">Ready</span>
+            </div>
+
+            <div class="vol-wrap" title="Volume (M = mute)">
+                <button class="mute-btn" id="muteBtn" aria-label="Mute or unmute volume">
+                    <svg viewBox="0 0 24 24" id="muteIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <input type="range" class="vol-slider" id="volSlider" min="0" max="100" step="1" value="90" aria-label="Volume">
+            </div>
+        </section>
+
+        <!-- PLAYER / SEEK -->
+        <section class="player">
+            <div class="player-top">
+                <div class="p-title">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    <span id="playerTitle">Ready for assembly</span>
+                </div>
+                <div class="badge idle" id="playerBadge">idle</div>
+                <div class="p-time" id="timeDisplay">0:00 / 0:00</div>
+            </div>
+            <div class="seek-slider-wrapper">
+                <div class="seek-track">
+                    <div class="seek-fill" id="seekFill"></div>
+                </div>
+                <input type="range" class="seek-slider" id="seekSlider" min="0" max="100" value="0" step="0.1" disabled>
+            </div>
+        </section>
+
+        <!-- SOUND PADS (edited by Python GUI) -->
+        <section class="pad-grid" id="padGrid">
+            <div class="sound-card custom" data-sound="audio_9d6ebb" data-label="Sarasawati_Bandana" data-type="audio" data-src="sounds/sarasawati_bandana.mp3">
+                <i>🚩</i>
+                <span class="name">Sarasawati_Bandana</span>
+                <small>proud</small>
+            </div>
+            <div class="sound-card anthem" data-sound="audio_26211e" data-label="National Anthem Song" data-type="audio" data-src="sounds/national-anthem-of-nepal.mp3">
+                <i>🚩</i>
+                <span class="name">National Anthem Song</span>
+                <small>anthem</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_88c3c0" data-label="National Anthem Music Only" data-type="audio" data-src="sounds/national-anthem-of-nepal-music-onl.mp3">
+                <i>🎵</i>
+                <span class="name">National Anthem Music Only</span>
+                <small>audio</small>
+            </div>
+            <div class="sound-card drum" data-sound="audio_83d12f" data-label="Drum Roll" data-type="audio" data-src="sounds/march-past-drum-beat.mp3">
+                <i>🥁</i>
+                <span class="name">Drum Roll</span>
+                <small>roll</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_c01b8d" data-label="Musical_PT" data-type="audio" data-src="sounds/musical-pt.mp3">
+                <i>👏</i>
+                <span class="name">Musical_PT</span>
+                <small>proud</small>
+            </div>
+            <div class="sound-card song" data-sound="audio_dd711d" data-label="School_Song_चौतारा-मावी_1" data-type="audio" data-src="sounds/1.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_चौतारा-मावी_1</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_ad7ed0" data-label="School_Song_चौतारा-मावी_2" data-type="audio" data-src="sounds/2.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_चौतारा-मावी_2</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_11c8b1" data-label="School_Song_हामी-हौँ-भोलिका-तारा_1" data-type="audio" data-src="sounds/1_2.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_हामी-हौँ-भोलिका-तारा_1</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_b842b2" data-label="School_Song_ज्ञानको-मन्दिर_1" data-type="audio" data-src="sounds/1_3.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_ज्ञानको-मन्दिर_1</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_3076a2" data-label="School_Song_चौतारा-हाम्रो-गौरव_1" data-type="audio" data-src="sounds/1_4.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_चौतारा-हाम्रो-गौरव_1</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_6fa936" data-label="School_Song_चौतारा-हाम्रो-गौरव_2" data-type="audio" data-src="sounds/2_2.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_चौतारा-हाम्रो-गौरव_2</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_4a3c43" data-label="School_Song_ज्ञान_1" data-type="audio" data-src="sounds/1_5.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_ज्ञान_1</span>
+                <small>pride</small>
+            </div>
+            <div class="sound-card custom" data-sound="audio_3072bb" data-label="School_Song_ज्ञान_2" data-type="audio" data-src="sounds/2_3.mp3">
+                <i>🎓</i>
+                <span class="name">School_Song_ज्ञान_2</span>
+                <small>pride</small>
+            </div>
+        </section>
+
+        <footer>
+            <span class="hint"><kbd>1</kbd>–<kbd>0</kbd> <kbd>-</kbd> <kbd>=</kbd> play pads</span>
+            <span class="hint"><kbd>Space</kbd> stop</span>
+            <span class="hint"><kbd>Enter</kbd> play</span>
+            <span class="hint"><kbd>R</kbd> random</span>
+            <span class="hint"><kbd>M</kbd> mute</span>
+        </footer>
+    </main>
+
+    <script>
+        (function () {
+            // ============================================================
+            //  STATE
+            // ============================================================
+            let audioCtx = null;
+            let masterGain = null;
+
+            let activeNodes = [];
+            let activeTimeouts = [];
+            let activePadElement = null;
+            let selectedCard = null;
+
+            let isPlaying = false;
+            let currentSoundKey = null;
+            let currentLabel = null;
+
+            let playStartCtxTime = 0;
+            let soundDuration = 0;
+            let seekUpdateInterval = null;
+            let isScrubbing = false;
+            let currentSource = null;
+
+            let uploadedAudio = null;
+            let uploadedAudioEndedHandler = null;
+
+            let volume = parseFloat(localStorage.getItem('sb_vol') || '0.9');
+            if (!isFinite(volume)) volume = 0.9;
+            volume = Math.min(1, Math.max(0, volume));
+            let muted = localStorage.getItem('sb_mute') === '1';
+
+            // Synth durations (seconds)
+            const SOUND_DURATIONS = {
+                drumroll: 0.8, snare: 0.3, kick: 0.35, bell: 2.0, chime: 1.4,
+                morningSong: 2.0, nationalAnthem: 2.9, schoolSong: 2.5,
+                transition: 0.9, applause: 1.3, attention: 0.5, rimshot: 0.3
+            };
+
+            const HOTKEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+
+            // ============================================================
+            //  DOM REFS
+            // ============================================================
+            const $ = (id) => document.getElementById(id);
+            const playBtn = $('playBtn');
+            const stopBtn = $('stopBtn');
+            const randomBtn = $('randomBtn');
+            const muteBtn = $('muteBtn');
+            const muteIcon = $('muteIcon');
+            const volSlider = $('volSlider');
+            const ctrlIcon = $('ctrlIcon');
+            const ctrlStatusText = $('ctrlStatusText');
+            const playerTitle = $('playerTitle');
+            const playerBadge = $('playerBadge');
+            const timeDisplay = $('timeDisplay');
+            const seekFill = $('seekFill');
+            const seekSlider = $('seekSlider');
+            const cards = Array.from(document.querySelectorAll('.sound-card'));
+
+            const ICON_VOLUME = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            const ICON_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+
+            // ============================================================
+            //  AUDIO CONTEXT
+            // ============================================================
+            function initAudio() {
+                if (audioCtx) return audioCtx;
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    masterGain = audioCtx.createGain();
+                    masterGain.gain.value = muted ? 0 : volume;
+                    masterGain.connect(audioCtx.destination);
+                } catch (e) {
+                    console.warn('Web Audio API not supported.');
+                }
+                return audioCtx;
+            }
+
+            async function ensureAudioReady() {
+                const ctx = initAudio();
+                if (ctx && ctx.state === 'suspended') {
+                    await ctx.resume();
+                }
+                return ctx;
+            }
+
+            function applyVolume() {
+                if (masterGain) masterGain.gain.value = muted ? 0 : volume;
+                if (uploadedAudio) uploadedAudio.volume = muted ? 0 : volume;
+                muteBtn.classList.toggle('muted', muted);
+                muteIcon.innerHTML = muted ? ICON_MUTE : ICON_VOLUME;
+                volSlider.value = Math.round(volume * 100);
+                updateVolFill();
+                try {
+                    localStorage.setItem('sb_vol', String(volume));
+                    localStorage.setItem('sb_mute', muted ? '1' : '0');
+                } catch (e) {}
+            }
+
+            function updateVolFill() {
+                const v = volSlider.value;
+                volSlider.style.background =
+                    'linear-gradient(to right, #ffc857 ' + v + '%, #0d1a24 ' + v + '%)';
+            }
+
+            // ============================================================
+            //  TIME FORMAT
+            // ============================================================
+            function formatTime(sec) {
+                if (!isFinite(sec) || sec < 0) sec = 0;
+                const m = Math.floor(sec / 60);
+                const s = Math.floor(sec % 60);
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            }
+
+            // ============================================================
+            //  SEEK DISPLAY
+            // ============================================================
+            function updateSeekDisplay(currentTime) {
+                if (soundDuration <= 0) return;
+                const percent = Math.min((currentTime / soundDuration) * 100, 100);
+                seekFill.style.width = percent + '%';
+                if (!isScrubbing) seekSlider.value = percent;
+                timeDisplay.textContent = formatTime(currentTime) + ' / ' + formatTime(soundDuration);
+            }
+
+            // ============================================================
+            //  UI STATE
+            // ============================================================
+            function updateUI() {
+                const label = currentLabel ||
+                    (selectedCard ? (selectedCard.dataset.label || selectedCard.dataset.sound) : null);
+
+                if (isPlaying && label) {
+                    playBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    ctrlStatusText.textContent = label;
+                    ctrlIcon.innerHTML = '<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>';
+                    playerTitle.textContent = label;
+                    playerBadge.textContent = '▶ playing';
+                    playerBadge.className = 'badge playing';
+                    seekSlider.disabled = false;
+                } else {
+                    playBtn.disabled = !selectedCard;
+                    stopBtn.disabled = true;
+                    ctrlStatusText.textContent = label ? ('Selected · ' + label) : 'Ready';
+                    ctrlIcon.innerHTML = '<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>';
+                    playerTitle.textContent = label ? (label + ' · ready') : 'Ready for assembly';
+                    playerBadge.textContent = label ? '🎯 selected' : 'idle';
+                    playerBadge.className = 'badge ' + (label ? 'sel' : 'idle');
+                    seekSlider.disabled = true;
+                    seekSlider.value = 0;
+                    seekFill.style.width = '0%';
+                    timeDisplay.textContent = '0:00 / 0:00';
+                }
+            }
+
+            function resetSeek(label) {
+                seekSlider.disabled = false;
+                seekSlider.value = 0;
+                seekFill.style.width = '0%';
+                timeDisplay.textContent = '0:00 / ' + formatTime(soundDuration);
+                playerTitle.textContent = label;
+            }
+
+            // ============================================================
+            //  SELECTED CARD
+            // ============================================================
+            function setSelectedCard(card) {
+                cards.forEach(c => c.classList.remove('selected-pad'));
+                selectedCard = card;
+                if (card) card.classList.add('selected-pad');
+                updateUI();
+            }
+
+            // ============================================================
+            //  STOP ALL
+            // ============================================================
+            function stopAllSounds() {
+                if (seekUpdateInterval) {
+                    clearInterval(seekUpdateInterval);
+                    seekUpdateInterval = null;
+                }
+
+                if (uploadedAudio) {
+                    try {
+                        uploadedAudio.pause();
+                        uploadedAudio.currentTime = 0;
+                        if (uploadedAudioEndedHandler) {
+                            uploadedAudio.removeEventListener('ended', uploadedAudioEndedHandler);
+                            uploadedAudioEndedHandler = null;
+                        }
+                    } catch (e) {}
+                    uploadedAudio = null;
+                }
+
+                if (currentSource) {
+                    try { currentSource.stop(0); } catch (e) {}
+                    try { currentSource.disconnect(); } catch (e) {}
+                    currentSource = null;
+                }
+
+                activeNodes.forEach(node => {
+                    try {
+                        if (node.stop) node.stop(0);
+                        else if (node.disconnect) node.disconnect();
+                    } catch (e) {}
+                });
+                activeNodes = [];
+
+                activeTimeouts.forEach(t => clearTimeout(t));
+                activeTimeouts = [];
+
+                if (activePadElement) {
+                    activePadElement.classList.remove('active-pad');
+                    activePadElement = null;
+                }
+
+                isPlaying = false;
+                currentSoundKey = null;
+                currentLabel = null;
+                soundDuration = 0;
+                updateUI();
+            }
+
+            function registerNode(node) {
+                activeNodes.push(node);
+                return node;
+            }
+
+            // ============================================================
+            //  PLAY UPLOADED AUDIO (base64 data URI)
+            // ============================================================
+            async function playUploadedAudio(dataUri) {
+                if (uploadedAudio) {
+                    try { uploadedAudio.pause(); } catch (e) {}
+                    uploadedAudio = null;
+                }
+
+                uploadedAudio = new Audio();
+                uploadedAudio.preload = 'auto';
+                uploadedAudio.volume = muted ? 0 : volume;
+                uploadedAudio.src = dataUri;
+
+                await new Promise((resolve) => {
+                    const onLoaded = () => {
+                        uploadedAudio.removeEventListener('loadedmetadata', onLoaded);
+                        uploadedAudio.removeEventListener('error', onError);
+                        resolve();
+                    };
+                    const onError = () => {
+                        uploadedAudio.removeEventListener('loadedmetadata', onLoaded);
+                        uploadedAudio.removeEventListener('error', onError);
+                        resolve();
+                    };
+                    uploadedAudio.addEventListener('loadedmetadata', onLoaded);
+                    uploadedAudio.addEventListener('error', onError);
+                    setTimeout(resolve, 1500);
+                });
+
+                if (!uploadedAudio) return;
+
+                soundDuration = uploadedAudio.duration && isFinite(uploadedAudio.duration)
+                    ? uploadedAudio.duration : 30;
+
+                try {
+                    await uploadedAudio.play();
+                } catch (e) {
+                    console.warn('Playback failed:', e);
+                }
+
+                if (seekUpdateInterval) clearInterval(seekUpdateInterval);
+                seekUpdateInterval = setInterval(() => {
+                    if (uploadedAudio && !uploadedAudio.paused) {
+                        updateSeekDisplay(uploadedAudio.currentTime);
+                    }
+                }, 100);
+
+                uploadedAudioEndedHandler = () => {
+                    stopAllSounds();
+                    updateUI();
+                };
+                uploadedAudio.addEventListener('ended', uploadedAudioEndedHandler);
+            }
+
+            // ============================================================
+            //  PLAY SOUND (dispatcher: synth or uploaded)
+            // ============================================================
+            async function playSound(soundKey, label, padElement) {
+                const ctx = await ensureAudioReady();
+                if (!ctx) return;
+
+                stopAllSounds();
+
+                if (padElement) {
+                    padElement.classList.add('active-pad');
+                    activePadElement = padElement;
+                }
+
+                const src = padElement ? padElement.dataset.src : null;
+                const type = padElement ? padElement.dataset.type : null;
+
+                if (type === 'audio' && src) {
+                    isPlaying = true;
+                    currentSoundKey = soundKey;
+                    currentLabel = label;
+                    soundDuration = 30;
+                    updateUI();
+                    resetSeek(label);
+                    await playUploadedAudio(src);
+                    return;
+                }
+
+                soundDuration = SOUND_DURATIONS[soundKey] || 1.0;
+                playStartCtxTime = ctx.currentTime;
+
+                if (soundMap[soundKey]) {
+                    soundMap[soundKey](ctx);
+                } else {
+                    console.warn('Unknown synth sound:', soundKey);
+                    playFallbackBeep(ctx);
+                    soundDuration = 0.25;
+                }
+
+                isPlaying = true;
+                currentSoundKey = soundKey;
+                currentLabel = label;
+                updateUI();
+                resetSeek(label);
+
+                startSeekUpdate();
+
+                const stopTimeout = setTimeout(() => {
+                    if (isPlaying && currentSoundKey === soundKey) {
+                        stopAllSounds();
+                        updateUI();
+                    }
+                }, (soundDuration + 0.2) * 1000);
+                activeTimeouts.push(stopTimeout);
+            }
+
+            function selectAndPlay(card) {
+                if (!card) return;
+                setSelectedCard(card);
+                const soundKey = card.dataset.sound;
+                const label = card.dataset.label || soundKey;
+                return playSound(soundKey, label, card);
+            }
+
+            function playSelected() {
+                if (selectedCard) {
+                    const soundKey = selectedCard.dataset.sound;
+                    const label = selectedCard.dataset.label || soundKey;
+                    return playSound(soundKey, label, selectedCard);
+                }
+            }
+
+            function playRandom() {
+                if (!cards.length) return;
+                return selectAndPlay(cards[Math.floor(Math.random() * cards.length)]);
+            }
+
+            function toggleMute() {
+                muted = !muted;
+                applyVolume();
+            }
+
+            function startSeekUpdate() {
+                if (seekUpdateInterval) clearInterval(seekUpdateInterval);
+                seekUpdateInterval = setInterval(() => {
+                    if (!isPlaying || !audioCtx) return;
+                    const elapsed = audioCtx.currentTime - playStartCtxTime;
+                    if (elapsed >= soundDuration) {
+                        updateSeekDisplay(soundDuration);
+                        return;
+                    }
+                    if (!isScrubbing) updateSeekDisplay(elapsed);
+                }, 50);
+            }
+
+            // ============================================================
+            //  SEEK
+            // ============================================================
+            async function seekTo(percent) {
+                if (!isPlaying || !currentSoundKey) return;
+                const ctx = await ensureAudioReady();
+                if (!ctx) return;
+
+                if (uploadedAudio && soundDuration > 0) {
+                    const newTime = (percent / 100) * soundDuration;
+                    try {
+                        uploadedAudio.currentTime = newTime;
+                        updateSeekDisplay(newTime);
+                    } catch (e) {}
+                    return;
+                }
+
+                const label = currentLabel;
+                const key = currentSoundKey;
+                const pad = activePadElement;
+                const wasPlaying = isPlaying;
+
+                stopAllSounds();
+
+                if (wasPlaying && key) {
+                    setTimeout(async () => {
+                        await playSound(key, label, pad);
+                        playStartCtxTime = audioCtx.currentTime;
+                        updateSeekDisplay(0);
+                    }, 30);
+                }
+            }
+
+            // ============================================================
+            //  SYNTH SOUNDS
+            // ============================================================
+            function playFallbackBeep(ctx) {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 660;
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.26);
+                registerNode(osc);
+            }
+
+            function playDrumRoll(ctx) {
+                const now = ctx.currentTime;
+                const duration = 0.8;
+                const bufferSize = ctx.sampleRate * duration;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 1.5);
+                }
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                const gain = ctx.createGain();
+                gain.gain.value = 0.6;
+                source.connect(filter).connect(gain).connect(masterGain);
+                source.start(now);
+                currentSource = source;
+                registerNode(source);
+                return source;
+            }
+
+            function playSnare(ctx) {
+                const now = ctx.currentTime;
+                const bufferSize = ctx.sampleRate * 0.2;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const noiseGain = ctx.createGain();
+                noiseGain.gain.value = 0.5;
+                const noiseFilter = ctx.createBiquadFilter();
+                noiseFilter.type = 'highpass';
+                noiseFilter.frequency.value = 1000;
+                noise.connect(noiseFilter).connect(noiseGain).connect(masterGain);
+                noise.start(now);
+
+                const osc = ctx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.value = 180;
+                const oscGain = ctx.createGain();
+                oscGain.gain.setValueAtTime(0.4, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(oscGain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.15);
+
+                registerNode(noise);
+                registerNode(osc);
+                return noise;
+            }
+
+            function playKick(ctx) {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(1.0, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.31);
+                registerNode(osc);
+                return osc;
+            }
+
+            function playBell(ctx) {
+                const now = ctx.currentTime;
+                const fundamental = 880;
+                const osc1 = ctx.createOscillator();
+                osc1.type = 'sine';
+                osc1.frequency.value = fundamental;
+                const osc2 = ctx.createOscillator();
+                osc2.type = 'sine';
+                osc2.frequency.value = fundamental * 2.76;
+                const gain1 = ctx.createGain();
+                const gain2 = ctx.createGain();
+                gain1.gain.setValueAtTime(0.5, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+                gain2.gain.setValueAtTime(0.2, now);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+                osc1.connect(gain1).connect(masterGain);
+                osc2.connect(gain2).connect(masterGain);
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 2.0);
+                osc2.stop(now + 2.0);
+                registerNode(osc1);
+                registerNode(osc2);
+                return osc1;
+            }
+
+            function playChime(ctx) {
+                const now = ctx.currentTime;
+                const notes = [1046.50, 1318.51, 1567.98];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.0, now + idx * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.3, now + idx * 0.08 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 1.2);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 1.3);
+                    registerNode(osc);
+                });
+            }
+
+            function playMorningSong(ctx) {
+                const now = ctx.currentTime;
+                const notes = [
+                    { f: 523.25, t: 0.0, d: 0.25 },
+                    { f: 587.33, t: 0.25, d: 0.2 },
+                    { f: 659.25, t: 0.45, d: 0.25 },
+                    { f: 783.99, t: 0.7, d: 0.4 },
+                    { f: 659.25, t: 1.15, d: 0.2 },
+                    { f: 783.99, t: 1.4, d: 0.5 }
+                ];
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'triangle';
+                    osc.frequency.value = n.f;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, now + n.t);
+                    gain.gain.linearRampToValueAtTime(0.25, now + n.t + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.05);
+                    registerNode(osc);
+                });
+            }
+
+            function playNationalAnthem(ctx) {
+                const now = ctx.currentTime;
+                const notes = [
+                    { f: 392.00, t: 0.0, d: 0.5 },
+                    { f: 392.00, t: 0.5, d: 0.3 },
+                    { f: 440.00, t: 0.8, d: 0.6 },
+                    { f: 493.88, t: 1.4, d: 0.5 },
+                    { f: 523.25, t: 1.9, d: 0.9 },
+                ];
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = n.f;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, now + n.t);
+                    gain.gain.linearRampToValueAtTime(0.3, now + n.t + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.1);
+                    registerNode(osc);
+                });
+            }
+
+            function playSchoolSong(ctx) {
+                const now = ctx.currentTime;
+                const notes = [
+                    { f: 523.25, t: 0.0, d: 0.3 },
+                    { f: 659.25, t: 0.3, d: 0.3 },
+                    { f: 783.99, t: 0.6, d: 0.3 },
+                    { f: 1046.50, t: 0.9, d: 0.5 },
+                    { f: 783.99, t: 1.4, d: 0.3 },
+                    { f: 1046.50, t: 1.7, d: 0.7 },
+                ];
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'triangle';
+                    osc.frequency.value = n.f;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, now + n.t);
+                    gain.gain.linearRampToValueAtTime(0.25, now + n.t + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.1);
+                    registerNode(osc);
+                });
+            }
+
+            function playTransition(ctx) {
+                const now = ctx.currentTime;
+                const notes = [587.33, 698.46, 880.00];
+                notes.forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = f;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, now + i * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.2, now + i * 0.1 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.6);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + i * 0.1);
+                    osc.stop(now + i * 0.1 + 0.7);
+                    registerNode(osc);
+                });
+            }
+
+            function playApplause(ctx) {
+                const now = ctx.currentTime;
+                const bufferSize = ctx.sampleRate * 1.2;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(Math.sin(i / bufferSize * Math.PI), 0.7);
+                }
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                const gain = ctx.createGain();
+                gain.gain.value = 0.5;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1200;
+                filter.Q.value = 0.7;
+                source.connect(filter).connect(gain).connect(masterGain);
+                source.start(now);
+                currentSource = source;
+                registerNode(source);
+                return source;
+            }
+
+            function playAttention(ctx) {
+                const now = ctx.currentTime;
+                [0, 0.2].forEach((t, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'square';
+                    osc.frequency.value = i === 0 ? 880 : 1100;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, now + t);
+                    gain.gain.linearRampToValueAtTime(0.2, now + t + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.2);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(now + t);
+                    osc.stop(now + t + 0.25);
+                    registerNode(osc);
+                });
+            }
+
+            function playRimshot(ctx) {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.value = 1000;
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.12);
+                const noise = ctx.createBufferSource();
+                const bufferSize = ctx.sampleRate * 0.1;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                noise.buffer = buffer;
+                const nGain = ctx.createGain();
+                nGain.gain.setValueAtTime(0.3, now);
+                nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                noise.connect(nGain).connect(masterGain);
+                noise.start(now);
+                registerNode(osc);
+                registerNode(noise);
+            }
+
+            const soundMap = {
+                drumroll: playDrumRoll,
+                snare: playSnare,
+                kick: playKick,
+                bell: playBell,
+                chime: playChime,
+                morningSong: playMorningSong,
+                nationalAnthem: playNationalAnthem,
+                schoolSong: playSchoolSong,
+                transition: playTransition,
+                applause: playApplause,
+                attention: playAttention,
+                rimshot: playRimshot
+            };
+
+            // ============================================================
+            //  HOTKEY BADGES (auto-assigned from pad order)
+            // ============================================================
+            function buildHotkeys() {
+                cards.forEach((card, i) => {
+                    const key = HOTKEYS[i];
+                    if (!key) return;
+                    const badge = document.createElement('b');
+                    badge.className = 'hotkey';
+                    badge.textContent = key;
+                    card.appendChild(badge);
+                });
+            }
+
+            // ============================================================
+            //  EVENT LISTENERS
+            // ============================================================
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    selectAndPlay(card);
+                });
+            });
+
+            playBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                playSelected();
+            });
+
+            stopBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                stopAllSounds();
+            });
+
+            randomBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                playRandom();
+            });
+
+            // Volume
+            volSlider.addEventListener('input', (e) => {
+                volume = parseFloat(e.target.value) / 100;
+                updateVolFill();
+                applyVolume();
+            });
+
+            muteBtn.addEventListener('click', () => {
+                toggleMute();
+            });
+
+            // Seek
+            seekSlider.addEventListener('input', (e) => {
+                const percent = parseFloat(e.target.value);
+                seekFill.style.width = percent + '%';
+                const time = (percent / 100) * soundDuration;
+                timeDisplay.textContent = formatTime(time) + ' / ' + formatTime(soundDuration);
+            });
+
+            seekSlider.addEventListener('mousedown', () => { isScrubbing = true; });
+            seekSlider.addEventListener('touchstart', () => { isScrubbing = true; }, { passive: true });
+
+            seekSlider.addEventListener('mouseup', () => {
+                isScrubbing = false;
+                seekTo(parseFloat(seekSlider.value));
+            });
+            seekSlider.addEventListener('touchend', () => {
+                isScrubbing = false;
+                seekTo(parseFloat(seekSlider.value));
+            });
+            seekSlider.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+                    seekTo(parseFloat(seekSlider.value));
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                const t = e.target;
+                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                const code = e.code;
+                const key = e.key;
+
+                if (code === 'Space') {
+                    e.preventDefault();
+                    stopAllSounds();
+                    return;
+                }
+                if (code === 'Enter') { playSelected(); return; }
+
+                const k = key.toLowerCase();
+                if (k === 'r') { if (!e.repeat) playRandom(); return; }
+                if (k === 'm') { if (!e.repeat) toggleMute(); return; }
+
+                const idx = HOTKEYS.indexOf(key);
+                if (idx >= 0) {
+                    const card = cards[idx];
+                    if (card) selectAndPlay(card);
+                }
+            });
+
+            // Summon + unlock audio context on any gesture
+            function unlockAudio() {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            }
+            document.body.addEventListener('pointerdown', unlockAudio);
+
+            window.addEventListener('beforeunload', () => {
+                if (audioCtx) {
+                    try { audioCtx.close(); } catch (e) {}
+                }
+            });
+
+            // ============================================================
+            //  INIT
+            // ============================================================
+            buildHotkeys();
+            applyVolume();
+            updateUI();
+        })();
+    </script>
+</body>
+</html>
