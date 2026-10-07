@@ -20,7 +20,7 @@
 // General Banner Settings
 const bannerSettings = {
     // Master switch: Enable or disable the entire banner media viewer feature on the website
-    enabled: false,
+    enabled: true,
 
     // Automatically open popup when index.html loads
     autoOpen: true,
@@ -41,7 +41,7 @@ const bannerSettings = {
     autoDetectPhp: true,
 
     // Last updated timestamp (ms) - changes whenever admin edits/adds media or saves
-    lastUpdated: 1790562641944
+    lastUpdated: 1791367179177
 };
 
 // Media Items to Display
@@ -57,13 +57,10 @@ const bannerMeta = {
     "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png": {"title": "CTEVT_DCOM_2nd_4th_Sem_Final_Exam_Notice"},
     "banner/banner_img/1000109735.jpg": {"title": "ECA_Program_2082-06-02_Pic_1"},
     "banner/banner_img/1000109736.jpg": {"title": "ECA_Program_2082-06-02_Pic_2"},
-    "banner/banner_img/1000109732.jpg": {"title": "ECA_Program_2082-06-02_Pic_3"}
+    "banner/banner_img/1000109732.jpg": {"title": "ECA_Program_2082-06-02_Pic_3"},
+    "banner/banner_img/Gemini_Generated_Image_h2diy1h2diy1h2di__1_.mp4": {"title": "विजयादशमीको शुभकामना"}
 };
 
 const bannerMedia = [
-    "banner/banner_img/6th-sem.png",
-    "banner/banner_img/CTEVT_2nd_4th_SEM_Exam_Notice.png",
-    "banner/banner_img/1000109735.jpg",
-    "banner/banner_img/1000109736.jpg",
-    "banner/banner_img/1000109732.jpg"
+    "banner/banner_img/Gemini_Generated_Image_h2diy1h2diy1h2di__1_.mp4"
 ];
