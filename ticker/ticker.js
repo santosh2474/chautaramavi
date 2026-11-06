@@ -30,6 +30,14 @@
     // data so the detail page can open the notice without fetching anything.
     var FALLBACK_NOTICES = [
         {
+            "id": "notice-e19acab2de",
+            "title": "CTEVT Final Exam Center - 2083 ( I/II and II/II)",
+            "content": "सानोठिमी, भक्तपुरको डिप्लोमा/प्रमाणपत्र तहको नियमित/आंशिक परीक्षा २०८३ को परीक्षा केन्द्र कायम गरिएको सम्वन्धी अत्यन्त जरुरी सूचना (सूचना प्रकाशित मितिः २०८३।०७।२० गते)",
+            "date": "2083/07/20",
+            "badge": "⭐ Important",
+            "file": "notices/Examination Centres for the Regular_Partial Diploma_Certificate Level Examinations 2083_2fcb7a0e.jpg"
+        },
+        {
             "id": "notice-4bd91bcb49",
             "title": "Final Practical Examination 6th Semester",
             "content": "Final Practical Examination 6th Semester Routine - 2083",
@@ -44,14 +52,6 @@
             "date": "2083/06/09",
             "badge": "⭐ Important",
             "file": "notices/IMG-20260927-WA0001_c7e26570.jpg"
-        },
-        {
-            "id": "notice-8e08c22339",
-            "title": "CTEVT 2nd and 4th Sem (R & B) Routine - 2083",
-            "content": "डिप्लोमा/प्रमाणपत्र तहको नियमित तथा आंशिक परीक्षा २०८३ को संशोधित परीक्षा तालिका सम्बन्धी अत्यन्त जरुरी सूचना",
-            "date": "2083/06/06",
-            "badge": "⭐ Important",
-            "file": "notices/CTEVT 2nd and 4th Sem R  B Routine - 2083_b70f239e.jpg"
         }
     ];
 
