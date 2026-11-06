@@ -14,11 +14,191 @@ import urllib.parse
 import webbrowser
 import subprocess
 import platform
+import glob
+import importlib.util
 from datetime import date, datetime
+
+
+# ── Third-party Dependency Bootstrap ────────────────────────────────────────
+# These libraries are not part of the Python standard library. On a fresh
+# Python install they are often missing, which used to crash the app (Pillow /
+# BeautifulSoup) or silently disable features (qrcode / pillow-heif).
+REQUIRED_PACKAGES = {
+    "PIL": "Pillow",
+    "bs4": "beautifulsoup4",
+    "qrcode": "qrcode",
+    "pillow_heif": "pillow-heif",
+}
+SCRIPT_PATH = os.path.abspath(__file__)
+_IMPORT_CHECK = (
+    "import importlib.util as u, sys; sys.exit(0 if all("
+    "u.find_spec(m) is not None for m in "
+    "('PIL', 'bs4', 'qrcode', 'pillow_heif')) else 1)"
+)
+
+
+def _module_missing(module):
+    try:
+        return importlib.util.find_spec(module) is None
+    except (ImportError, ValueError):
+        return True
+
+
+def _missing_packages():
+    return [pkg for mod, pkg in REQUIRED_PACKAGES.items() if _module_missing(mod)]
+
+
+def _same_interpreter(exe):
+    try:
+        return (
+            os.path.normcase(os.path.realpath(exe))
+            == os.path.normcase(os.path.realpath(sys.executable))
+        )
+    except Exception:
+        return False
+
+
+def _interpreter_has_packages(exe=None, extra_args=()):
+    if exe is None or _same_interpreter(exe):
+        return not _missing_packages()
+    try:
+        return subprocess.run(
+            [exe, *extra_args, "-c", _IMPORT_CHECK],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+        ).returncode == 0
+    except Exception:
+        return False
+
+
+def _other_interpreters():
+    """Other installed Python interpreters found on PATH / via the py launcher."""
+    seen = {os.path.normcase(os.path.realpath(sys.executable))}
+    candidates = []
+    for name in ("python", "python3"):
+        exe = shutil.which(name)
+        if exe:
+            candidates.append((exe, ()))
+    py = shutil.which("py")
+    if py:
+        candidates.append((py, ("-3",)))
+
+    # Also look in the usual Windows install locations. This catches setups
+    # where a bare python.exe is used directly and PATH points somewhere else.
+    for env_key in ("LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)"):
+        root = os.environ.get(env_key)
+        if not root:
+            continue
+        pattern = os.path.join(root, "Programs", "Python", "Python*", "python.exe") \
+            if env_key == "LOCALAPPDATA" else os.path.join(root, "Python*", "python.exe")
+        for exe in sorted(glob.glob(pattern), reverse=True):
+            candidates.append((exe, ()))
+
+    for exe, extra in candidates:
+        try:
+            key = os.path.normcase(os.path.realpath(exe))
+        except Exception:
+            key = os.path.normcase(exe)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield exe, extra
+
+
+def _relaunch(exe, extra_args):
+    """Replace this process with a Python interpreter that has the libraries."""
+    print("Switching to a Python interpreter that already has the required libraries:")
+    print(f"  {exe}")
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os.environ["NOTICE_ADMIN_REEXEC"] = "1"
+    try:
+        os.execv(exe, [exe, *extra_args, SCRIPT_PATH, *sys.argv[1:]])
+    except Exception as exc:
+        print(f"Could not relaunch with {exe}: {exc}")
+        return False
+    return True
+
+
+def _install_missing_packages():
+    """Best-effort auto-install so the admin suite runs on a clean machine."""
+    if os.environ.get("NOTICE_ADMIN_NO_AUTO_INSTALL") == "1":
+        return False
+    missing = _missing_packages()
+    if not missing:
+        return True
+    print(f"Installing missing Python packages: {', '.join(missing)} ...")
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "--disable-pip-version-check", *missing],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+            timeout=600,
+        )
+    except Exception as exc:
+        print(f"Could not auto-install packages: {exc}")
+        return False
+    if result.returncode != 0:
+        print("Could not auto-install packages (pip returned an error).")
+        return False
+    print("Package installation complete.")
+    return True
+
+
+def _bootstrap_dependencies():
+    if not _missing_packages():
+        return
+
+    # The launched interpreter may be a bare/incomplete install without pip
+    # (e.g. running C:\Python315\python.exe directly). Prefer another Python
+    # that already has every required library instead of failing.
+    if os.environ.get("NOTICE_ADMIN_REEXEC") != "1":
+        for exe, extra in _other_interpreters():
+            if _interpreter_has_packages(exe, extra) and _relaunch(exe, extra):
+                sys.exit(0)
+
+    # Otherwise try pip on this interpreter.
+    try:
+        has_pip = subprocess.run(
+            [sys.executable, "-m", "pip", "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+        ).returncode == 0
+    except Exception:
+        has_pip = False
+
+    if has_pip and _install_missing_packages() and not _missing_packages():
+        return
+
+    print(
+        "Required packages are still missing. Install them manually with:\n"
+        f'  "{sys.executable}" -m pip install '
+        + " ".join(REQUIRED_PACKAGES.values())
+    )
+
+
+if __name__ == "__main__":
+    _bootstrap_dependencies()
+
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
-from PIL import Image, ImageTk
-from bs4 import BeautifulSoup
+
+try:
+    from PIL import Image, ImageTk
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+    Image = None
+    ImageTk = None
+
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
+    BeautifulSoup = None
 
 try:
     import qrcode
@@ -29,6 +209,13 @@ except ImportError:
 try:
     import pillow_heif
     HAS_HEIF = True
+
+    # Register the HEIF opener so Image.open() can preview .heic/.heif files,
+    # not just convert uploads manually.
+    try:
+        pillow_heif.register_heif_opener()
+    except Exception:
+        pass
 except ImportError:
     HAS_HEIF = False
 
@@ -148,18 +335,25 @@ def notice_row_id(title):
 
 def convert_heic_to_jpeg(heic_data):
     """Convert HEIC image data to JPEG bytes."""
-    if not HAS_HEIF:
+    if not HAS_HEIF or not HAS_PIL:
         return None
     try:
-        heif_file = pillow_heif.read_heif(heic_data)
-        img = Image.frombytes(
-            heif_file.mode,
-            heif_file.size,
-            heif_file.data,
-            "raw",
-            heif_file.mode,
-            heif_file.stride
-        )
+        # pillow-heif >= 1.x exposes open_heif(); read_heif() is kept as a
+        # fallback for older releases.
+        if hasattr(pillow_heif, "open_heif"):
+            img = pillow_heif.open_heif(heic_data).to_pillow()
+        else:
+            heif_file = pillow_heif.read_heif(heic_data)
+            img = Image.frombytes(
+                heif_file.mode,
+                heif_file.size,
+                heif_file.data,
+                "raw",
+                heif_file.mode,
+                heif_file.stride
+            )
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
         out = io.BytesIO()
         img.save(out, format="JPEG", quality=92)
         return out.getvalue()
@@ -1986,10 +2180,15 @@ class NoticeAdminApp:
         )
 
         # Image thumbnail preview
-        if ext in IMAGE_EXTENSIONS:
+        if HAS_PIL and ext in IMAGE_EXTENSIONS:
             try:
                 img = Image.open(file_path)
-                img.thumbnail((320, 180), Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.ANTIALIAS)
+                resampling = getattr(Image, "Resampling", Image)
+                resample_filter = getattr(resampling, "LANCZOS", None)
+                if resample_filter is not None:
+                    img.thumbnail((320, 180), resample_filter)
+                else:
+                    img.thumbnail((320, 180))
                 self.preview_thumbnail_photo = ImageTk.PhotoImage(img)
                 self.lbl_preview_media.config(image=self.preview_thumbnail_photo, text="", height=0)
                 return
@@ -2049,16 +2248,30 @@ class NoticeAdminApp:
         lbl_qr = tk.Label(qr_card, bg="#FFFFFF", padx=10, pady=10)
         lbl_qr.pack()
 
-        if HAS_QRCODE:
-            qr = qrcode.QRCode(box_size=6, border=2)
-            qr.add_data(upload_url)
-            qr.make(fit=True)
-            qr_img = qr.make_image(fill_color="black", back_color="white")
-            self.qr_photo = ImageTk.PhotoImage(qr_img)
-            lbl_qr.config(image=self.qr_photo)
+        if HAS_QRCODE and HAS_PIL:
+            try:
+                qr = qrcode.QRCode(box_size=6, border=2)
+                qr.add_data(upload_url)
+                qr.make(fit=True)
+                qr_img = qr.make_image(fill_color="black", back_color="white")
+                if hasattr(qr_img, "get_image"):
+                    qr_img = qr_img.get_image()
+                if getattr(qr_img, "mode", "RGB") not in ("RGB", "RGBA"):
+                    qr_img = qr_img.convert("RGB")
+                self.qr_photo = ImageTk.PhotoImage(qr_img)
+                lbl_qr.config(image=self.qr_photo)
+            except Exception as e:
+                print(f"QR code generation error: {e}")
+                lbl_qr.config(
+                    text=f"Could not generate QR code.\nOpen this link on your phone:\n{upload_url}",
+                    fg="#000000",
+                    bg="#FFFFFF",
+                    font=("Segoe UI", 10)
+                )
         else:
+            missing = "qrcode" if not HAS_QRCODE else "Pillow"
             lbl_qr.config(
-                text=f"QR Code library not installed.\nOpen this link on your phone:\n{upload_url}",
+                text=f"QR code unavailable ({missing} not installed).\nOpen this link on your phone:\n{upload_url}",
                 fg="#000000",
                 bg="#FFFFFF",
                 font=("Segoe UI", 10)
@@ -2171,6 +2384,26 @@ class NoticeAdminApp:
 
 # ── Application Entry Point ──────────────────────────────────────────────────
 if __name__ == "__main__":
+    missing_required = []
+    if not HAS_BS4:
+        missing_required.append("beautifulsoup4")
+    if not HAS_PIL:
+        missing_required.append("Pillow")
+
+    if missing_required:
+        err_root = tk.Tk()
+        err_root.withdraw()
+        messagebox.showerror(
+            "Missing Python Libraries",
+            "Required libraries could not be loaded:\n\n  • "
+            + "\n  • ".join(missing_required)
+            + "\n\nInstall them manually by running:\n"
+            + f'"{sys.executable}" -m pip install '
+            + " ".join(missing_required)
+        )
+        err_root.destroy()
+        sys.exit(1)
+
     root = tk.Tk()
     app = NoticeAdminApp(root)
     root.mainloop()
