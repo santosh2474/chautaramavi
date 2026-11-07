@@ -1,0 +1,23 @@
+# robots.txt for www.chautaramavi.edu.np
+# Official website of Shree Chautara Secondary School (Chautara Mavi),
+# Dandakharka, Sunkoshi Rural Municipality-5, Okhaldhunga, Nepal.
+
+User-agent: *
+Allow: /
+
+# Keep private/admin and development files out of search results.
+Disallow: /admin/
+Disallow: /__pycache__/
+Disallow: /notice_admin.py
+Disallow: /requirements.txt
+Disallow: /README.md
+Disallow: /SEO.md
+Disallow: /scss/
+
+# Search engines need these assets to render the pages.
+Allow: /css/
+Allow: /js/
+Allow: /img/
+Allow: /lib/
+
+Sitemap: https://www.chautaramavi.edu.np/sitemap.xml
