@@ -10094,4 +10094,115 @@ h6,
   }
 }
 
+/* ================================================================
+   Navbar Login Button (CDLH Log in)
+   Responsive: inline on desktop/tablet, full-width CTA on phones
+   and when the mobile menu is open.
+   ================================================================ */
+.login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.1rem;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  border-radius: 50rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-btn:hover,
+.login-btn:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 0.2rem rgba(72, 140, 238, 0.35), 0 4px 12px rgba(40, 120, 235, 0.35);
+}
+
+@media (max-width: 991.98px) {
+  /* Shown inside the collapsed hamburger menu on phones/tablets */
+  .login-btn {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .navbar-brand img {
+    max-height: 48px !important;
+  }
+
+  .navbar .logo-text h1 {
+    font-size: 13px !important;
+  }
+
+  .login-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 359.98px) {
+  .navbar-brand img {
+    max-height: 42px !important;
+  }
+
+  .navbar .logo-text h1 {
+    font-size: 11px !important;
+  }
+
+  .login-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 11px;
+  }
+}
+
+/* ================================================================
+   Contact Info Card
+   Keeps long details such as the email address inside the card
+   on narrow screens instead of overflowing it.
+   ================================================================ */
+.contact-info-card .mt-n1 {
+  min-width: 0;
+}
+
+.contact-info-card .mt-n1 p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 575.98px) {
+  .contact-info-card {
+    height: auto !important;
+    min-height: 450px;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  .contact-info-card > div.mb-5 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .contact-info-card .btn-icon {
+    width: 56px;
+    height: 56px;
+    margin-right: 1rem !important;
+  }
+
+  .contact-info-card .btn-icon i {
+    font-size: 1.5rem;
+  }
+
+  .contact-info-card .mt-n1 h4 {
+    font-size: 1.1rem;
+  }
+
+  .contact-info-card .mt-n1 p {
+    font-size: 0.9rem;
+  }
+}
+
 
