@@ -396,21 +396,22 @@
                 <p class="m-0 text-uppercase">Contact</p>
             </div>
             <div class="mx-auto mb-5" style="width: 100%; max-width: 600px;">
-                <div class="input-group">
+                <div class="input-group" data-course-search>
                     <div class="input-group-prepend">
                         <button class="btn btn-outline-light bg-white text-body px-4 dropdown-toggle" type="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Courses</button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="/detail.html">Diploma In Computer Engineering</a>
-                            <a class="dropdown-item" href="/detail3.html">+2 Education</a>
-                            <a class="dropdown-item" href="/detail2.html">+2 Science</a>
-                            <a class="dropdown-item" href="/detail4.html">School</a>
+                            <a class="dropdown-item" href="detail.html">Diploma In Computer Engineering</a>
+                            <a class="dropdown-item" href="detail2.html">+2 Science</a>
+                            <a class="dropdown-item" href="detail3.html">+2 Education</a>
+                            <a class="dropdown-item" href="detail4.html">School</a>
                         </div>
                     </div>
                     <input type="text" class="form-control border-light" style="padding: 30px 25px;"
-                        placeholder="Keyword">
+                        placeholder="Keyword" autocomplete="off" aria-label="Search courses by keyword"
+                        data-course-search-input>
                     <div class="input-group-append">
-                        <button class="btn btn-secondary px-4 px-lg-5">Search</button>
+                        <button type="button" class="btn btn-secondary px-4 px-lg-5" data-course-search-button>Search</button>
                     </div>
                 </div>
             </div>
@@ -618,6 +619,7 @@
     <script src="lib/owlcarousel/owl.carousel.min.js"></script>
 
     <!-- Template Javascript -->
+    <script src="js/course-search.js"></script>
     <script src="js/main.js"></script>
 </body>
 
